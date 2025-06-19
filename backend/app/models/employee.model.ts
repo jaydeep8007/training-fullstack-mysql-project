@@ -44,11 +44,11 @@
 
 // export default employeeModel;
 
-import { DataTypes } from "sequelize";
-import sequelize from "../config/sequelize";
+import { DataTypes } from 'sequelize';
+import sequelize from '../config/sequelize';
 
 const employeeModel = sequelize.define(
-  "employee",
+  'employee',
   {
     emp_id: {
       type: DataTypes.INTEGER,
@@ -63,8 +63,8 @@ const employeeModel = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
       unique: {
-        name: "unique_email",
-        msg: "Email address already in use",
+        name: 'unique_email',
+        msg: 'Email address already in use',
       },
     },
     emp_password: {
@@ -83,18 +83,18 @@ const employeeModel = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: "customer", // 👈 referenced table name (should match DB table name)
-        key: "cus_id", // 👈 referenced column
+        model: 'customer', // 👈 referenced table name (should match DB table name)
+        key: 'cus_id', // 👈 referenced column
       },
-      onUpdate: "CASCADE",
-      onDelete: "CASCADE",
+      onUpdate: 'CASCADE',
+      onDelete: 'CASCADE',
     },
   },
   {
-    tableName: "employee",
+    tableName: 'employee',
     timestamps: true,
-    collate: "utf8_general_ci",
-  }
+    collate: 'utf8_general_ci',
+  },
 );
 
 export default employeeModel;

@@ -1,8 +1,8 @@
-import { DataTypes } from "sequelize";
-import sequelize from "../config/sequelize";
+import { DataTypes } from 'sequelize';
+import sequelize from '../config/sequelize';
 
 const jobModel = sequelize.define(
-  "job",
+  'job',
   {
     job_id: {
       type: DataTypes.INTEGER,
@@ -23,10 +23,10 @@ const jobModel = sequelize.define(
     },
   },
   {
-    tableName: "job",
+    tableName: 'job',
     timestamps: true,
-    collate: "utf8_general_ci",
-  }
+    collate: 'utf8_general_ci',
+  },
 );
 
 export default jobModel;

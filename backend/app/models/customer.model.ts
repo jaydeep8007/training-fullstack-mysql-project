@@ -1,5 +1,5 @@
-import { DataTypes, Model, Optional } from "sequelize";
-import sequelize from "../config/sequelize";
+import { DataTypes, Model, Optional } from 'sequelize';
+import sequelize from '../config/sequelize';
 
 interface CustomerAttributes {
   cus_id: string;
@@ -11,10 +11,10 @@ interface CustomerAttributes {
 
   reset_password_token?: string | null;
   reset_password_expires?: Date | null;
-  cus_status: "active" | "inactive" | "restricted" | "blocked";
+  cus_status: 'active' | 'inactive' | 'restricted' | 'blocked';
 }
 
-type CustomerCreationAttributes = Optional<CustomerAttributes, "cus_id">;
+type CustomerCreationAttributes = Optional<CustomerAttributes, 'cus_id'>;
 
 class customerModel
   extends Model<CustomerAttributes, CustomerCreationAttributes>
@@ -28,7 +28,7 @@ class customerModel
   public cus_password!: string;
   public reset_password_token?: string | null;
   public reset_password_expires?: Date | null;
-  public cus_status!: "active" | "inactive" | "restricted" | "blocked";
+  public cus_status!: 'active' | 'inactive' | 'restricted' | 'blocked';
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -47,7 +47,7 @@ customerModel.init(
       validate: {
         len: {
           args: [2, 30],
-          msg: "First name must be between 2 and 30 characters",
+          msg: 'First name must be between 2 and 30 characters',
         },
       },
     },
@@ -57,7 +57,7 @@ customerModel.init(
       validate: {
         len: {
           args: [2, 30],
-          msg: "Last name must be between 2 and 30 characters",
+          msg: 'Last name must be between 2 and 30 characters',
         },
       },
     },
@@ -76,33 +76,33 @@ customerModel.init(
       validate: {
         len: {
           args: [6, 100],
-          msg: "Password must be at least 6 characters long",
+          msg: 'Password must be at least 6 characters long',
         },
       },
     },
     cus_status: {
-      type: DataTypes.ENUM("active", "inactive", "restricted", "blocked"),
+      type: DataTypes.ENUM('active', 'inactive', 'restricted', 'blocked'),
       allowNull: false,
-      defaultValue: "active",
+      defaultValue: 'active',
     },
   },
   {
     sequelize,
-    tableName: "customer",
+    tableName: 'customer',
     timestamps: true,
     indexes: [
       {
-        name: "unique_cus_email",
+        name: 'unique_cus_email',
         unique: true,
-        fields: ["cus_email"],
+        fields: ['cus_email'],
       },
       {
-        name: "unique_cus_phone_number",
+        name: 'unique_cus_phone_number',
         unique: true,
-        fields: ["cus_phone_number"],
+        fields: ['cus_phone_number'],
       },
     ],
-  }
+  },
 );
 
 export default customerModel;

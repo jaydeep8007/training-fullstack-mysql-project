@@ -228,33 +228,33 @@
 //   resetPasswordSchema,
 // };
 
-import { z } from "zod";
-import customerModel from "../models/customer.model"; // Adjust path as needed
+import { z } from 'zod';
+import customerModel from '../models/customer.model'; // Adjust path as needed
 
 // Common password validation function
 const validateStrongPassword = (val: string, ctx: z.RefinementCtx) => {
   if (!/[A-Z]/.test(val)) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
-      message: "Password must contain at least one uppercase letter",
+      message: 'Password must contain at least one uppercase letter',
     });
   }
   if (!/[a-z]/.test(val)) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
-      message: "Password must contain at least one lowercase letter",
+      message: 'Password must contain at least one lowercase letter',
     });
   }
   if (!/\d/.test(val)) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
-      message: "Password must contain at least one number",
+      message: 'Password must contain at least one number',
     });
   }
   if (!/[!@#$%^&*()_+]/.test(val)) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
-      message: "Password must contain at least one special character",
+      message: 'Password must contain at least one special character',
     });
   }
 };
@@ -265,40 +265,41 @@ const customerCreateSchema = z
     cus_firstname: z
       .string()
       .trim()
-      .min(1, "First name is required")
-      .max(50, "Maximum 50 characters allowed")
-      .regex(/^[A-Za-z\s]+$/, "First name must not contain numbers or special characters"),
+      .min(1, 'First name is required')
+      .max(50, 'Maximum 50 characters allowed')
+      .regex(/^[A-Za-z\s]+$/, 'First name must not contain numbers or special characters'),
 
     cus_lastname: z
       .string()
       .trim()
-      .min(1, "Last name is required")
-      .max(50, "Maximum 50 characters allowed")
-      .regex(/^[A-Za-z\s]+$/, "Last name must not contain numbers or special characters"),
+      .min(1, 'Last name is required')
+      .max(50, 'Maximum 50 characters allowed')
+      .regex(/^[A-Za-z\s]+$/, 'Last name must not contain numbers or special characters'),
 
     cus_email: z
       .string()
       .trim()
-      .email("Invalid email address")
+      .email('Invalid email address')
       .transform((email) => email.toLowerCase()),
 
     cus_phone_number: z
       .string()
-      .length(10, "Phone number must be exactly 10 digits")
-      .regex(/^\d+$/, "Phone number must contain only digits"),
+      .length(10, 'Phone number must be exactly 10 digits')
+      .regex(/^\d+$/, 'Phone number must contain only digits'),
 
     cus_password: z
       .string()
-      .min(8, "Password must be at least 8 characters")
+      .min(8, 'Password must be at least 8 characters')
       .superRefine(validateStrongPassword),
 
-    cus_confirm_password: z.string().min(8, "Confirm password is required"),
+    cus_confirm_password: z.string().min(8, 'Confirm password is required'),
 
     cus_status: z.string().optional(),
-  }).strict()
+  })
+  .strict()
   .refine((data) => data.cus_password === data.cus_confirm_password, {
-    message: "Passwords do not match",
-    path: ["cus_confirm_password"],
+    message: 'Passwords do not match',
+    path: ['cus_confirm_password'],
   })
   .superRefine(async (data, ctx) => {
     // ✅ Check email uniqueness
@@ -309,8 +310,8 @@ const customerCreateSchema = z
     if (emailExists) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "Email already exists",
-        path: ["cus_email"],
+        message: 'Email already exists',
+        path: ['cus_email'],
       });
     }
 
@@ -322,8 +323,8 @@ const customerCreateSchema = z
     if (phoneExists) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "Phone number already exists",
-        path: ["cus_phone_number"],
+        message: 'Phone number already exists',
+        path: ['cus_phone_number'],
       });
     }
   });
@@ -333,71 +334,76 @@ const customerLoginSchema = z.object({
   cus_email: z
     .string()
     .trim()
-    .email("Invalid email address")
+    .email('Invalid email address')
     .transform((email) => email.toLowerCase()),
   cus_password: z.string(),
 });
 
-const customerUpdateSchema = z.object({
-  cus_firstname: z.string().min(2).max(50).optional(),
-  cus_lastname: z.string().min(2).max(50).optional(),
-  cus_email: z.string().email("Please provide a valid email address").optional(),
-  cus_phone_number: z
-    .string()
-    .length(10, "Phone number must be exactly 10 digits")
-    .regex(/^\d+$/, "Phone number must contain only digits")
-    .optional(),
-  cus_password: z
-    .string()
-    .min(8, "Password must be at least 8 characters long")
-    .regex(
-      /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+]).*$/,
-      "Password must include at least one uppercase letter, one lowercase letter, one number, and one special character"
-    )
-    .optional(),
-  cus_status: z
-    .enum(["active", "inactive", "restricted", "blocked"], {
-      errorMap: () => ({
-        message: "Status must be one of: active, inactive, restricted, or blocked",
-      }),
-    })
-    .optional(),
-}).strict();
+const customerUpdateSchema = z
+  .object({
+    cus_firstname: z.string().min(2).max(50).optional(),
+    cus_lastname: z.string().min(2).max(50).optional(),
+    cus_email: z.string().email('Please provide a valid email address').optional(),
+    cus_phone_number: z
+      .string()
+      .length(10, 'Phone number must be exactly 10 digits')
+      .regex(/^\d+$/, 'Phone number must contain only digits')
+      .optional(),
+    cus_password: z
+      .string()
+      .min(8, 'Password must be at least 8 characters long')
+      .regex(
+        /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+]).*$/,
+        'Password must include at least one uppercase letter, one lowercase letter, one number, and one special character',
+      )
+      .optional(),
+    cus_status: z
+      .enum(['active', 'inactive', 'restricted', 'blocked'], {
+        errorMap: () => ({
+          message: 'Status must be one of: active, inactive, restricted, or blocked',
+        }),
+      })
+      .optional(),
+  })
+  .strict();
 
- const forgotPasswordSchema = z.object({
-  cus_email: z
-    .string({
-      required_error: "Email is required",
-    })
-    .trim()
-    .email("Invalid email address")
-    .transform((email) => email.toLowerCase()),
-}).strict();
+const forgotPasswordSchema = z
+  .object({
+    cus_email: z
+      .string({
+        required_error: 'Email is required',
+      })
+      .trim()
+      .email('Invalid email address')
+      .transform((email) => email.toLowerCase()),
+  })
+  .strict();
 
 const resetPasswordSchema = z
   .object({
     cus_auth_refresh_token: z
       .string({
-        required_error: "Reset token is required",
+        required_error: 'Reset token is required',
       })
-      .min(1, "Reset token is required"),
+      .min(1, 'Reset token is required'),
 
     new_password: z
       .string({
-        required_error: "New password is required",
+        required_error: 'New password is required',
       })
-      .min(8, "Password must be at least 8 characters")
+      .min(8, 'Password must be at least 8 characters')
       .superRefine(validateStrongPassword),
 
     confirm_password: z
       .string({
-        required_error: "Confirm password is required",
+        required_error: 'Confirm password is required',
       })
-      .min(8, "Confirm password must be at least 8 characters"),
-  }).strict()
+      .min(8, 'Confirm password must be at least 8 characters'),
+  })
+  .strict()
   .refine((data) => data.new_password === data.confirm_password, {
-    message: "Passwords do not match",
-    path: ["confirm_password"],
+    message: 'Passwords do not match',
+    path: ['confirm_password'],
   });
 // Final export
 export const customerValidations = {

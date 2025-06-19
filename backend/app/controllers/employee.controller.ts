@@ -1,12 +1,12 @@
-import { NextFunction, Request, Response } from "express";
-import { Op, ValidationError } from "sequelize";
-import employeeModel from "../models/employee.model";
-import customerModel from "../models/customer.model";
-import employeeValidation from "../validations/employee.validation";
-import { resCode } from "../constants/resCode";
-import { responseHandler } from "../services/responseHandler.service";
-import { msg } from "../constants/language/en.constant";
-import commonQuery from "../services/commonQuery.service";
+import { NextFunction, Request, Response } from 'express';
+import { Op, ValidationError } from 'sequelize';
+import employeeModel from '../models/employee.model';
+import customerModel from '../models/customer.model';
+import employeeValidation from '../validations/employee.validation';
+import { resCode } from '../constants/resCode';
+import { responseHandler } from '../services/responseHandler.service';
+import { msg } from '../constants/language/en.constant';
+import commonQuery from '../services/commonQuery.service';
 
 // 🔸 Initialize queries
 const employeeQuery = commonQuery(employeeModel);
@@ -16,36 +16,21 @@ const customerQuery = commonQuery(customerModel);
  * ➕ Create a New Employee
  * ============================================================================
  */
-const createEmployee = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+const createEmployee = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const parsed = await employeeValidation.employeeCreateSchema.safeParseAsync(
-      req.body
-    );
+    const parsed = await employeeValidation.employeeCreateSchema.safeParseAsync(req.body);
     if (!parsed.success) {
-      const errorMsg = parsed.error.errors.map((err) => err.message).join(", ");
+      const errorMsg = parsed.error.errors.map((err) => err.message).join(', ');
       return responseHandler.error(res, errorMsg, resCode.BAD_REQUEST);
     }
 
     const newEmployee = await employeeQuery.create(parsed.data);
 
-    return responseHandler.success(
-      res,
-      msg.employee.createSuccess,
-      newEmployee,
-      resCode.CREATED
-    );
+    return responseHandler.success(res, msg.employee.createSuccess, newEmployee, resCode.CREATED);
   } catch (error: any) {
     if (error instanceof ValidationError) {
       const messages = error.errors.map((err) => err.message);
-      return responseHandler.error(
-        res,
-        messages.join(", "),
-        resCode.BAD_REQUEST
-      );
+      return responseHandler.error(res, messages.join(', '), resCode.BAD_REQUEST);
     }
 
     return next(error);
@@ -56,41 +41,7 @@ const createEmployee = async (
  * 📥 Get All Employees with Associated Customers
  * ============================================================================
  */
-// const getAllEmployees = async (
-//   req: Request,
-//   res: Response,
-//   next: NextFunction
-// ) => {
-//   try {
-//     const employees = await employeeQuery.getAll({
-//       include: [
-//         {
-//           model: customerModel,
-//           as: "customer",
-//           attributes: ["cus_id", "cus_firstname", "cus_lastname", "cus_email"],
-//         },
-//       ],
-//     });
 
-//     return responseHandler.success(
-//       res,
-//       msg.employee.fetchSuccess,
-//       employees,
-//       resCode.OK
-//     );
-//   } catch (error) {
-//     if (error instanceof ValidationError) {
-//       const messages = error.errors.map((err) => err.message);
-//       return responseHandler.error(
-//         res,
-//         messages.join(", "),
-//         resCode.BAD_REQUEST
-//       );
-//     }
-
-//     return next(error);
-//   }
-// };
 const getAllEmployees = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const page = parseInt(req.query.page as string, 10) || 1;
@@ -101,9 +52,9 @@ const getAllEmployees = async (req: Request, res: Response, next: NextFunction) 
       include: [
         {
           model: customerModel,
-          as: "customer",
-          attributes: ["cus_id", "cus_firstname", "cus_lastname", "cus_email"]
-        }
+          as: 'customer',
+          attributes: ['cus_id', 'cus_firstname', 'cus_lastname', 'cus_email'],
+        },
       ],
       limit,
       offset,
@@ -119,47 +70,33 @@ const getAllEmployees = async (req: Request, res: Response, next: NextFunction) 
         totalPages: Math.ceil(totalDataCount / limit), // how many pages needed
         data: employees,
       },
-      resCode.OK
+      resCode.OK,
     );
   } catch (error) {
     if (error instanceof ValidationError) {
       const messages = error.errors.map((err) => err.message);
-      return responseHandler.error(res, messages.join(", "), resCode.BAD_REQUEST);
+      return responseHandler.error(res, messages.join(', '), resCode.BAD_REQUEST);
     }
     return next(error);
   }
 };
 
-
 /* ============================================================================
  * 🗑️ Delete Employee by ID
  * ============================================================================
  */
-const deleteEmployeeById = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+const deleteEmployeeById = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
 
     const employee = await employeeQuery.getById(id);
     if (!employee) {
-      return responseHandler.error(
-        res,
-        msg.employee.notFound,
-        resCode.NOT_FOUND
-      );
+      return responseHandler.error(res, msg.employee.notFound, resCode.NOT_FOUND);
     }
 
     await employee.destroy();
 
-    return responseHandler.success(
-      res,
-      msg.employee.deleteSuccess,
-      null,
-      resCode.OK
-    );
+    return responseHandler.success(res, msg.employee.deleteSuccess, null, resCode.OK);
   } catch (error) {
     return next(error);
   }
@@ -169,20 +106,14 @@ const deleteEmployeeById = async (
  * 🔁 Update Employee by ID
  * ============================================================================
  */
-const updateEmployeeById = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+const updateEmployeeById = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
 
     // Validate request body with Zod
-    const parsed = await employeeValidation.employeeUpdateSchema.safeParseAsync(
-      req.body
-    );
+    const parsed = await employeeValidation.employeeUpdateSchema.safeParseAsync(req.body);
     if (!parsed.success) {
-      const errorMsg = parsed.error.errors.map((e) => e.message).join(", ");
+      const errorMsg = parsed.error.errors.map((e) => e.message).join(', ');
       return responseHandler.error(res, errorMsg, resCode.BAD_REQUEST);
     }
 
@@ -193,11 +124,7 @@ const updateEmployeeById = async (
       where: { emp_id: Number(id) },
     });
     if (!employee) {
-      return responseHandler.error(
-        res,
-        msg.employee.notFound,
-        resCode.NOT_FOUND
-      );
+      return responseHandler.error(res, msg.employee.notFound, resCode.NOT_FOUND);
     }
 
     // Check for duplicate email
@@ -209,11 +136,7 @@ const updateEmployeeById = async (
         },
       });
       if (emailExists) {
-        return responseHandler.error(
-          res,
-          msg.employee.emailAlreadyExists,
-          resCode.BAD_REQUEST
-        );
+        return responseHandler.error(res, msg.employee.emailAlreadyExists, resCode.BAD_REQUEST);
       }
     }
 
@@ -226,11 +149,7 @@ const updateEmployeeById = async (
         },
       });
       if (phoneExists) {
-        return responseHandler.error(
-          res,
-          msg.employee.phoneAlreadyExists,
-          resCode.BAD_REQUEST
-        );
+        return responseHandler.error(res, msg.employee.phoneAlreadyExists, resCode.BAD_REQUEST);
       }
     }
 
@@ -244,12 +163,7 @@ const updateEmployeeById = async (
       where: { emp_id: Number(id) },
     });
 
-    return responseHandler.success(
-      res,
-      msg.employee.updateSuccess,
-      updatedEmployee,
-      resCode.OK
-    );
+    return responseHandler.success(res, msg.employee.updateSuccess, updatedEmployee, resCode.OK);
   } catch (error) {
     return next(error);
   }

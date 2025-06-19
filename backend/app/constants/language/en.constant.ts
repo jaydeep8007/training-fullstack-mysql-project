@@ -3,6 +3,8 @@ export const msg = {
     unexpectedError: "Oops! Something went wrong. Please try again later.",
     unauthorized: "You are not authorized to perform this action.",
     invalidToken: "Session expired or token is invalid. Please log in again.",
+    tokenNotFound :"Token not found",
+    serverError: "Internal server error. Please contact support.",
     invalidId: "No matching record found for the given ID.",
     fetchSuccess: "Data retrieved successfully.",
     createSuccess: "Record created successfully.",
@@ -15,6 +17,7 @@ export const msg = {
     missingFields: "Some required fields are missing.",
     invalidEmail: "Please provide a valid email address.",
     invalidPhone: "Phone number format is invalid.",
+     phoneExists: "Phone number already exists.",
     invalidDate: "Date format is not valid.",
     invalidPassword: "Password does not meet security requirements.",
     passwordMismatch: "Passwords do not match.",
@@ -32,61 +35,51 @@ export const msg = {
     deleteSuccess: "Customer removed successfully.",
     deleteFailed: "Failed to remove customer.",
     notFound: "Customer not found.",
-    notFoundById: "No customer found with the provided ID.",
+    idNotFound: "No customer found with the provided ID.",
     emailAlreadyExists: "A customer with this email already exists.",
   },
 
   auth: {
-    loginSuccess: "Logged in successfully.",
-    registerSuccess: "Registration successful. Welcome aboard!",
-    logoutSuccess: "Logged out successfully.",
-    resetPasswordSuccess: "Your password has been reset.",
-    emailNotFound: "No account associated with this email.",
-    accountInactive: "Account is currently inactive.",
-    invalidPassword: "Incorrect password.",
-    passwordMismatch: "Passwords must match.",
-    emailRequired: "Email is required.",
-    usernameRequired: "Username is required.",
-    usernameNotFound: "Username does not exist.",
-    usernameAlreadyExists: "This username is already in use.",
-    deletedUser: "This account is no longer accessible.",
-    resetTokenSent: "A password reset token has been sent to your email.",
-    invalidResetToken: "The reset token is invalid or has expired.",
+    signupSuccess: "Customer signed up successfully.",
+    loginSuccess: "Login successful.",
+    logoutSucces:"Logout successful",
+    registerSuccess: "Registration successful.",
+    customerNotFound: "Customer not found.",
+    invalidPassword: "Invalid password.",
+    emailExists: "Email already exists.",
+    phoneExists: "Phone number already exists.",
+    passwordMismatch: "Passwords do not match.",
+    resetTokenGenerated: "Reset token generated successfully.",
+    invalidResetToken: "Invalid or expired reset token.",
+    passwordResetSuccess: "Password reset successfully.",
+    profileFetchSuccess:"profile feched succesfully",
+    resetTokenSent: "Password reset token sent to your email.",
   },
-
   employee: {
-    // ✅ Success Messages
     createSuccess: "Employee created successfully.",
-    fetchSuccess: "Employee details fetched successfully.",
-    updateSuccess: "Employee record updated.",
-    deleteSuccess: "Employee record deleted.",
+    fetchSuccess: "Employees fetched successfully.",
+    emailExists: "Employee email already exists.",
+    updateSuccess: "Employee updated successfully",
+    deleteSuccess: "Employee deleted successfully",
+    notFound: "Employee not found",
 
-    // ❌ Not Found / Existence Errors
-    notFound: "Employee not found.",
-    notFoundById: "No employee found with the provided ID.",
     emailAlreadyExists: "An employee with this email already exists.",
     phoneAlreadyExists: "An employee with this phone number already exists.",
-
-    // ⚠️ Validation Errors (Optional but recommended)
-    invalidEmail: "Invalid email format.",
-    invalidPhone: "Invalid phone number format.",
-    missingFields: "Required employee fields are missing.",
     invalidId: "Invalid employee ID provided.",
   },
 
   job: {
-    // ✅ Success Messages
     createSuccess: "Job posted successfully.",
     fetchSuccess: "Job details fetched successfully.",
     updateSuccess: "Job details updated.",
     deleteSuccess: "Job deleted successfully.",
-
-    // ❌ Error Messages
     notFound: "Job not found.",
-    notFoundById: "Job not found with the given ID.", // (Optional, for clarity)
-    skuExists: "A job with this SKU already exists.",
+    // skuExists: "A job with this SKU already exists.",
+    skuExists: (sku: string) => `Job SKU '${sku}' already exists.`,
+    invalidName: "Job name must be between 2 to 50 characters.",
   },
   employeeJob: {
     assignSuccess: "Job assigned to employee(s) successfully.",
+    fetchSuccess: "Employee job assignments fetched successfully.",
   },
 };

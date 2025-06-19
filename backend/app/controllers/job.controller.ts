@@ -1,13 +1,13 @@
-import { Request, Response, NextFunction } from "express";
-import { ValidationError } from "sequelize";
+import { Request, Response, NextFunction } from 'express';
+import { ValidationError } from 'sequelize';
 
-import jobModel from "../models/job.model";
-import { jobCreateSchema } from "../validations/job.validation";
+import jobModel from '../models/job.model';
+import { jobCreateSchema } from '../validations/job.validation';
 
-import { resCode } from "../constants/resCode";
-import { msg } from "../constants/language/en.constant";
-import { responseHandler } from "../services/responseHandler.service";
-import commonQuery from "../services/commonQuery.service";
+import { resCode } from '../constants/resCode';
+import { msg } from '../constants/language/en.constant';
+import { responseHandler } from '../services/responseHandler.service';
+import commonQuery from '../services/commonQuery.service';
 
 // 🔸 Initialize job-specific query handler
 const jobQuery = commonQuery(jobModel);
@@ -21,22 +21,17 @@ const createJob = async (req: Request, res: Response, next: NextFunction) => {
     const parsed = await jobCreateSchema.safeParseAsync(req.body);
 
     if (!parsed.success) {
-      const errorMsg = parsed.error.errors.map((err) => err.message).join(", ");
+      const errorMsg = parsed.error.errors.map((err) => err.message).join(', ');
       return responseHandler.error(res, errorMsg, resCode.BAD_REQUEST);
     }
 
     const newJob = await jobQuery.create(parsed.data);
 
-    return responseHandler.success(
-      res,
-      msg.job.createSuccess,
-      newJob,
-      resCode.CREATED
-    );
+    return responseHandler.success(res, msg.job.createSuccess, newJob, resCode.CREATED);
   } catch (error) {
     if (error instanceof ValidationError) {
       const messages = error.errors.map((err) => err.message);
-      return responseHandler.error(res, messages.join(", "), resCode.BAD_REQUEST);
+      return responseHandler.error(res, messages.join(', '), resCode.BAD_REQUEST);
     }
 
     return next(error);
@@ -50,11 +45,7 @@ const createJob = async (req: Request, res: Response, next: NextFunction) => {
 
 // 📄 Get All Jobs with Pagination via commonQueryMongo
 
-const getAllJobs = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+const getAllJobs = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const page = parseInt(req.query.page as string, 10) || 1;
     const limit = parseInt(req.query.limit as string, 10) || 10;
@@ -71,19 +62,17 @@ const getAllJobs = async (
         results_per_page: result.pagination.limit,
         jobs: result.data,
       },
-      resCode.OK
+      resCode.OK,
     );
   } catch (error) {
     if (error instanceof ValidationError) {
       const messages = error.errors.map((err) => err.message);
-      return responseHandler.error(res, messages.join(", "), resCode.BAD_REQUEST);
+      return responseHandler.error(res, messages.join(', '), resCode.BAD_REQUEST);
     }
 
     return next(error);
   }
 };
-
-
 
 /* ============================================================================
  * 📦 Export Job Controller

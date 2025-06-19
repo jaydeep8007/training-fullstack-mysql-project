@@ -1,14 +1,17 @@
-import { Request, Response, NextFunction } from "express";
-import customerModel from "../models/customer.model";
-import customerAuthModel from "../models/customerAuth.model";
-import { comparePasswords, hashPassword } from "../services/password.service";
-import { authToken } from "../services/authToken.service";
-import { responseHandler } from "../services/responseHandler.service";
-import { resCode } from "../constants/resCode";
-import { ValidationError } from "sequelize";
-import { customerValidations } from "../validations/customer.validation";
-import { msg } from "../constants/language/en.constant";
-import commonQuery from "../services/commonQuery.service";
+import { Request, Response, NextFunction } from 'express';
+import customerModel from '../models/customer.model';
+import customerAuthModel from '../models/customerAuth.model';
+import { comparePasswords, hashPassword } from '../services/password.service';
+import { authToken } from '../services/authToken.service';
+import { responseHandler } from '../services/responseHandler.service';
+import { resCode } from '../constants/resCode';
+import { ValidationError } from 'sequelize';
+import { customerValidations } from '../validations/customer.validation';
+import { msg } from '../constants/language/en.constant';
+import { get } from '../config/config';
+import commonQuery from '../services/commonQuery.service';
+
+const envConfig = get(process.env.NODE_ENV);
 
 // 🔸 Initialize query service
 const customerQuery = commonQuery(customerModel);
@@ -18,28 +21,15 @@ const customerAuthQuery = commonQuery(customerAuthModel);
  * ✅ Signup Customer
  * ============================================================================
  */
-const signupCustomer = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+const signupCustomer = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const parsed =
-      await customerValidations.customerCreateSchema.safeParseAsync(req.body);
+    const parsed = await customerValidations.customerCreateSchema.safeParseAsync(req.body);
     if (!parsed.success) {
-      const errors = parsed.error.errors.map(
-        (err) => `${err.path[0] || "field"}: ${err.message}`
-      );
-      return responseHandler.error(res, errors.join(", "), resCode.BAD_REQUEST);
+      const errors = parsed.error.errors.map((err) => `${err.path[0] || 'field'}: ${err.message}`);
+      return responseHandler.error(res, errors.join(', '), resCode.BAD_REQUEST);
     }
 
-    const {
-      cus_firstname,
-      cus_lastname,
-      cus_email,
-      cus_phone_number,
-      cus_password,
-    } = parsed.data;
+    const { cus_firstname, cus_lastname, cus_email, cus_phone_number, cus_password } = parsed.data;
 
     const hashedPassword = await hashPassword(cus_password);
 
@@ -49,12 +39,12 @@ const signupCustomer = async (
       cus_email,
       cus_phone_number,
       cus_password: hashedPassword,
-      cus_status: "active",
+      cus_status: 'active',
     });
 
     const customerData = newCustomer.get();
 
-    const token = authToken.generateAuthToken({
+    const accessToken = authToken.generateAuthToken({
       user_id: customerData.cus_id,
       email: customerData.cus_email,
     });
@@ -66,24 +56,29 @@ const signupCustomer = async (
 
     await customerAuthQuery.create({
       cus_id: customerData.cus_id,
-      cus_auth_token: token,
+      cus_auth_token: accessToken,
       cus_auth_refresh_token: refreshToken,
     });
 
+    // ✅ Set HTTP-only refresh token cookie
+    res.cookie('refreshToken', refreshToken, {
+      ...envConfig.COOKIE_OPTIONS,
+    });
+
+    // ✅ Send accessToken and customer in response
     return responseHandler.success(
       res,
       msg.auth.registerSuccess,
-      { customer: customerData, token, refreshToken },
-      resCode.CREATED
+      {
+        customer: customerData,
+        accessToken,
+      },
+      resCode.CREATED,
     );
   } catch (error) {
     if (error instanceof ValidationError) {
       const messages = error.errors.map((err) => err.message);
-      return responseHandler.error(
-        res,
-        messages.join(", "),
-        resCode.BAD_REQUEST
-      );
+      return responseHandler.error(res, messages.join(', '), resCode.BAD_REQUEST);
     }
     return next(error);
   }
@@ -93,48 +88,29 @@ const signupCustomer = async (
  * 🔐 Signin Customer
  * ============================================================================
  */
-const signinCustomer = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+const signinCustomer = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const parsed = await customerValidations.customerLoginSchema.safeParseAsync(
-      req.body
-    );
+    const parsed = await customerValidations.customerLoginSchema.safeParseAsync(req.body);
     if (!parsed.success) {
-      const errors = parsed.error.errors.map(
-        (err) => `${err.path[0]}: ${err.message}`
-      );
-      return responseHandler.error(res, errors.join(", "), resCode.BAD_REQUEST);
+      const errors = parsed.error.errors.map((err) => `${err.path[0]}: ${err.message}`);
+      return responseHandler.error(res, errors.join(', '), resCode.BAD_REQUEST);
     }
 
     const { cus_email, cus_password } = parsed.data;
 
-    const customer = await customerQuery.getOne({ where: { cus_email } });
+    const customer = await customerQuery.getOne({ cus_email });
     if (!customer) {
-      return responseHandler.error(
-        res,
-        msg.customer.notFound,
-        resCode.NOT_FOUND
-      );
+      return responseHandler.error(res, msg.customer.notFound, resCode.NOT_FOUND);
     }
 
     const customerData = customer.get();
 
-    const isValid = await comparePasswords(
-      cus_password,
-      customerData.cus_password
-    );
+    const isValid = await comparePasswords(cus_password, customerData.cus_password);
     if (!isValid) {
-      return responseHandler.error(
-        res,
-        msg.common.invalidPassword,
-        resCode.UNAUTHORIZED
-      );
+      return responseHandler.error(res, msg.common.invalidPassword, resCode.UNAUTHORIZED);
     }
 
-    const token = authToken.generateAuthToken({
+    const accessToken = authToken.generateAuthToken({
       user_id: customerData.cus_id,
       email: customerData.cus_email,
     });
@@ -146,24 +122,34 @@ const signinCustomer = async (
 
     await customerAuthQuery.create({
       cus_id: customerData.cus_id,
-      cus_auth_token: token,
+      cus_auth_token: accessToken,
       cus_auth_refresh_token: refreshToken,
     });
 
+    // ✅ Set refresh token as HTTP-only cookie
+    res.cookie('refreshToken', refreshToken, {
+      ...envConfig.COOKIE_OPTIONS,
+    });
+
+    // ✅ Send access token and customer data in response
     return responseHandler.success(
       res,
       msg.auth.loginSuccess,
-      { token, refreshToken, customer: {} },
-      resCode.OK
+      {
+        accessToken,
+        customer: {
+          cus_id: customerData.cus_id,
+          cus_firstname: customerData.cus_firstname,
+          cus_lastname: customerData.cus_lastname,
+          cus_email: customerData.cus_email,
+        },
+      },
+      resCode.OK,
     );
   } catch (error) {
     if (error instanceof ValidationError) {
       const messages = error.errors.map((err) => err.message);
-      return responseHandler.error(
-        res,
-        messages.join(", "),
-        resCode.BAD_REQUEST
-      );
+      return responseHandler.error(res, messages.join(', '), resCode.BAD_REQUEST);
     }
     return next(error);
   }
@@ -173,15 +159,11 @@ const signinCustomer = async (
  * 📧 Forgot Password - Request Reset Token
  * ============================================================================
  */
-const forgotPassword = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+const forgotPassword = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const result = customerValidations.forgotPasswordSchema.safeParse(req.body);
     if (!result.success) {
-      const errors = result.error.errors.map((e) => e.message).join(", ");
+      const errors = result.error.errors.map((e) => e.message).join(', ');
       return responseHandler.error(res, errors, resCode.BAD_REQUEST);
     }
 
@@ -200,13 +182,13 @@ const forgotPassword = async (
     const [authEntry, created] = await customerAuthModel.findOrCreate({
       where: { cus_id: customer.cus_id },
       defaults: {
-        cus_auth_token: "", // can leave empty or null
+        cus_auth_token: '', // can leave empty or null
         cus_auth_refresh_token,
       },
     });
 
     if (!created) {
-      authEntry.set("cus_auth_refresh_token", cus_auth_refresh_token);
+      authEntry.set('cus_auth_refresh_token', cus_auth_refresh_token);
       await authEntry.save();
     }
 
@@ -214,12 +196,12 @@ const forgotPassword = async (
       res,
       msg.auth.resetTokenSent,
       { cus_auth_refresh_token }, // ✅ return with proper key
-      resCode.OK
+      resCode.OK,
     );
   } catch (error) {
     if (error instanceof ValidationError) {
       const messages = error.errors.map((err) => err.message);
-      return responseHandler.error(res, messages.join(", "), resCode.BAD_REQUEST);
+      return responseHandler.error(res, messages.join(', '), resCode.BAD_REQUEST);
     }
     return next(error);
   }
@@ -229,15 +211,11 @@ const forgotPassword = async (
  * 🔒 Reset Password using Token
  * ============================================================================
  */
-const resetPassword = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+const resetPassword = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const result =await  customerValidations.resetPasswordSchema.safeParseAsync(req.body);
+    const result = await customerValidations.resetPasswordSchema.safeParseAsync(req.body);
     if (!result.success) {
-      const errors = result.error.errors.map((e) => e.message).join(", ");
+      const errors = result.error.errors.map((e) => e.message).join(', ');
       return responseHandler.error(res, errors, resCode.BAD_REQUEST);
     }
 
@@ -249,33 +227,90 @@ const resetPassword = async (
 
     const authEntry = await customerAuthQuery.getOne({
       where: { cus_auth_refresh_token },
-      include: [{ model: customerModel, as: "customer" }],
+      include: [{ model: customerModel, as: 'customer' }],
     });
 
-    if (!authEntry || !authEntry.get("customer")) {
+    if (!authEntry || !authEntry.get('customer')) {
       return responseHandler.error(res, msg.auth.invalidResetToken, resCode.UNAUTHORIZED);
     }
 
-    const customerInstance = authEntry.get("customer") as typeof customerModel.prototype;
+    const customerInstance = authEntry.get('customer') as typeof customerModel.prototype;
 
     const hashedPassword = await hashPassword(new_password);
-    customerInstance.set("cus_password", hashedPassword);
-    customerInstance.set("reset_password_token", null);
+    customerInstance.set('cus_password', hashedPassword);
+    customerInstance.set('reset_password_token', null);
     await customerInstance.save();
 
-    authEntry.set("cus_auth_refresh_token", ""); // Clear token after use
+    authEntry.set('cus_auth_refresh_token', ''); // Clear token after use
     await authEntry.save();
 
-    return responseHandler.success(
-      res,
-      msg.auth.resetPasswordSuccess,
-      {},
-      resCode.OK
-    );
+    return responseHandler.success(res, msg.auth.resetTokenGenerated, {}, resCode.OK);
   } catch (error) {
     if (error instanceof ValidationError) {
       const messages = error.errors.map((err) => err.message);
-      return responseHandler.error(res, messages.join(", "), resCode.BAD_REQUEST);
+      return responseHandler.error(res, messages.join(', '), resCode.BAD_REQUEST);
+    }
+    return next(error);
+  }
+};
+
+/* ============================================================================
+ * 🚪 Logout - Customer Logout
+ * ============================================================================
+ */
+const logoutCustomer = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const cus_id = (req as any).user?.cus_id;
+    console.log('Customer ID from request:', cus_id);
+
+    if (!cus_id) {
+      return responseHandler.error(res, msg.common.unauthorized, resCode.UNAUTHORIZED);
+    }
+
+    // ✅ Verify customer exists
+    const customer = await customerQuery.getById(cus_id);
+    if (!customer) {
+      return responseHandler.error(res, msg.customer.notFound, resCode.NOT_FOUND);
+    }
+
+
+    // ❌ Optional: Delete customer auth tokens
+    await customerAuthModel.destroy({ where: { cus_id } });
+
+    // 🍪 Clear refresh token cookie
+    res.clearCookie('refreshToken');
+
+    // ✅ Success response
+    return responseHandler.success(res, msg.auth.logoutSucces, {}, resCode.OK);
+  } catch (error) {
+    if (error instanceof ValidationError) {
+      const messages = error.errors.map((err) => err.message);
+      return responseHandler.error(res, messages.join(', '), resCode.BAD_REQUEST);
+    }
+    return next(error);
+  }
+};
+
+const getCustomerProfile = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const cus_id = (req as any).user?.cus_id;
+
+    if (!cus_id) {
+      return responseHandler.error(res, 'Unauthorized', resCode.UNAUTHORIZED);
+    }
+
+    // ✅ Fetch customer using Sequelize `where`
+    const customer = await customerQuery.getById(cus_id);
+
+    if (!customer) {
+      return responseHandler.error(res, msg.customer.notFound, resCode.NOT_FOUND);
+    }
+
+    return responseHandler.success(res, msg.auth.profileFetchSuccess, { customer }, resCode.OK);
+  } catch (error) {
+    if (error instanceof ValidationError) {
+      const messages = error.errors.map((err) => err.message);
+      return responseHandler.error(res, messages.join(', '), resCode.BAD_REQUEST);
     }
     return next(error);
   }
@@ -290,4 +325,6 @@ export default {
   signinCustomer,
   forgotPassword,
   resetPassword,
+  logoutCustomer,
+  getCustomerProfile,
 };

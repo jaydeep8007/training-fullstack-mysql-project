@@ -1,4 +1,3 @@
-
 import * as bcrypt from 'bcrypt';
 
 const saltRounds = 10;
@@ -9,15 +8,18 @@ export async function hashPassword(password: string): Promise<string> {
     const hashed = await bcrypt.hash(password, saltRounds);
     return hashed;
   } catch (error) {
-    console.error("Hashing error:", error);
-    throw new Error("Failed to hash password");
+    console.error('Hashing error:', error);
+    throw new Error('Failed to hash password');
   }
 }
 
 /* ✅ COMPARE PASSWORD USING ONLY BCRYPT */
-export async function comparePasswords(plainPassword: string, hashedPassword: string): Promise<boolean> {
-    const match = await bcrypt.compare(plainPassword, hashedPassword);
-    return match;
+export async function comparePasswords(
+  plainPassword: string,
+  hashedPassword: string,
+): Promise<boolean> {
+  const match = await bcrypt.compare(plainPassword, hashedPassword);
+  return match;
 }
 
 /* ✅ Generate a simple reset token (e.g. for forgot password) */

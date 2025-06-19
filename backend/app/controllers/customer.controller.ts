@@ -1,13 +1,13 @@
-import { Request, Response, NextFunction } from "express";
-import { hashPassword } from "../services/password.service";
-import { responseHandler } from "../services/responseHandler.service";
-import { resCode } from "../constants/resCode";
-import { ValidationError } from "sequelize";
-import { customerValidations } from "../validations/customer.validation";
-import { msg } from "../constants/language/en.constant";
-import customerModel from "../models/customer.model";
-import employeeModel from "../models/employee.model";
-import commonQuery from "../services/commonQuery.service";
+import { Request, Response, NextFunction } from 'express';
+import { hashPassword } from '../services/password.service';
+import { responseHandler } from '../services/responseHandler.service';
+import { resCode } from '../constants/resCode';
+import { ValidationError } from 'sequelize';
+import { customerValidations } from '../validations/customer.validation';
+import { msg } from '../constants/language/en.constant';
+import customerModel from '../models/customer.model';
+import employeeModel from '../models/employee.model';
+import commonQuery from '../services/commonQuery.service';
 
 // 🔸 Initialize customer-specific query service
 const customerQuery = commonQuery(customerModel);
@@ -22,7 +22,7 @@ const addCustomer = async (req: Request, res: Response, next: NextFunction) => {
     const parsed = await customerValidations.customerCreateSchema.safeParseAsync(req.body);
 
     if (!parsed.success) {
-      const errorMsg = parsed.error.errors.map((err) => err.message).join(", ");
+      const errorMsg = parsed.error.errors.map((err) => err.message).join(', ');
       return responseHandler.error(res, errorMsg, resCode.BAD_REQUEST);
     }
 
@@ -32,9 +32,9 @@ const addCustomer = async (req: Request, res: Response, next: NextFunction) => {
       cus_phone_number,
       cus_firstname,
       cus_lastname,
-      cus_status = "active",
+      cus_status = 'active',
     } = parsed.data as typeof parsed.data & {
-      cus_status: "active" | "inactive" | "restricted" | "blocked";
+      cus_status: 'active' | 'inactive' | 'restricted' | 'blocked';
     };
 
     // 🔐 Hash the password before saving
@@ -50,16 +50,11 @@ const addCustomer = async (req: Request, res: Response, next: NextFunction) => {
       cus_status,
     });
 
-    return responseHandler.success(
-      res,
-      msg.customer.createSuccess,
-      newCustomer,
-      resCode.CREATED
-    );
+    return responseHandler.success(res, msg.customer.createSuccess, newCustomer, resCode.CREATED);
   } catch (error) {
     if (error instanceof ValidationError) {
       const messages = error.errors.map((err) => err.message);
-      return responseHandler.error(res, messages.join(", "), resCode.BAD_REQUEST);
+      return responseHandler.error(res, messages.join(', '), resCode.BAD_REQUEST);
     }
 
     return next(error);
@@ -70,11 +65,7 @@ const addCustomer = async (req: Request, res: Response, next: NextFunction) => {
  * 📄 Get All Customers
  * ============================================================================
  */
-const getCustomers = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+const getCustomers = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const page = parseInt(req.query.page as string, 10) || 1;
     const limit = parseInt(req.query.results_per_page as string, 10) || 10;
@@ -87,11 +78,11 @@ const getCustomers = async (
         include: [
           {
             model: employeeModel,
-            as: "employee", // should match alias in customerModel association
+            as: 'employee', // should match alias in customerModel association
             required: false, // LEFT JOIN behavior
           },
         ],
-      }
+      },
     );
 
     return responseHandler.success(
@@ -104,48 +95,17 @@ const getCustomers = async (
         results_per_page: result.pagination.limit,
         data: result.data,
       },
-      resCode.OK
+      resCode.OK,
     );
   } catch (error) {
     if (error instanceof ValidationError) {
       const messages = error.errors.map((err) => err.message);
-      return responseHandler.error(res, messages.join(", "), resCode.BAD_REQUEST);
+      return responseHandler.error(res, messages.join(', '), resCode.BAD_REQUEST);
     }
 
     return next(error);
   }
 };
-// const getCustomers = async (req: Request, res: Response, next: NextFunction) => {
-//   try {
-//     const page = parseInt(req.query.page as string) || 1;
-//     const limit = parseInt(req.query.limit as string) || 10;
-//     const offset = (page - 1) * limit;
-
-//     const customers = await customerQuery.getAll({ limit, offset });
-//     const totalDataCount = await customerModel.count();
-
-//     return responseHandler.success(
-//       res,
-//       msg.customer.fetchSuccess,
-//       {
-//         totalDataCount,
-//         page,
-//         limit,
-//         totalPages: Math.ceil(totalDataCount / limit),//how many pages we need to show all data
-//         data: customers,
-//       },
-//       resCode.OK
-//     );
-//   } catch (error) {
-//     if (error instanceof ValidationError) {
-//       const messages = error.errors.map((err) => err.message);
-//       return responseHandler.error(res, messages.join(", "), resCode.BAD_REQUEST);
-//     }
-
-//     return next(error);
-//   }
-// };
-
 
 /* ============================================================================
  * 📄 Get Customer by ID (with associated employees)
@@ -157,8 +117,8 @@ const getCustomerById = async (req: Request, res: Response, next: NextFunction) 
       include: [
         {
           model: employeeModel,
-          as: "employee", // must match model association alias
-          attributes: ["emp_id", "emp_name", "emp_email", "emp_mobile_number"],
+          as: 'employee', // must match model association alias
+          attributes: ['emp_id', 'emp_name', 'emp_email', 'emp_mobile_number'],
         },
       ],
     });
@@ -171,7 +131,7 @@ const getCustomerById = async (req: Request, res: Response, next: NextFunction) 
   } catch (error) {
     if (error instanceof ValidationError) {
       const messages = error.errors.map((err) => err.message);
-      return responseHandler.error(res, messages.join(", "), resCode.BAD_REQUEST);
+      return responseHandler.error(res, messages.join(', '), resCode.BAD_REQUEST);
     }
 
     return next(error);
@@ -195,14 +155,14 @@ const updateCustomer = async (req: Request, res: Response, next: NextFunction) =
     const parsed = await customerValidations.customerUpdateSchema.safeParseAsync(req.body);
 
     if (!parsed.success) {
-      const errorMsg = parsed.error.errors.map((err) => err.message).join(", ");
+      const errorMsg = parsed.error.errors.map((err) => err.message).join(', ');
       return responseHandler.error(res, errorMsg, resCode.BAD_REQUEST);
     }
 
     // 🔁 Update customer
     const { affectedCount, updatedRows } = await customerQuery.update(
       { cus_id: req.params.id },
-      parsed.data
+      parsed.data,
     );
 
     if (affectedCount === 0) {
@@ -213,7 +173,7 @@ const updateCustomer = async (req: Request, res: Response, next: NextFunction) =
   } catch (error) {
     if (error instanceof ValidationError) {
       const messages = error.errors.map((err) => err.message);
-      return responseHandler.error(res, messages.join(", "), resCode.BAD_REQUEST);
+      return responseHandler.error(res, messages.join(', '), resCode.BAD_REQUEST);
     }
 
     return next(error);
@@ -236,7 +196,7 @@ const deleteCustomerById = async (req: Request, res: Response, next: NextFunctio
   } catch (error) {
     if (error instanceof ValidationError) {
       const messages = error.errors.map((err) => err.message);
-      return responseHandler.error(res, messages.join(", "), resCode.BAD_REQUEST);
+      return responseHandler.error(res, messages.join(', '), resCode.BAD_REQUEST);
     }
 
     return next(error);
