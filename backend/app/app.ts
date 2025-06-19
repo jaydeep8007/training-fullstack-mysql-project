@@ -22,8 +22,8 @@ dotenv.config();
 const app = express();
 
 // Middleware
-// app.use(cors());
-app.use(cors({ origin: ['http://localhost:3000', 'http://localhost:5173'] }));
+app.use(cors());
+// app.use(cors({ origin: ['http://localhost:3000', 'http://localhost:5173'] }));
 app.use(cookieParser()); // Parse cookies
 app.use(express.json()); // Parse JSON request bodies
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded request bodies
@@ -43,11 +43,11 @@ app.use(cors());
 app.use(logger('combined')); // Just uncomment this line to show logs.
 
 /* =======   Settings for CORS ========== */
-app.use((req: any, res: any, next: any) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-  next();
-});
+// app.use((req: any, res: any, next: any) => {
+//   res.header('Access-Control-Allow-Origin', '*');
+//   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+//   next();
+// });
 
 function haltOnTimedout(req: any, res: any, next: any) {
   if (!req.timedout) next();

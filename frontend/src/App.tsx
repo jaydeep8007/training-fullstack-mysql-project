@@ -1,5 +1,9 @@
 
 import './App.css'
+import CustomerSignup from './pages/CustomerSignup'
+
+
+
 
 function App() {
 
@@ -7,8 +11,8 @@ function App() {
   return (
     <>
       <div>
-        <p className='bg-red-500 h-10'>new param</p>
-        <div className='bg-slate-300 h-screen w-full'>any</div>
+       {/* <CustomerProfile/> */}
+       <CustomerSignup />
       </div>
     </>
   )

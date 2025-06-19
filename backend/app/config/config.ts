@@ -8,7 +8,7 @@ var config: any = {
       DIALECT: 'mysql',
       LOGGING: false,
     },
-    SECURITY_TOKEN: 'Fuse2ServerSecurityKey',
+    SECURITY_TOKEN: 'ServerSecurityKey',
     SERVER_PORT: '3000',
        TOKEN_EXPIRES_IN: 60 * 60 * 24, // 1 day in seconds
     REFRESH_TOKEN_EXPIRES_IN: 60 * 60 * 24 * 7, // 7 days in seconds
@@ -28,7 +28,7 @@ var config: any = {
       DIALECT: 'mysql',
       LOGGING: false,
     },
-    SECURITY_TOKEN: 'Fuse2ServerSecurityKey',
+    SECURITY_TOKEN: 'ServerSecurityKey',
     SERVER_PORT: '3000',
     TOKEN_EXPIRES_IN: 60 * 60 * 24, // 1 day in seconds
     REFRESH_TOKEN_EXPIRES_IN: 60 * 60 * 24 * 7, // 7 days in seconds

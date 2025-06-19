@@ -20,3 +20,14 @@ primary id changes
 addd all validation in zod 
 add employee as a reference to customer and add validation in employee apis 
 
+
+dynamic form builderbackend and frontend
+
+join query in mongo 
+respons formate for pagination
+foreign key change in mongo
+slug for frontend and backend 
+smtp settings 
+language setings 
+what are seeders and migration
+

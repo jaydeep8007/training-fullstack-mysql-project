@@ -24,10 +24,10 @@ const customerAuthQuery = commonQuery(customerAuthModel);
 const signupCustomer = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const parsed = await customerValidations.customerCreateSchema.safeParseAsync(req.body);
-    if (!parsed.success) {
-      const errors = parsed.error.errors.map((err) => `${err.path[0] || 'field'}: ${err.message}`);
-      return responseHandler.error(res, errors.join(', '), resCode.BAD_REQUEST);
-    }
+   if (!parsed.success) {
+  const errors = parsed.error.errors.map((err) => err.message); // ⛔ no field prefix
+  return responseHandler.error(res, errors.join(', '), resCode.BAD_REQUEST);
+}
 
     const { cus_firstname, cus_lastname, cus_email, cus_phone_number, cus_password } = parsed.data;
 
@@ -91,10 +91,10 @@ const signupCustomer = async (req: Request, res: Response, next: NextFunction) =
 const signinCustomer = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const parsed = await customerValidations.customerLoginSchema.safeParseAsync(req.body);
-    if (!parsed.success) {
-      const errors = parsed.error.errors.map((err) => `${err.path[0]}: ${err.message}`);
-      return responseHandler.error(res, errors.join(', '), resCode.BAD_REQUEST);
-    }
+   if (!parsed.success) {
+  const errors = parsed.error.errors.map((err) => err.message); // ⛔ no field prefix
+  return responseHandler.error(res, errors.join(', '), resCode.BAD_REQUEST);
+}
 
     const { cus_email, cus_password } = parsed.data;
 
