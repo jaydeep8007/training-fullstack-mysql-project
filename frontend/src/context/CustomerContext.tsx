@@ -1,4 +1,4 @@
-import { createContext, useState, useContext } from 'react';
+import { createContext, useState} from 'react';
 
 // ✅ Create the context
 type CustomerContextType = {

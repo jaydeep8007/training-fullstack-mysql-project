@@ -45,7 +45,7 @@ const CustomerLogin = () => {
         console.log("Customer Data:", customer);
 
         // ✅ Save token to localStorage
-        localStorage.setItem("accessToken", token);
+        localStorage.setItem("customerAccessToken", token);
 
         // ✅ Save customer to context
         updateCustomer(customer);

@@ -267,28 +267,30 @@ const resetPassword = async (req: Request, res: Response, next: NextFunction) =>
  */
 const logoutCustomer = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    //  const msg = getMsg();
     const cus_id = (req as any).user?.cus_id;
-    console.log('Customer ID from request:', cus_id);
+    console.log('🔓 Logout request from Customer ID:', cus_id);
 
     if (!cus_id) {
       return responseHandler.error(res, msg.common.unauthorized, resCode.UNAUTHORIZED);
     }
 
-    // ✅ Verify customer exists
+    // ✅ Check if customer exists
     const customer = await customerQuery.getById(cus_id);
     if (!customer) {
       return responseHandler.error(res, msg.customer.notFound, resCode.NOT_FOUND);
     }
 
-
-    // ❌ Optional: Delete customer auth tokens
+    // ✅ Delete auth tokens for this customer (access/refresh pair in DB)
     await customerAuthModel.destroy({ where: { cus_id } });
 
-    // 🍪 Clear refresh token cookie
-    res.clearCookie('refreshToken');
+    // ✅ Clear refresh token cookie (secure & HTTP-only)
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production",
+    });
 
-    // ✅ Success response
+    // ✅ Return success
     return responseHandler.success(res, msg.auth.logoutSucces, {}, resCode.OK);
   } catch (error) {
     if (error instanceof ValidationError) {
@@ -298,6 +300,7 @@ const logoutCustomer = async (req: Request, res: Response, next: NextFunction) =
     return next(error);
   }
 };
+
 
 const getCustomerProfile = async (req: Request, res: Response, next: NextFunction) => {
   try {
