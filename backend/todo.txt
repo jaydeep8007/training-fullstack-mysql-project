@@ -21,14 +21,16 @@ addd all validation in zod
 add employee as a reference to customer and add validation in employee apis 
 
 
-join query in mongo 
+join query in mongo --> simple populate or pipeline with $lookup
 respons formate for pagination
 foreign key change in mongo
 
 
 slug for frontend and backend 
-what are seeders and migration
-dynamic form builderbackend and frontend
+what are seeders and migration --> using drizzle for seed and migration in typescript or use sequelize-cli 
+dynamic form builder backend and frontend-->  Frontend: React + Formik, React Hook Form, Vue, Angular
+
+                                              Backend: JSON schema, Mongoose schemas, SQL structure
 
 flow chart 
 

@@ -48,9 +48,7 @@ const assignJobToEmployee = async (req: Request, res: Response, next: NextFuncti
     }
 
     // 🔎 Check if the employee is already assigned to a job
-    const alreadyAssigned = await employeeJobQuery.getOne({
-      where: { emp_id },
-    });
+    const alreadyAssigned = await employeeJobQuery.getOne({ emp_id });
 
     if (alreadyAssigned) {
       return responseHandler.error(
@@ -98,11 +96,9 @@ const assignJobToManyEmployees = async (req: Request, res: Response, next: NextF
     }
 
     // 🔎 Fetch and verify employees
-    const foundEmployees = await employeeQuery.getAll({
-      where: { emp_id: emp_ids },
-    });
+    const foundEmployees = await employeeQuery.getAll({ emp_id: emp_ids }); // ✅ commonQuery handles `where`
 
-    const foundEmpIds = foundEmployees.data.map((emp: any) => emp.get('emp_id'));
+    const foundEmpIds = foundEmployees.data.map((emp: any) => emp.emp_id); // use raw access if `.get()` not needed
     const missingEmpIds = emp_ids.filter((id) => !foundEmpIds.includes(id));
 
     if (missingEmpIds.length > 0) {
@@ -114,12 +110,10 @@ const assignJobToManyEmployees = async (req: Request, res: Response, next: NextF
     }
 
     // 🔎 Check for already assigned employees
-    const existingAssignments = await employeeJobModel.findAll({
-      where: { emp_id: emp_ids },
-    });
+    const existingAssignments = await employeeJobQuery.getAll({ emp_id: emp_ids }); // ✅ Uses commonQuery
 
-    if (existingAssignments.length > 0) {
-      const alreadyAssignedEmpIds = existingAssignments.map((ea) => ea.get('emp_id'));
+    if (existingAssignments.data.length > 0) {
+      const alreadyAssignedEmpIds = existingAssignments.data.map((ea: any) => ea.emp_id);
       return responseHandler.error(
         res,
         `These employees are already assigned a job: ${alreadyAssignedEmpIds.join(', ')}`,
@@ -139,16 +133,17 @@ const assignJobToManyEmployees = async (req: Request, res: Response, next: NextF
       resCode.CREATED,
     );
   } catch (error) {
-    // ⚠️ Handle validation errors
+    // ⚠️ Handle Sequelize validation errors
     if (error instanceof ValidationError) {
-      const messages = error.errors.map((err) => err.message);
-      return responseHandler.error(res, messages.join(', '), resCode.BAD_REQUEST);
+      const messages = error.errors.map((err) => err.message).join(', ');
+      return responseHandler.error(res, messages, resCode.BAD_REQUEST);
     }
 
     // 🔁 Forward unhandled errors
     return next(error);
   }
 };
+
 
 /* ============================================================================
  * 📦 Export Controller

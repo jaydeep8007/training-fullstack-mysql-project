@@ -1,17 +1,17 @@
-// validations/employee_job.validation.ts
 import { z } from 'zod';
 import employeeModel from '../models/employee.model';
 import jobModel from '../models/job.model';
+import { msg } from '../constants/language';
 
 const assignJobSchema = z
   .object({
     emp_id: z
-      .number({ invalid_type_error: 'emp_id must be a number' })
-      .min(1, 'emp_id is required'),
+      .number({ invalid_type_error: msg.validation.employeeJob.empIdType })
+      .min(1, { message: msg.validation.employeeJob.empIdRequired }),
 
     job_id: z
-      .number({ invalid_type_error: 'job_id must be a number' })
-      .min(1, 'job_id is required'),
+      .number({ invalid_type_error: msg.validation.employeeJob.jobIdType })
+      .min(1, { message: msg.validation.employeeJob.jobIdRequired }),
   })
   .superRefine(async (data, ctx) => {
     // Check if emp_id exists
@@ -19,7 +19,7 @@ const assignJobSchema = z
     if (!employee) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'Employee ID does not exist',
+        message: msg.validation.employeeJob.empIdNotFound,
         path: ['emp_id'],
       });
     }
@@ -29,7 +29,7 @@ const assignJobSchema = z
     if (!job) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'Job ID does not exist',
+        message: msg.validation.employeeJob.jobIdNotFound,
         path: ['job_id'],
       });
     }
@@ -37,10 +37,10 @@ const assignJobSchema = z
 
 const assignMultipleJobsSchema = z.object({
   emp_ids: z
-    .array(z.number({ invalid_type_error: 'emp_id must be a number' }))
-    .nonempty('emp_ids array cannot be empty'),
+    .array(z.number({ invalid_type_error: msg.validation.employeeJob.empIdType }))
+    .nonempty({ message: msg.validation.employeeJob.empIdsEmpty }),
 
-  job_id: z.number({ required_error: 'job_id is required' }),
+  job_id: z.number({ required_error: msg.validation.employeeJob.jobIdRequired }),
 });
 
 export default {

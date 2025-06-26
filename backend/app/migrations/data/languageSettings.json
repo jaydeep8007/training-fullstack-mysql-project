@@ -1,0 +1,19 @@
+{
+  "global_config_label": "Language Settings",
+  "global_config_slug": "language_settings",
+  "global_config_sequence": 1,
+  "global_config_json": {
+    "language_code": "en"
+  },
+  "global_config_fields": [
+    {
+      "key": "language_code",
+      "label": "Preferred Language",
+      "type": "select",
+      "required": true,
+      "options": ["en", "es"],
+      "placeholder": "Select your preferred language"
+    }
+  ],
+  "global_config_view": true
+}

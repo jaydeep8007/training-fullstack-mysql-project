@@ -49,31 +49,42 @@ const getAllJobs = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const page = parseInt(req.query.page as string, 10) || 1;
     const limit = parseInt(req.query.limit as string, 10) || 10;
+    const offset = (page - 1) * limit;
 
-    const result = await jobQuery.getAll({}, { page, limit });
+    const filter = {}; // Add conditions if needed
 
+    const options = {
+      limit,
+      offset,
+      // include: [] // add associations if needed
+
+    };
+
+    // ✅ Get paginated data
+    const jobs = await jobQuery.getAll( filter, options);
+
+    // ✅ Get total count
+    const count = await jobQuery.countDocuments(jobModel, filter);
+
+
+    // ✅ Send response
     return responseHandler.success(
       res,
       msg.job.fetchSuccess,
       {
-        totalDataCount: result.pagination.totalDataCount,
-        totalPages: result.pagination.totalPages,
-        page: result.pagination.page,
-        results_per_page: result.pagination.limit,
-        jobs: result.data,
+        count,
+        rows: jobs,
       },
-      resCode.OK,
+      resCode.OK
     );
   } catch (error) {
     if (error instanceof ValidationError) {
       const messages = error.errors.map((err) => err.message);
       return responseHandler.error(res, messages.join(', '), resCode.BAD_REQUEST);
     }
-
     return next(error);
   }
 };
-
 /* ============================================================================
  * 📦 Export Job Controller
  * ============================================================================

@@ -42,12 +42,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cors());
 app.use(logger('combined')); // Just uncomment this line to show logs.
 
-/* =======   Settings for CORS ========== */
-// app.use((req: any, res: any, next: any) => {
-//   res.header('Access-Control-Allow-Origin', '*');
-//   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-//   next();
-// });
+
 
 function haltOnTimedout(req: any, res: any, next: any) {
   if (!req.timedout) next();
@@ -60,6 +55,7 @@ const PORT = process.env.PORT || 3000;
 
 // Import your models with associations
 import models from './models/index';
+import { initLanguage } from './constants/language';
 
 app.listen(PORT, async () => {
   try {
@@ -69,6 +65,10 @@ app.listen(PORT, async () => {
     // Sync all models and associations
     await models.sequelize.sync({ alter: true });
     console.log('✅ Database synced successfully.');
+
+        // ✅ Load language from global config table
+    await initLanguage();
+
   } catch (error) {
     console.error('❌ Unable to connect to the database or sync:', error);
   }

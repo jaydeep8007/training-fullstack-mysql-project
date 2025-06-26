@@ -1,10 +1,12 @@
 {
-  "global_config_labal": "SMTP Settings",
-  "globlal_config_slug": "smtp_settings",
+  "global_config_label": "SMTP Settings",
+  "global_config_slug": "smtp_settings",
+  "global_config_sequence": 1,
   "global_config_json": {
     "smtp_host": "",
     "smtp_port": "",
-    "smtp_username": ""
+    "smtp_username": "",
+    "smtp_password": ""
   },
   "global_config_fields": [
     {
@@ -27,6 +29,14 @@
       "type": "text",
       "required": true,
       "placeholder": "Enter SMTP username"
+    },
+    {
+      "key": "smtp_password",
+      "label": "SMTP Password",
+      "type": "password",
+      "required": true,
+      "placeholder": "Enter SMTP password"
     }
-  ]
+  ],
+  "global_config_view": true
 }

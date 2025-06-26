@@ -45,10 +45,14 @@ const createEmployee = async (req: Request, res: Response, next: NextFunction) =
 const getAllEmployees = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const page = parseInt(req.query.page as string, 10) || 1;
-    const limit = parseInt(req.query.limit as string, 10) || 10;
-    const offset = (page - 1) * limit;
+    const results_per_page = parseInt(req.query.results_per_page as string, 10) || 10;
+    const offset = (page - 1) * results_per_page;
 
-    const { count: totalDataCount, rows: employees } = await employeeModel.findAndCountAll({
+    const filter = {}; // Add conditions if needed (e.g. { isActive: true })
+
+    const options = {
+      limit: results_per_page,
+      offset,
       include: [
         {
           model: customerModel,
@@ -56,27 +60,26 @@ const getAllEmployees = async (req: Request, res: Response, next: NextFunction) 
           attributes: ['cus_id', 'cus_firstname', 'cus_lastname', 'cus_email'],
         },
       ],
-      limit,
-      offset,
-    });
+    };
 
+    // ✅ Get employees using commonQuerySQL.getAll
+    const employees = await employeeQuery.getAll( filter, options);
+
+    // ✅ Count total records using countDocuments
+    const count = await employeeQuery.countDocuments(employeeModel, filter);
+
+
+    // ✅ Send formatted response
     return responseHandler.success(
       res,
       msg.employee.fetchSuccess,
       {
-        totalDataCount,
-        page,
-        limit,
-        totalPages: Math.ceil(totalDataCount / limit), // how many pages needed
-        data: employees,
+        count,
+        rows: employees,
       },
       resCode.OK,
     );
   } catch (error) {
-    if (error instanceof ValidationError) {
-      const messages = error.errors.map((err) => err.message);
-      return responseHandler.error(res, messages.join(', '), resCode.BAD_REQUEST);
-    }
     return next(error);
   }
 };
@@ -96,7 +99,7 @@ const deleteEmployeeById = async (req: Request, res: Response, next: NextFunctio
 
     await employee.destroy();
 
-    return responseHandler.success(res, msg.employee.deleteSuccess, null, resCode.OK);
+    return responseHandler.success(res, msg.employee.deleteSuccess);
   } catch (error) {
     return next(error);
   }

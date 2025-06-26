@@ -1,0 +1,36 @@
+{
+  "global_config_label": "Email Settings",
+  "global_config_slug": "email_settings",
+  "global_config_sequence": 2,
+  "global_config_json": {
+    "from_email": "",
+    "from_name": "",
+    "reply_to": ""
+  },
+  "global_config_fields": [
+    {
+      "key": "from_email",
+      "label": "From Email",
+      "type": "text",
+      "required": true,
+      "placeholder": "example@example.com",
+      "regex": "^[\\w.-]+@[\\w.-]+\\.[a-zA-Z]{2,}$"
+    },
+    {
+      "key": "from_name",
+      "label": "From Name",
+      "type": "text",
+      "required": true,
+      "placeholder": "Your Name or Company"
+    },
+    {
+      "key": "reply_to",
+      "label": "Reply To",
+      "type": "text",
+      "required": false,
+      "placeholder": "reply@example.com",
+      "regex": "^[\\w.-]+@[\\w.-]+\\.[a-zA-Z]{2,}$"
+    }
+  ],
+  "global_config_view": true
+}

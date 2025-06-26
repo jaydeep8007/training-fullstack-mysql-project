@@ -7,7 +7,7 @@ import { responseHandler } from '../services/responseHandler.service';
 import { resCode } from '../constants/resCode';
 import { ValidationError } from 'sequelize';
 import { customerValidations } from '../validations/customer.validation';
-import { msg } from '../constants/language/en.constant';
+import { msg } from '../constants/language';
 import { get } from '../config/config';
 import commonQuery from '../services/commonQuery.service';
 
@@ -23,6 +23,7 @@ const customerAuthQuery = commonQuery(customerAuthModel);
  */
 const signupCustomer = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    //  const msg = getMsg();
     const parsed = await customerValidations.customerCreateSchema.safeParseAsync(req.body);
    if (!parsed.success) {
   const errors = parsed.error.errors.map((err) => err.message); // ⛔ no field prefix
@@ -90,6 +91,7 @@ const signupCustomer = async (req: Request, res: Response, next: NextFunction) =
  */
 const signinCustomer = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    //  const msg = getMsg();
     const parsed = await customerValidations.customerLoginSchema.safeParseAsync(req.body);
    if (!parsed.success) {
   const errors = parsed.error.errors.map((err) => err.message); // ⛔ no field prefix
@@ -161,6 +163,7 @@ const signinCustomer = async (req: Request, res: Response, next: NextFunction) =
  */
 const forgotPassword = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    //  const msg = getMsg();
     const result = customerValidations.forgotPasswordSchema.safeParse(req.body);
     if (!result.success) {
       const errors = result.error.errors.map((e) => e.message).join(', ');
@@ -169,7 +172,7 @@ const forgotPassword = async (req: Request, res: Response, next: NextFunction) =
 
     const { cus_email } = result.data;
 
-    const customer = await customerQuery.getOne({ where: { cus_email } });
+    const customer = await customerQuery.getOne({ cus_email  });
     if (!customer) {
       return responseHandler.error(res, msg.customer.notFound, resCode.NOT_FOUND);
     }
@@ -213,6 +216,7 @@ const forgotPassword = async (req: Request, res: Response, next: NextFunction) =
  */
 const resetPassword = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    //  const msg = getMsg();
     const result = await customerValidations.resetPasswordSchema.safeParseAsync(req.body);
     if (!result.success) {
       const errors = result.error.errors.map((e) => e.message).join(', ');
@@ -225,10 +229,13 @@ const resetPassword = async (req: Request, res: Response, next: NextFunction) =>
       return responseHandler.error(res, msg.common.requiredAllFields, resCode.BAD_REQUEST);
     }
 
-    const authEntry = await customerAuthQuery.getOne({
-      where: { cus_auth_refresh_token },
-      include: [{ model: customerModel, as: 'customer' }],
-    });
+     // ✅ Get auth entry with associated customer
+    const authEntry = await customerAuthQuery.getOne(
+      { cus_auth_refresh_token },
+      {
+        include: [{ model: customerModel, as: 'customer' }],
+      }
+    );
 
     if (!authEntry || !authEntry.get('customer')) {
       return responseHandler.error(res, msg.auth.invalidResetToken, resCode.UNAUTHORIZED);
@@ -244,7 +251,7 @@ const resetPassword = async (req: Request, res: Response, next: NextFunction) =>
     authEntry.set('cus_auth_refresh_token', ''); // Clear token after use
     await authEntry.save();
 
-    return responseHandler.success(res, msg.auth.resetTokenGenerated, {}, resCode.OK);
+    return responseHandler.success(res, msg.auth.passwordResetSuccess, {}, resCode.OK);
   } catch (error) {
     if (error instanceof ValidationError) {
       const messages = error.errors.map((err) => err.message);
@@ -260,6 +267,7 @@ const resetPassword = async (req: Request, res: Response, next: NextFunction) =>
  */
 const logoutCustomer = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    //  const msg = getMsg();
     const cus_id = (req as any).user?.cus_id;
     console.log('Customer ID from request:', cus_id);
 
@@ -293,10 +301,11 @@ const logoutCustomer = async (req: Request, res: Response, next: NextFunction) =
 
 const getCustomerProfile = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    //  const msg = getMsg();
     const cus_id = (req as any).user?.cus_id;
 
     if (!cus_id) {
-      return responseHandler.error(res, 'Unauthorized', resCode.UNAUTHORIZED);
+      return responseHandler.error(res, msg.common.unauthorized, resCode.UNAUTHORIZED);
     }
 
     // ✅ Fetch customer using Sequelize `where`

@@ -5,6 +5,7 @@ import employeeModel from './employee.model';
 import employeeJobModel from './employeeJobAssign.model';
 import customerModel from './customer.model';
 import customerAuthModel from './customerAuth.model';
+// import globalConfigModel from './globalConfig.model';
 
 // Associations
 
@@ -47,4 +48,5 @@ export default {
   employeeJobModel,
   customerModel,
   customerAuthModel,
+  // globalConfigModel
 };

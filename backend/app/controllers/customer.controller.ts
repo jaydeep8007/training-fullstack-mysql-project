@@ -4,7 +4,7 @@ import { responseHandler } from '../services/responseHandler.service';
 import { resCode } from '../constants/resCode';
 import { ValidationError } from 'sequelize';
 import { customerValidations } from '../validations/customer.validation';
-import { msg } from '../constants/language/en.constant';
+import { msg } from '../constants/language';
 import customerModel from '../models/customer.model';
 import employeeModel from '../models/employee.model';
 import commonQuery from '../services/commonQuery.service';
@@ -68,41 +68,39 @@ const addCustomer = async (req: Request, res: Response, next: NextFunction) => {
 const getCustomers = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const page = parseInt(req.query.page as string, 10) || 1;
-    const limit = parseInt(req.query.results_per_page as string, 10) || 10;
+    const results_per_page = parseInt(req.query.results_per_page as string, 10) || 10;
+    const offset = (page - 1) * results_per_page;
 
-    const result = await customerQuery.getAll(
-      {},
-      {
-        page,
-        limit,
-        include: [
-          {
-            model: employeeModel,
-            as: 'employee', // should match alias in customerModel association
-            required: false, // LEFT JOIN behavior
-          },
-        ],
-      },
-    );
+    const filter = {}; // add filters if needed (e.g. { isActive: true })
+
+    const options = {
+      limit:results_per_page,
+      offset,
+      include: [
+        {
+          model: employeeModel,
+          as: 'employee',
+          required: false,
+        },
+      ],
+    };
+
+    const data = await customerQuery.getAll(filter, options);
+
+    // const count = await customerModel.count({ where: filter });
+    const count = await customerQuery.countDocuments(customerModel, filter);
+
 
     return responseHandler.success(
       res,
       msg.customer.fetchSuccess,
       {
-        totalDataCount: result.pagination.totalDataCount,
-        totalPages: result.pagination.totalPages,
-        page: result.pagination.page,
-        results_per_page: result.pagination.limit,
-        data: result.data,
+        count,
+        rows: data,
       },
       resCode.OK,
     );
   } catch (error) {
-    if (error instanceof ValidationError) {
-      const messages = error.errors.map((err) => err.message);
-      return responseHandler.error(res, messages.join(', '), resCode.BAD_REQUEST);
-    }
-
     return next(error);
   }
 };
@@ -113,6 +111,7 @@ const getCustomers = async (req: Request, res: Response, next: NextFunction) => 
  */
 const getCustomerById = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    //  const msg = getMsg();
     const customer = await customerQuery.getById(req.params.id, {
       include: [
         {
@@ -142,34 +141,53 @@ const getCustomerById = async (req: Request, res: Response, next: NextFunction) 
  * ✏️ Update Customer by ID
  * ============================================================================
  */
+
+
 const updateCustomer = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    // 🔍 Check if customer exists
-    const customer = await customerQuery.getById(req.params.id);
+    const cus_id = req.params.id;
 
-    if (!customer) {
+    // 🔍 1. Check if customer exists
+    const existingCustomer = await customerQuery.getById(cus_id);
+    if (!existingCustomer) {
       return responseHandler.error(res, msg.customer.fetchFailed, resCode.NOT_FOUND);
     }
 
-    // 🔍 Validate update input
+    // 🔍 2. Validate input
     const parsed = await customerValidations.customerUpdateSchema.safeParseAsync(req.body);
-
     if (!parsed.success) {
       const errorMsg = parsed.error.errors.map((err) => err.message).join(', ');
       return responseHandler.error(res, errorMsg, resCode.BAD_REQUEST);
     }
 
-    // 🔁 Update customer
-    const { affectedCount, updatedRows } = await customerQuery.update(
-      { cus_id: req.params.id },
-      parsed.data,
+    const updateData = parsed.data;
+
+    // 🔍 3. Check if updateData is same as existing
+    const isSame = Object.entries(updateData).every(
+      ([key, value]) => existingCustomer[key] === value
     );
 
-    if (affectedCount === 0) {
+    if (isSame) {
+      return responseHandler.success(res, msg.common.noChanges);
+    }
+    // 🔁 4. Compare & collect changed fields
+const changedFields: Record<string, any> = {};
+for (const [key, value] of Object.entries(updateData)) {
+  if (existingCustomer[key] !== value) {
+    changedFields[key] = value;
+  }
+}
+
+    // 🔁 5. Update using common query
+    const updatedCount = await customerQuery.update(updateData, { cus_id });
+
+    if (updatedCount === 0) {
       return responseHandler.error(res, msg.customer.updateFailed, resCode.BAD_REQUEST);
     }
 
-    return responseHandler.success(res, msg.customer.updateSuccess, updatedRows, resCode.OK);
+    return responseHandler.success(res, msg.customer.updateSuccess, {
+    updatedFields: changedFields,
+  }, resCode.OK);
   } catch (error) {
     if (error instanceof ValidationError) {
       const messages = error.errors.map((err) => err.message);
@@ -180,19 +198,23 @@ const updateCustomer = async (req: Request, res: Response, next: NextFunction) =
   }
 };
 
+
+
+
 /* ============================================================================
  * ❌ Delete Customer by ID
  * ============================================================================
  */
 const deleteCustomerById = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    //  const msg = getMsg();
     const result = await customerQuery.deleteById({ cus_id: req.params.id });
 
     if (result.deletedCount === 0) {
       return responseHandler.error(res, msg.common.invalidId, resCode.NOT_FOUND);
     }
 
-    return responseHandler.success(res, msg.customer.deleteSuccess, null, resCode.OK);
+    return responseHandler.success(res, msg.customer.deleteSuccess);
   } catch (error) {
     if (error instanceof ValidationError) {
       const messages = error.errors.map((err) => err.message);

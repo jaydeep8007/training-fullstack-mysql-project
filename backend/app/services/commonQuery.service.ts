@@ -11,56 +11,40 @@ const commonQuery = (model: any) => {
     },
 
     // ✅ GET ALL records with pagination and optional associations
-    async getAll(filter: Record<string, any> = {}, options: Record<string, any> = {}) {
+   async getAll(
+      filter: Record<string, any> = {},
+      options: Record<string, any> = {}
+    ) {
       try {
-        const page = Number(options.page) > 0 ? Number(options.page) : 1;
-        const limit = Number(options.limit) > 0 ? Number(options.limit) : 10;
-        const offset = (page - 1) * limit;
-
-        const queryOptions: any = {
+        const results = await model.findAll({
           where: filter,
-          limit,
-          offset,
-        };
-
-        // ✅ Optional include associations
-        if (options.include) {
-          queryOptions.include = options.include;
-        }
-
-        // ✅ Optional ordering
-        if (options.order) {
-          queryOptions.order = options.order;
-        }
-
-        const [data, totalDataCount] = await Promise.all([
-          model.findAll(queryOptions),
-          model.count({ where: filter }),
-        ]);
-
-        return {
-          data,
-          pagination: {
-            page,
-            limit,
-            totalDataCount,
-            totalPages: Math.ceil(totalDataCount / limit),
-          },
-        };
+          ...options, // include, limit, offset, order, etc.
+        });
+        return results;
       } catch (error) {
         throw error;
       }
     },
 
-    // ✅ GET ONE record by filter
-    async getOne(filter: Record<string, any> = {}) {
-      try {
-        const item = await model.findOne({ where: filter });
-        return item;
-      } catch (error) {
-        throw error;
-      }
-    },
+      async countDocuments(model: any, filter: any = {}) {
+    return await model.count({ where: filter });
+  },
+
+   // ✅ GET ONE record by filter with optional include/options
+async getOne(
+  filter: Record<string, any> = {},
+  options: Record<string, any> = {}
+) {
+  try {
+    const item = await model.findOne({
+      where: filter,
+      ...options, // includes things like `include`, `attributes`, `order`, etc.
+    });
+    return item;
+  } catch (error) {
+    throw error;
+  }
+},
 
     // ✅ GET BY PRIMARY KEY with options
     async getById(id: number | string, options: Record<string, any> = {}) {
@@ -78,10 +62,10 @@ const commonQuery = (model: any) => {
       options: { returnDeleted?: boolean } = {},
     ) {
       try {
-        const whereClause = typeof filter === 'object' ? filter : { id: filter };
+        const id = typeof filter === 'object' ? filter : { id: filter };
 
         // Check if the item exists before deletion
-        const existingItem = await model.findOne({ where: whereClause });
+        const existingItem = await model.findOne({ where: id });
 
         if (!existingItem) {
           return {
@@ -92,7 +76,7 @@ const commonQuery = (model: any) => {
 
         const deletedItem = options.returnDeleted ? existingItem : null;
 
-        const deletedCount = await model.destroy({ where: whereClause });
+        const deletedCount = await model.destroy({ where: id });
 
         return {
           deleted: deletedCount > 0,
@@ -105,21 +89,55 @@ const commonQuery = (model: any) => {
     },
 
     // ✅ UPDATE by filter (MySQL-compatible)
-    async update(filter: Record<string, any>, data: Record<string, any>) {
+
+  async update(data: Record<string, any>, filter: Record<string, any>) {
+  try {
+    const [updatedCount] = await model.update(data, { where: filter }); // ✅ MUST be under `where`
+    return updatedCount;
+  } catch (error) {
+    throw error;
+  }
+},
+
+
+   
+    async getAllWithInclude(
+      filter: Record<string, any> = {},
+      options: {
+        page?: number;
+        limit?: number;
+        include?: any[];
+      } = {}
+    ) {
       try {
-        const [affectedCount] = await model.update(data, {
+        const page = Number(options.page) > 0 ? Number(options.page) : 1;
+        const limit = Number(options.limit) > 0 ? Number(options.limit) : 10;
+        const offset = (page - 1) * limit;
+
+        const result = await model.findAndCountAll({
           where: filter,
+          include: options.include || [],
+          limit,
+          offset,
         });
 
-        // ✅ Fetch updated rows manually (optional)
-        const updatedRows = await model.findAll({ where: filter });
-
-        return { affectedCount, updatedRows };
+        return {
+          data: result.rows,
+          pagination: {
+            totalRecords: result.count,
+            page,
+            limit,
+            totalPages: Math.ceil(result.count / limit),
+          },
+        };
       } catch (error) {
         throw error;
       }
-    },
-  };
-};
+    }
+  }
+}
+
+    
+
 
 export default commonQuery;
