@@ -1,12 +1,14 @@
 import express from 'express';
 const router = express.Router();
 // const VERIFY = require('../util/userAuth');
+import adminRoutes from './admin.route';
 import customerRoutes from './customer.route';
 import empoyeeRoutes from './employee.route';
 import jobRoutes from './job.route';
 import employeeJobRoutes from './employeeJob.route';
 import globalConfigRoutes from './globalConfig.route';
 
+router.use('/admin',adminRoutes)
 router.use('/customer', customerRoutes);
 router.use('/employee', empoyeeRoutes);
 router.use('/job', jobRoutes);

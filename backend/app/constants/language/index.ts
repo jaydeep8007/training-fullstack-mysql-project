@@ -114,7 +114,7 @@ export async function initLanguage() {
     const lang = globalConfigJson?.language_code === 'es' ? 'es' : 'en';
 
     currentLang = lang;
-    msg = lang === 'es' ? esMsg : enMsg;
+    // msg = lang === 'es' ? esMsg : enMsg;
 
     console.log(`✅ Language set to '${lang}'`);
   } catch (err) {

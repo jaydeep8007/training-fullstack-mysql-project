@@ -28,6 +28,18 @@ export const msg = {
     languageUpdateSuccess: 'Language settings updated successfully',
     noChanges: 'No changes detected in the provided data.',
   },
+  admin: {
+    createSuccess: 'Admin created successfully.',
+    fetchSuccess: 'Admins fetched successfully.',
+    updateFailed: 'Failed to update admin details.',
+    fetchFailed: 'Failed to fetch admin data.',
+    updateSuccess: 'Admin updated successfully.',
+    deleteSuccess: 'Admin deleted successfully.',
+    notFound: 'Admin not found.',
+    emailExists: 'An admin with this email already exists.',
+    phoneExists: 'An admin with this phone number already exists.',
+    invalidId: 'Invalid admin ID provided.',
+  },
 
   customer: {
     createSuccess: 'Customer registered successfully.',
