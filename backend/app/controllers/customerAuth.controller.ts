@@ -10,6 +10,9 @@ import { customerValidations } from '../validations/customer.validation';
 import { msg } from '../constants/language';
 import { get } from '../config/config';
 import commonQuery from '../services/commonQuery.service';
+import nodemailer from "nodemailer";
+import { getSmtpSettings } from '../utils/utils.getSmtpSettings';
+
 
 const envConfig = get(process.env.NODE_ENV);
 
@@ -161,20 +164,20 @@ const signinCustomer = async (req: Request, res: Response, next: NextFunction) =
  * 📧 Forgot Password - Request Reset Token
  * ============================================================================
  */
+
 const forgotPassword = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    //  const msg = getMsg();
     const result = customerValidations.forgotPasswordSchema.safeParse(req.body);
     if (!result.success) {
-      const errors = result.error.errors.map((e) => e.message).join(', ');
+      const errors = result.error.errors.map((e) => e.message).join(", ");
       return responseHandler.error(res, errors, resCode.BAD_REQUEST);
     }
 
     const { cus_email } = result.data;
 
-    const customer = await customerQuery.getOne({ cus_email  });
+    const customer = await customerQuery.getOne({ cus_email });
     if (!customer) {
-      return responseHandler.error(res, msg.customer.notFound, resCode.NOT_FOUND);
+      return responseHandler.error(res, "Customer not found", resCode.NOT_FOUND);
     }
 
     const cus_auth_refresh_token = authToken.generateRefreshAuthToken({
@@ -185,30 +188,62 @@ const forgotPassword = async (req: Request, res: Response, next: NextFunction) =
     const [authEntry, created] = await customerAuthModel.findOrCreate({
       where: { cus_id: customer.cus_id },
       defaults: {
-        cus_auth_token: '', // can leave empty or null
+        cus_auth_token: '',
         cus_auth_refresh_token,
       },
     });
 
     if (!created) {
-      authEntry.set('cus_auth_refresh_token', cus_auth_refresh_token);
+      authEntry.set("cus_auth_refresh_token", cus_auth_refresh_token);
       await authEntry.save();
     }
 
+    // ✅ Construct reset URL
+    const resetUrl = `http://localhost:5173/customer-reset-password/${cus_auth_refresh_token}`;
+
+    // ✅ Fetch SMTP config from DB
+    const smtpConfig = await getSmtpSettings();
+    console.log("SMTP Config:", smtpConfig);
+    if (!smtpConfig) {
+      return responseHandler.error(res, "SMTP configuration not found", resCode.SERVER_ERROR);
+    }
+
+    const transporter = nodemailer.createTransport({
+      host: smtpConfig.smtp_host,
+      port: smtpConfig.smtp_port,
+      secure: smtpConfig.smtp_port === 465, // true for port 465
+      auth: {
+        user: smtpConfig.smtp_username,
+        pass: smtpConfig.smtp_password,
+      },
+    });
+
+    const mailOptions = {
+      from: `"Job Portal" <${smtpConfig.smtp_username}>`,
+      to: cus_email,
+      subject: "Reset Your Password",
+      html: `
+        <p>Hello ${customer.cus_firstname},</p>
+        <p>Click the link below to reset your password:</p>
+        <a href="${resetUrl}" style="color:blue;">Reset Password</a>
+        <p>This link will expire in 10 minutes.</p>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+
     return responseHandler.success(
       res,
-      msg.auth.resetTokenSent,
-      { cus_auth_refresh_token }, // ✅ return with proper key
-      resCode.OK,
+      msg.common.resetLinkSend,
+      { email: cus_email },
+      resCode.OK
     );
   } catch (error) {
-    if (error instanceof ValidationError) {
-      const messages = error.errors.map((err) => err.message);
-      return responseHandler.error(res, messages.join(', '), resCode.BAD_REQUEST);
-    }
-    return next(error);
+    console.error("Forgot password error:", error);
+    return responseHandler.error(res, "Something went wrong", resCode.SERVER_ERROR);
   }
 };
+
 
 /* ============================================================================
  * 🔒 Reset Password using Token

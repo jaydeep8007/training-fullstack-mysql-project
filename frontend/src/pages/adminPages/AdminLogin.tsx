@@ -67,7 +67,7 @@ const AdminLogin = () => {
     <div className="w-full h-screen flex items-center justify-center bg-gradient-to-br from-[#1a1a2e] to-[#16213e] px-4">
       <form
         onSubmit={submitHandler}
-        className="w-[90%] max-w-sm md:max-w-md lg:max-w-md p-6 bg-gray-900 text-white flex-col flex items-center gap-4 rounded-xl shadow-blue-400 shadow-xl"
+        className="w-[90%] max-w-sm md:max-w-md lg:max-w-md p-6 bg-gray-900 text-white flex-col flex items-center gap-4 rounded-xl shadow-blue-200 shadow-xl"
       >
         <h1 className="text-lg md:text-xl font-semibold">Welcome Admin</h1>
         <p className="text-xs md:text-sm text-gray-400 text-center">
@@ -120,7 +120,7 @@ const AdminLogin = () => {
 
         <button
           type="submit"
-          className="w-full p-2 bg-blue-600 rounded-xl mt-1 hover:bg-blue-700 text-sm md:text-base transition"
+          className="w-full p-2 bg-purple-600 rounded-xl mt-1 hover:bg-purple-700 text-sm md:text-base transition"
         >
           Login
         </button>
@@ -155,7 +155,7 @@ const AdminLogin = () => {
 
         <Link
           to="/customer-login"
-          className="w-full mt-4 p-2 text-center text-sm bg-purple-600 hover:bg-purple-700 rounded-xl transition"
+          className="w-full mt-4 p-2 text-center text-sm bg-blue-600 hover:bg-blue-700 rounded-xl transition"
         >
           Sign in as Customer
         </Link>

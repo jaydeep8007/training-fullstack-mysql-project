@@ -27,6 +27,7 @@ export const msg = {
     languageInvalid: 'Invalid language code provided.',
     languageUpdateSuccess: 'Language settings updated successfully',
     noChanges: 'No changes detected in the provided data.',
+    resetLinkSend: 'Reset link sent to your email.',
   },
   admin: {
     createSuccess: 'Admin created successfully.',

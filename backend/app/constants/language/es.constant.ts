@@ -27,6 +27,7 @@ export const msg = {
     languageInvalid: 'Código de idioma no válido.',
     languageUpdateSuccess: 'Configuración de idioma actualizada con éxito.',
         noChanges: 'No se detectaron cambios en los datos proporcionados.',
+        resetLinkSend: 'Enlace de restablecimiento enviado a tu correo.',
   },
 
   customer: {

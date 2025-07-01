@@ -9,6 +9,7 @@ import CustomerHome from "./pages/customerPages/customerHomePage";
 // ✅ Add these 2 imports for Toastify
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+
 import AdminSignup from "./pages/adminPages/AdminSignup";
 import AdminHome from "./pages/adminPages/AdminHomePage";
 import AdminLogin from "./pages/adminPages/AdminLogin";
@@ -24,6 +25,7 @@ function App() {
         <Route path="/" element={<Navigate to="/customer-login" replace />} />
         <Route path="/customer-home" element={<CustomerHome />} />
         <Route path="/admin-home" element={<AdminHome />} />
+        
 
         {/*  pages */}
         <Route path="/customer-signup" element={<CustomerSignup />} />
@@ -34,7 +36,7 @@ function App() {
         <Route path="/admin-profile" element={<AdminProfile />} />
 
         <Route path="/customer-forget-password" element={<CustomerForgotPassword />} />
-<Route path="/customer-reset-password/:token" element={<CustomerResetPassword />} />
+        <Route path="/customer-reset-password/:token" element={<CustomerResetPassword />} />
 
         {/* Optional: 404 Not Found fallback */}
         <Route path="*" element={<NotFound />} />

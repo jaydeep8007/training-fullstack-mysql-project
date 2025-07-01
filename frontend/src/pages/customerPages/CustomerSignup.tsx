@@ -251,7 +251,7 @@ const CustomerSignup = () => {
         toast.success("Signup successful! 🎉");
 
         setTimeout(() => {
-          navigate("/home");
+          navigate("/customer-home");
         }, 100);
       }
     } catch (error: any) {

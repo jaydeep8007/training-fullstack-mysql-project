@@ -5,48 +5,58 @@ import { useNavigate } from "react-router-dom";
 
 const CustomerForgotPassword = () => {
   const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
+
     try {
-      const res = await axios.post(`${import.meta.env.VITE_BASE_URL}/customer/auth/forget-password`, {
-        cus_email: email,
-      });
+      const res = await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/customer/auth/forget-password`,
+        { cus_email: email }
+      );
 
       toast.success(res.data.message || "Reset link sent!");
       navigate("/customer-login");
     } catch (error: any) {
       toast.error(error?.response?.data?.message || "Something went wrong");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-200 px-4">
+    <div className="w-full h-screen flex items-center justify-center bg-gradient-to-br from-[#1a1a2e] to-[#16213e] px-4">
       <form
         onSubmit={handleSubmit}
-        className="bg-white p-8 rounded-lg shadow-md w-full max-w-sm space-y-5"
+        className="w-[90%] max-w-sm md:max-w-md p-6 bg-gray-900 text-white flex-col flex items-center gap-4 rounded-xl shadow-slate-700 shadow-xl"
       >
-        <h2 className="text-2xl font-semibold text-center text-gray-800">
-          Forgot Password
-        </h2>
-        <p className="text-sm text-gray-500 text-center">
+        <h2 className="text-lg md:text-xl font-semibold">Forgot Password</h2>
+        <p className="text-xs md:text-sm text-gray-400 text-center">
           Enter your email to receive a password reset link.
         </p>
+
         <input
           type="email"
-          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-400"
+          className="w-full px-4 py-3 bg-gray-800 rounded-xl outline-none border-0 text-sm md:text-base"
           placeholder="Enter your email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
         />
+
         <button
           type="submit"
-          className="w-full bg-gray-700 text-white py-2 rounded hover:bg-gray-800 transition"
+          disabled={loading}
+          className={`w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-xl transition text-sm md:text-base ${
+            loading ? "opacity-50 cursor-not-allowed" : ""
+          }`}
         >
-          Send Reset Link
+          {loading ? "Sending..." : "Send Reset Link"}
         </button>
+
         <div className="text-xs text-center text-gray-400 pt-2">
           © 2025 JobPortal. All rights reserved.
         </div>
