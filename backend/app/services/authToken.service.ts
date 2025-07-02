@@ -59,8 +59,26 @@ const generateRefreshAuthToken = (user: any) => {
   });
 };
 
+/* GENERATE PASSWORD RESET TOKEN */
+const generateResetToken = (user: any) => {
+  console.log('Reset token generated!');
+  const payload = {
+    id: user.user_id,
+    email: user.email,
+    purpose: 'password-reset', // optional, to distinguish token usage
+  };
+
+  // 10-minute expiry
+  return jwt.sign(payload, config.SECURITY_TOKEN as string, {
+    expiresIn: '10m',
+  });
+};
+
+
 export const authToken = {
   generateAuthToken,
   generateRefreshAuthToken,
+   generateResetToken,
   verifyAuthToken,
+  
 };
