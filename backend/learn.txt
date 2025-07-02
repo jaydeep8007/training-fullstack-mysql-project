@@ -99,3 +99,50 @@ LEFT OUTER JOIN `employee` AS `employee`
   ON `customer`.`cus_id` = `employee`.`cus_id`
 
 WHERE `customer`.`cus_id` = <req.params.id>;
+
+
+
+
+
+now the real chalange begins now i want to create dynamic pages in frontend with this global config like i have in databse create smtp settings and email settings and language settings created in global config table in this all this type of json fields and all have in db i share u json file {
+  "global_config_label": "SMTP Settings",
+  "global_config_slug": "smtp_settings",
+  "global_config_sequence": 1,
+  "global_config_json": {
+    "smtp_host": "",
+    "smtp_port": "",
+    "smtp_username": "",
+    "smtp_password": ""
+  },
+  "global_config_fields": [
+    {
+      "key": "smtp_host",
+      "label": "SMTP Host",
+      "type": "text",
+      "required": true,
+      "placeholder": "Enter SMTP host"
+    },
+    {
+      "key": "smtp_port",
+      "label": "SMTP Port",
+      "type": "text",
+      "required": true,
+      "placeholder": "Enter SMTP port"
+    },
+    {
+      "key": "smtp_username",
+      "label": "SMTP Username",
+      "type": "text",
+      "required": true,
+      "placeholder": "Enter SMTP username"
+    },
+    {
+      "key": "smtp_password",
+      "label": "SMTP Password",
+      "type": "password",
+      "required": true,
+      "placeholder": "Enter SMTP password"
+    }
+  ],
+  "global_config_view": true
+} okey so this is one smtp setting with slug i want to get to one page toanothe page yes this is after showing page but want to first get data from this global config and then if there is 3 settings it shows 3 settings if i add 4th setting in my db it automatically set this page to frontend so give me step by step path how to acheave this from backend to frontend which api i need to create and all okey 

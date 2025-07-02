@@ -1,22 +1,19 @@
+// src/layouts/AdminLayout.tsx
 import { useEffect, useContext, useState, useRef } from "react";
 import { AdminDataContext } from "@/context/AdminContext";
-import { useNavigate } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
-import Sidebar from "@/layout/sidebar";
-import Header from "@/layout/header";
-import Footer from "@/layout/footer";
-import AdminMain from "@/layout/adminMain";
+import Sidebar from "@/components/shared/sidebar";
+import Header from "@/components/shared/header";
+import Footer from "@/components/shared/footer";
 
-const AdminHome = () => {
+
+
+const AdminLayout = () => {
   const navigate = useNavigate();
-  const {
-    admin,
-    updateAdmin,
-    setIsLoading,
-    setError,
-    isLoading,
-  } = useContext(AdminDataContext)!;
+  const { admin, updateAdmin, setIsLoading, setError, isLoading } =
+    useContext(AdminDataContext)!;
 
   const [openLogoutDialog, setOpenLogoutDialog] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -103,7 +100,11 @@ const AdminHome = () => {
         toggleCollapse={toggleCollapse}
       />
 
-      <div className={`flex-1 min-h-screen bg-[#f2eff32d] text-[#1d2226] font-sans text-[15px] transition-all duration-300 ${isCollapsed ? 'ml-16' : 'ml-64'}`}>
+      <div
+        className={`flex-1 min-h-screen bg-[#f2eff32d] text-[#1d2226] font-sans text-[15px] transition-all duration-300 ${
+          isCollapsed ? "ml-16" : "ml-[200px]"
+        }`}
+      >
         {isLoading && (
           <div className="fixed inset-0 bg-black bg-opacity-20 flex items-center justify-center z-50">
             <div className="text-blue-600 text-lg font-semibold">Loading...</div>
@@ -116,16 +117,19 @@ const AdminHome = () => {
           isCollapsed={isCollapsed}
           toggleCollapse={toggleCollapse}
         />
+        <div className="h-3 w-full">
 
-        <main className="">
-          <AdminMain admin={admin} />
-        </main>
+        </div>
+
+        <main className="flex-1">
+        <Outlet context={{ admin }} />
+      </main>
 
         {openLogoutDialog && (
           <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
             <div className="bg-gray-600 rounded p-6 w-[90%] max-w-sm shadow-lg text-sm">
               <h3 className="text-md font-semibold mb-2">Confirm Logout</h3>
-              <p className="text-gray-600 mb-4">Are you sure you want to logout?</p>
+              <p className="text-gray-300 mb-4">Are you sure you want to logout?</p>
               <div className="flex justify-end gap-2">
                 <button
                   className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
@@ -150,4 +154,4 @@ const AdminHome = () => {
   );
 };
 
-export default AdminHome;
+export default AdminLayout;

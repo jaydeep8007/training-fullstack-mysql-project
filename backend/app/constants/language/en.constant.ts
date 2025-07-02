@@ -101,6 +101,7 @@ export const msg = {
   globalConfig: {
     notFound: 'Global config not found.',
     fetchSuccess: 'Global config retrieved successfully.',
+    fetchAllSuccess: 'All global configs fetched successfully.',
   },
   validation: {
     firstName: {

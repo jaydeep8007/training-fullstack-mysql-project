@@ -30,7 +30,7 @@ const Sidebar = ({
   }[] = [
     {
       title: "Overview",
-      items: [{ label: "Dashboard", route: "/admin-home", icon: <FiHome /> }],
+      items: [{ label: "Dashboard", route: "/admin/dashboard", icon: <FiHome /> }],
     },
     {
       title: "Management",
@@ -63,31 +63,31 @@ const Sidebar = ({
 
       {/* Sidebar */}
       <div
-        className={`fixed top-0 left-0 h-full z-50 transform transition-all duration-300 ease-in-out shadow-lg
-        ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0
-        ${isCollapsed ? "w-20" : "w-64"}
-        bg-gradient-to-b from-slate-950 to-slate-900 border-r border-slate-700 text-white`}
+        className={`fixed top-0 left-0 h-full z-50 transform transition-all duration-300 ease-in-out shadow-xl
+          ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0
+          ${isCollapsed ? "w-20" : "w-[200px]"}
+          bg-background text-foreground border-r border-border ring-1 ring-muted/30`}
       >
         {/* Logo Section */}
         <div
-          className={`flex items-center gap-2 px-4 py-4 border-b border-slate-700 ${
+          className={`flex items-center gap-2 px-4 py-4 border-b border-border ${
             isCollapsed ? "justify-center" : "justify-start"
           }`}
         >
           <img
-            src="google-logo.png"
+            src="/google-logo.png"
             alt="Company Logo"
             className={`transition-all duration-300 ${
-              isCollapsed ? "w-8 h-8" : "w-10 h-10"
+              isCollapsed ? "w-8 h-8" : "w-8 h-8"
             } rounded-full`}
           />
           {!isCollapsed && (
-            <span className="text-xl font-bold text-blue-400 tracking-wide">
+            <span className="text-lg font-bold text-primary tracking-wide">
               JobPortal
             </span>
           )}
           <FiX
-            className="ml-auto cursor-pointer text-slate-400 hover:text-red-400 transition lg:hidden"
+            className="ml-auto cursor-pointer text-muted-foreground hover:text-red-400 transition lg:hidden"
             size={24}
             onClick={() => setSidebarOpen(false)}
           />
@@ -98,7 +98,7 @@ const Sidebar = ({
           {sectionedNav.map((section) => (
             <div key={section.title}>
               {!isCollapsed && (
-                <p className="text-xs font-bold uppercase text-slate-400 mb-2 tracking-wide px-1">
+                <p className="text-xs font-bold uppercase text-muted-foreground mb-2 tracking-wide px-1">
                   {section.title}
                 </p>
               )}
@@ -109,11 +109,11 @@ const Sidebar = ({
                     navigate(item.route);
                     setSidebarOpen(false);
                   }}
-                  className="flex items-center gap-3 w-full px-3 py-2 rounded-md text-left hover:bg-slate-700 text-slate-200 hover:text-white transition"
+                  className="flex items-center gap-3 w-full px-3 py-2 rounded-md text-left hover:bg-muted text-muted-foreground hover:text-foreground transition"
                 >
-                  <span className="text-base">{item.icon}</span>
+                  <span className="text-sm scale-125">{item.icon}</span>
                   {!isCollapsed && (
-                    <span className="text-sm font-medium">{item.label}</span>
+                    <span className="text-xs font-medium">{item.label}</span>
                   )}
                 </button>
               ))}

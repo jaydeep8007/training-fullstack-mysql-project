@@ -60,7 +60,7 @@ const AdminSignup = () => {
         updateAdmin(data.data.admin);
 
         toast.success("Signup successful! 🎉");
-        setTimeout(() => navigate("/admin-home"), 100);
+        setTimeout(() => navigate("/admin/dashboard"), 100);
       }
     } catch (error: any) {
       const errMsg = error?.response?.data?.message || "Signup failed!";

@@ -50,7 +50,7 @@ const AdminLogin = () => {
         toast.success("Signin successful! 🎉");
 
         setTimeout(() => {
-          navigate("/admin-home");
+          navigate("/admin/dashboard");
         }, 100);
       }
     } catch (error: any) {
