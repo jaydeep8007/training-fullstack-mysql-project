@@ -8,7 +8,8 @@ router.get("/", globalConfigController.getAllConfigs);
 
 // ✅ GET config by slug
 router.get('/:slug', globalConfigController.getConfigBySlug);
-router.put("/:slug", globalConfigController.updateLanguageSetting);
+router.put("/:slug", globalConfigController.updateGlobalConfig);
+
 
 
 

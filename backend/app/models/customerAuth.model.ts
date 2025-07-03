@@ -21,8 +21,8 @@ const customerAuthModel = sequelize.define(
     },
     cus_auth_token: {
       type: DataTypes.STRING,
-      allowNull: true, // can be null or empty
-      defaultValue: '', // default to empty string if not provided
+      allowNull: true,
+      defaultValue: '',
     },
     cus_auth_refresh_token: {
       type: DataTypes.STRING,
@@ -38,8 +38,14 @@ const customerAuthModel = sequelize.define(
         unique: true,
         fields: ['cus_auth_refresh_token'],
       },
+      {
+        name: 'unique_cus_id', // ✅ Prevent multiple entries for one customer
+        unique: true,
+        fields: ['cus_id'],
+      },
     ],
-  },
+  }
 );
+
 
 export default customerAuthModel;

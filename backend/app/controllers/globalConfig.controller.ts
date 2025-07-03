@@ -25,79 +25,68 @@ const getConfigBySlug = async (req: Request, res: Response, next: NextFunction) 
   }
 };
 
-// ✅ UPDATE Language Setting & Refresh In-Memory msg
-// const updateLanguageSetting = async (req: Request, res: Response, next: NextFunction) => {
-//   try {
-//     const { language_code } = req.body;
-
-//     if (!['en', 'es'].includes(language_code)) {
-//       return responseHandler.error(res, msg.common.languageInvalid, resCode.BAD_REQUEST);
-//     }
-
-//    await globalConfigQuery.update(
-//   { global_config_json: { language_code } },
-//   { global_config_slug: 'language_settings' } // ✅ This goes inside `where`
-// );
-
-   
-  
-//     // 🔁 Refresh language immediately
-//     await initLanguage();
-
-//     return responseHandler.success(res, msg.common.languageUpdateSuccess);
-//   } catch (error) {
-//     next(error);
-//   }
-// };
 
 
-const updateLanguageSetting = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const slug = req.params.slug;
-    const updateData = req.body; // Expecting global_config_json object or fields
-
-    const existing = await globalConfigQuery.getOne({ global_config_slug: slug });
-
-    if (!existing) {
-      return responseHandler.error(res, msg.globalConfig.notFound, resCode.NOT_FOUND);
-    }
-
-    const updated = await globalConfigQuery.update(
-      { global_config_json: updateData.global_config_json },
-      { global_config_slug: slug }
-    );
-
-    // Optional: If updated language, refresh the in-memory language
-    if (slug === "language_settings") {
-      await initLanguage();
-    }
-
-    return responseHandler.success(res, msg.common.languageUpdateSuccess, updated, resCode.OK);
-  } catch (error) {
-    next(error);
-  }
-};
-
-
-// ✅ GET All Global Configs
 const getAllConfigs = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    // Get all configs where `global_config_view` is true, ordered by `global_config_sequence`
     const configs = await globalConfigQuery.getAll(
       { global_config_view: true },
       {
         order: [['global_config_sequence', 'ASC']],
+        attributes: [
+          'global_config_id',
+          'global_config_label',
+          'global_config_slug',
+          'global_config_sequence',
+        ],
       }
     );
 
-    return responseHandler.success(res, msg.globalConfig.fetchAllSuccess, configs, resCode.OK);
+    return responseHandler.success(
+      res,
+      msg.globalConfig.fetchAllSuccess,
+      configs,
+      resCode.OK
+    );
   } catch (error) {
     next(error);
   }
 };
 
+const updateGlobalConfig = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { slug } = req.params;
+    const { global_config_json_value } = req.body;
+
+    if (!slug || !global_config_json_value) {
+      return responseHandler.error(res, "Missing configuration slug or values", resCode.BAD_REQUEST);
+    }
+
+    const config = await globalConfigQuery.getOne({ global_config_slug: slug } );
+
+    if (!config) {
+      return responseHandler.error(res, "Configuration not found", resCode.NOT_FOUND);
+    }
+
+    config.set('global_config_json_value', global_config_json_value);
+    await config.save();
+
+        // ✅ If updating language_settings, re-run initLanguage
+    if (slug === 'language_settings') {
+      await initLanguage(); // Re-initialize language immediately
+      console.log("✅ Language refreshed after update");
+      console.log("✔️ Sample message after setting:", msg.common.requiredAllFields);
+    }
+    return responseHandler.success(res, "Configuration updated successfully", config, resCode.OK);
+  } catch (error) {
+    console.error("Update config error:", error);
+    return responseHandler.error(res, "Failed to update configuration", resCode.SERVER_ERROR);
+  }
+};
+
+
 export default {
   getConfigBySlug,
   getAllConfigs,
-  updateLanguageSetting,
+  updateGlobalConfig
 };

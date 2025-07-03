@@ -180,7 +180,7 @@ const forgotPassword = async (req: Request, res: Response, next: NextFunction) =
       return responseHandler.error(res, "Customer not found", resCode.NOT_FOUND);
     }
 
-    const cus_auth_refresh_token = authToken.generateRefreshAuthToken({
+    const reset_token = authToken.generateResetToken({
       user_id: customer.cus_id,
       email: customer.cus_email,
     });
@@ -189,21 +189,21 @@ const forgotPassword = async (req: Request, res: Response, next: NextFunction) =
       where: { cus_id: customer.cus_id },
       defaults: {
         cus_auth_token: '',
-        cus_auth_refresh_token,
+        cus_auth_refresh_token : reset_token,
       },
     });
 
     if (!created) {
-      authEntry.set("cus_auth_refresh_token", cus_auth_refresh_token);
+      authEntry.set("cus_auth_refresh_token", reset_token);
       await authEntry.save();
     }
 
     // ✅ Construct reset URL
-    const resetUrl = `http://localhost:5173/customer-reset-password/${cus_auth_refresh_token}`;
+    const resetUrl = `http://localhost:5173/customer-reset-password/${reset_token}`;
 
     // ✅ Fetch SMTP config from DB
     const smtpConfig = await getSmtpSettings();
-    console.log("SMTP Config:", smtpConfig);
+    console.log("SMTP Config controller:", smtpConfig);
     if (!smtpConfig) {
       return responseHandler.error(res, "SMTP configuration not found", resCode.SERVER_ERROR);
     }
@@ -213,13 +213,13 @@ const forgotPassword = async (req: Request, res: Response, next: NextFunction) =
       port: smtpConfig.smtp_port,
       secure: smtpConfig.smtp_port === 465, // true for port 465
       auth: {
-        user: smtpConfig.smtp_username,
+        user: smtpConfig.smtp_user,
         pass: smtpConfig.smtp_password,
       },
     });
 
     const mailOptions = {
-      from: `"Job Portal" <${smtpConfig.smtp_username}>`,
+      from: `"Job Portal" <${smtpConfig.smtp_user}>`,
       to: cus_email,
       subject: "Reset Your Password",
       html: `
@@ -258,15 +258,15 @@ const resetPassword = async (req: Request, res: Response, next: NextFunction) =>
       return responseHandler.error(res, errors, resCode.BAD_REQUEST);
     }
 
-    const { cus_auth_refresh_token, new_password, confirm_password } = result.data;
+    const { reset_token, new_password, confirm_password } = result.data;
 
-    if (!cus_auth_refresh_token || !new_password || !confirm_password) {
+    if (!reset_token || !new_password || !confirm_password) {
       return responseHandler.error(res, msg.common.requiredAllFields, resCode.BAD_REQUEST);
     }
 
      // ✅ Get auth entry with associated customer
     const authEntry = await customerAuthQuery.getOne(
-      { cus_auth_refresh_token },
+      { cus_auth_refresh_token: reset_token },
       {
         include: [{ model: customerModel, as: 'customer' }],
       }

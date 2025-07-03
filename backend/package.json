@@ -11,7 +11,7 @@
     "migrate": "npx sequelize-cli db:migrate",
     "migrate:undo": "npx sequelize-cli db:migrate:undo",
     "migrate:status": "npx sequelize-cli db:migrate:status",
-    "migrate:generate": "npx sequelize-cli migration:generate --name language-settings-global-config"
+    "migrate:generate": "npx sequelize-cli migration:generate --name smtp-settings-global-config"
   },
   "description": "A Node.js + TypeScript project.",
   "author": "",

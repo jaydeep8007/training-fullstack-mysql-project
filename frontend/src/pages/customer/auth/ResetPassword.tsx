@@ -2,11 +2,14 @@ import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 
 const CustomerResetPassword = () => {
   const { token } = useParams();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const navigate = useNavigate();
 
@@ -27,7 +30,7 @@ const CustomerResetPassword = () => {
       const res = await axios.post(
         `${import.meta.env.VITE_BASE_URL}/customer/auth/reset-password`,
         {
-          cus_auth_refresh_token: token,
+          reset_token: token,
           new_password: password,
           confirm_password: confirmPassword,
         }
@@ -50,23 +53,41 @@ const CustomerResetPassword = () => {
           Reset Password
         </h2>
 
-        <input
-          type="password"
-          placeholder="Enter new password"
-          className="w-full px-4 py-3 bg-gray-800 rounded-xl outline-none border-0 text-sm md:text-base"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
+        {/* New Password Field */}
+        <div className="relative">
+          <input
+            type={showPassword ? "text" : "password"}
+            placeholder="Enter new password"
+            className="w-full px-4 py-3 bg-gray-800 rounded-xl outline-none border-0 text-sm md:text-base pr-12"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <div
+            className="absolute right-4 top-1/2 transform -translate-y-1/2 text-xl text-gray-400 cursor-pointer"
+            onClick={() => setShowPassword(!showPassword)}
+          >
+            {showPassword ? <FiEyeOff /> : <FiEye />}
+          </div>
+        </div>
 
-        <input
-          type="password"
-          placeholder="Confirm new password"
-          className="w-full px-4 py-3 bg-gray-800 rounded-xl outline-none border-0 text-sm md:text-base"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          required
-        />
+        {/* Confirm Password Field */}
+        <div className="relative">
+          <input
+            type={showConfirmPassword ? "text" : "password"}
+            placeholder="Confirm new password"
+            className="w-full px-4 py-3 bg-gray-800 rounded-xl outline-none border-0 text-sm md:text-base pr-12"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+          />
+          <div
+            className="absolute right-4 top-1/2 transform -translate-y-1/2 text-xl text-gray-400 cursor-pointer"
+            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+          >
+            {showConfirmPassword ? <FiEyeOff /> : <FiEye />}
+          </div>
+        </div>
 
         <button
           type="submit"

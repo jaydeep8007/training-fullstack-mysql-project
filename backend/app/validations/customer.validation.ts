@@ -3,7 +3,7 @@ import customerModel from '../models/customer.model';
 import { msg } from '../constants/language';
 
 // Common password validation function
-const validateStrongPassword = (val: string, ctx: z.RefinementCtx) => {
+export const validateStrongPassword = (val: string, ctx: z.RefinementCtx) => {
   if (!/[A-Z]/.test(val)) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
@@ -152,7 +152,7 @@ const forgotPasswordSchema = z
 
 const resetPasswordSchema = z
   .object({
-    cus_auth_refresh_token: z
+    reset_token: z
       .string({
         required_error: msg.validation.token.required,
       })

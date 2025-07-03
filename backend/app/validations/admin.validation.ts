@@ -152,7 +152,7 @@ const forgotPasswordSchema = z
 
 const resetPasswordSchema = z
   .object({
-    admin_auth_refresh_token: z
+    reset_token: z
       .string({
         required_error: msg.validation.token.required,
       })

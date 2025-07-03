@@ -2,12 +2,12 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-import CustomerSignup from "./pages/customerPages/CustomerSignup";
-import CustomerLogin from "./pages/customerPages/CustomerLogin";
-import CustomerProfile from "./pages/customerPages/CustomerProfile";
-import CustomerHome from "./pages/customerPages/customerHomePage";
-import CustomerForgotPassword from "./pages/customerPages/ForgotPassword";
-import CustomerResetPassword from "./pages/customerPages/ResetPassword";
+import CustomerSignup from "./pages/customer/auth/CustomerSignup";
+import CustomerLogin from "./pages/customer/auth/CustomerLogin";
+import CustomerProfile from "./pages/customer/CustomerProfile";
+import CustomerHome from "./pages/customer/customerHome";
+import CustomerForgotPassword from "./pages/customer/auth/ForgotPassword";
+import CustomerResetPassword from "./pages/customer/auth/ResetPassword";
 
 import AdminSignup from "./pages/admin/auth/AdminSignup";
 import AdminLogin from "./pages/admin/auth/AdminLogin";
@@ -30,8 +30,14 @@ function App() {
         <Route path="/customer-login" element={<CustomerLogin />} />
         <Route path="/customer-profile" element={<CustomerProfile />} />
         <Route path="/customer-home" element={<CustomerHome />} />
-        <Route path="/customer-forget-password" element={<CustomerForgotPassword />} />
-        <Route path="/customer-reset-password/:token" element={<CustomerResetPassword />} />
+        <Route
+          path="/customer-forget-password"
+          element={<CustomerForgotPassword />}
+        />
+        <Route
+          path="/customer-reset-password/:token"
+          element={<CustomerResetPassword />}
+        />
 
         {/* ✅ Admin Auth Routes */}
         <Route path="/admin-login" element={<AdminLogin />} />

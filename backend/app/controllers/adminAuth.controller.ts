@@ -11,6 +11,7 @@ import adminAuthModel from '../models/adminAuth.model';
 import commonQuery from '../services/commonQuery.service';
 import { adminValidations } from '../validations/admin.validation';
 import nodemailer from "nodemailer";
+import { getSmtpSettings } from '../utils/utils.getSmtpSettings';
 
 const envConfig = get(process.env.NODE_ENV);
 
@@ -233,9 +234,13 @@ const logoutAdmin = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+/* ============================================================================
+ * 📧 Admin Forgot Password - Request Reset Token
+ * ============================================================================
+ */
 const forgotPassword = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const result = adminValidations.forgotPasswordSchema.safeParse(req.body); // ✅ use admin schema
+    const result = adminValidations.forgotPasswordSchema.safeParse(req.body);
     if (!result.success) {
       const errors = result.error.errors.map((e) => e.message).join(", ");
       return responseHandler.error(res, errors, resCode.BAD_REQUEST);
@@ -243,12 +248,12 @@ const forgotPassword = async (req: Request, res: Response, next: NextFunction) =
 
     const { admin_email } = result.data;
 
-    const admin = await adminQuery.getOne({ admin_email }); // ✅ fetch admin by email
+    const admin = await adminQuery.getOne({ admin_email });
     if (!admin) {
       return responseHandler.error(res, "Admin not found", resCode.NOT_FOUND);
     }
 
-    const admin_auth_refresh_token = authToken.generateRefreshAuthToken({
+    const reset_token = authToken.generateResetToken({
       user_id: admin.admin_id,
       email: admin.admin_email,
     });
@@ -257,32 +262,39 @@ const forgotPassword = async (req: Request, res: Response, next: NextFunction) =
       where: { admin_id: admin.admin_id },
       defaults: {
         admin_auth_token: '',
-        admin_auth_refresh_token,
+        admin_auth_refresh_token: reset_token,
       },
     });
 
     if (!created) {
-      authEntry.set("admin_auth_refresh_token", admin_auth_refresh_token);
+      authEntry.set("admin_auth_refresh_token", reset_token);
       await authEntry.save();
     }
 
-    const resetUrl = `http://localhost:5173/admin-reset-password/${admin_auth_refresh_token}`;
+    const resetUrl = `http://localhost:5173/admin-reset-password/${reset_token}`;
+
+    const smtpConfig = await getSmtpSettings();
+    if (!smtpConfig) {
+      return responseHandler.error(res, "SMTP configuration not found", resCode.SERVER_ERROR);
+    }
 
     const transporter = nodemailer.createTransport({
-      service: "gmail",
+      host: smtpConfig.smtp_host,
+      port: smtpConfig.smtp_port,
+      secure: smtpConfig.smtp_port === 465,
       auth: {
-        user: "jrparmar8007@gmail.com",
-        pass: "olqvuhxslpmmokyc",
+        user: smtpConfig.smtp_user,
+        pass: smtpConfig.smtp_password,
       },
     });
 
     const mailOptions = {
-      from: '"Job Portal" <jrparmar8007@gmail.com>',
+      from: `"Job Portal Admin" <${smtpConfig.smtp_user}>`,
       to: admin_email,
-      subject: "Reset Your Password",
+      subject: "Admin Reset Password",
       html: `
-        <p>Hello ${admin.admin_firstname},</p>
-        <p>Click the link below to reset your password:</p>
+        <p>Hello ${admin.admin_name || "Admin"},</p>
+        <p>Click below to reset your password:</p>
         <a href="${resetUrl}" style="color:blue;">Reset Password</a>
         <p>This link will expire in 10 minutes.</p>
       `,
@@ -292,34 +304,39 @@ const forgotPassword = async (req: Request, res: Response, next: NextFunction) =
 
     return responseHandler.success(
       res,
-      "Reset link sent successfully!",
+      msg.common.resetLinkSend,
       { email: admin_email },
       resCode.OK
     );
   } catch (error) {
-    console.error(error);
+    console.error("Admin forgot password error:", error);
     return responseHandler.error(res, "Something went wrong", resCode.SERVER_ERROR);
   }
 };
 
+
+/* ============================================================================
+ * 🔒 Admin Reset Password using Token
+ * ============================================================================
+ */
 const resetPassword = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const result = await adminValidations.resetPasswordSchema.safeParseAsync(req.body); // ✅ Use admin schema
+    const result = await adminValidations.resetPasswordSchema.safeParseAsync(req.body);
     if (!result.success) {
       const errors = result.error.errors.map((e) => e.message).join(', ');
       return responseHandler.error(res, errors, resCode.BAD_REQUEST);
     }
 
-    const { admin_auth_refresh_token, new_password, confirm_password } = result.data;
+    const { reset_token, new_password, confirm_password } = result.data;
 
-    if (!admin_auth_refresh_token || !new_password || !confirm_password) {
+    if (!reset_token || !new_password || !confirm_password) {
       return responseHandler.error(res, msg.common.requiredAllFields, resCode.BAD_REQUEST);
     }
 
     const authEntry = await adminAuthQuery.getOne(
-      { admin_auth_refresh_token },
+      { admin_auth_refresh_token: reset_token },
       {
-        include: [{ model: adminModel, as: 'admin' }], // ✅ Include associated admin
+        include: [{ model: adminModel, as: 'admin' }],
       }
     );
 
@@ -331,10 +348,9 @@ const resetPassword = async (req: Request, res: Response, next: NextFunction) =>
 
     const hashedPassword = await hashPassword(new_password);
     adminInstance.set('admin_password', hashedPassword);
-
     await adminInstance.save();
 
-    authEntry.set('admin_auth_refresh_token', ''); // ✅ Clear token after use
+    authEntry.set('admin_auth_refresh_token', '');
     await authEntry.save();
 
     return responseHandler.success(res, msg.auth.passwordResetSuccess, {}, resCode.OK);
@@ -346,9 +362,6 @@ const resetPassword = async (req: Request, res: Response, next: NextFunction) =>
     return next(error);
   }
 };
-
-
-
 
 
 export default {

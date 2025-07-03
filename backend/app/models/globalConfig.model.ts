@@ -22,7 +22,7 @@ const globalConfigModel = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: true,
     },
-    global_config_json: {
+    global_config_json_value: {
       type: DataTypes.JSON,
       allowNull: true,
     },

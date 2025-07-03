@@ -1,19 +1,34 @@
 {
-  "global_config_label": "Language Settings",
   "global_config_slug": "language_settings",
-  "global_config_sequence": 1,
-  "global_config_json": {
-    "language_code": "en"
+  "global_config_label": "Language Settings",
+  "global_config_sequence": 3,
+  "global_config_view": true,
+  "global_config_json_value": {
+    "default_language": "en",
+    "available_languages": [
+      {
+        "label": "English",
+        "code": "en"
+      },
+      {
+        "label": "Spanish",
+        "code": "es"
+      }
+    ],
+    "allow_language_switching": true
   },
   "global_config_fields": [
     {
-      "key": "language_code",
-      "label": "Preferred Language",
-      "type": "select",
-      "required": true,
-      "options": ["en", "es"],
-      "placeholder": "Select your preferred language"
+      "default_language": {
+        "type": "select",
+        "label": "Default Language",
+        "required": true,
+        "options": [
+          { "label": "English", "value": "English" },
+          { "label": "Spanish", "value": "Spanish" }
+        ]
+      }
     }
-  ],
-  "global_config_view": true
+    
+  ]
 }
