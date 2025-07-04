@@ -6,8 +6,8 @@ import CustomerSignup from "./pages/customer/auth/CustomerSignup";
 import CustomerLogin from "./pages/customer/auth/CustomerLogin";
 import CustomerProfile from "./pages/customer/CustomerProfile";
 import CustomerHome from "./pages/customer/customerHome";
-import CustomerForgotPassword from "./pages/customer/auth/ForgotPassword";
-import CustomerResetPassword from "./pages/customer/auth/ResetPassword";
+import CustomerForgotPassword from "./pages/customer/auth/CustomerForgotPassword";
+import CustomerResetPassword from "./pages/customer/auth/CustomerResetPassword";
 
 import AdminSignup from "./pages/admin/auth/AdminSignup";
 import AdminLogin from "./pages/admin/auth/AdminLogin";
@@ -17,6 +17,9 @@ import GlobalConfigPage from "./pages/admin/GlobalConfig";
 
 import AdminLayout from "./layout/AdminLayout";
 import NotFound from "./pages/NotFound";
+import CustomerList from "./pages/admin/CustomerList";
+import AdminResetPassword from "./pages/admin/auth/AdminResetPassword";
+import AdminForgotPassword from "./pages/admin/auth/AdminForgotPassword";
 
 function App() {
   return (
@@ -42,6 +45,8 @@ function App() {
         {/* ✅ Admin Auth Routes */}
         <Route path="/admin-login" element={<AdminLogin />} />
         <Route path="/admin-signup" element={<AdminSignup />} />
+        <Route path="/admin-forgot-password" element={<AdminForgotPassword />} />
+        <Route path="/admin-reset-password/:token" element={<AdminResetPassword />} />
 
         {/* ✅ Admin Layout Route Wrapper */}
         <Route path="/admin" element={<AdminLayout />}>
@@ -49,6 +54,7 @@ function App() {
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="profile" element={<AdminProfile />} />
           <Route path="global-config" element={<GlobalConfigPage />} />
+          <Route path="customers" element={<CustomerList />} />
         </Route>
 
         {/* Not Found */}

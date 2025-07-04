@@ -104,8 +104,8 @@ const Header = ({
   }, []);
 
   return (
-    <header className="bg-background/90 backdrop-blur-md text-foreground px-6 py-1 flex items-center justify-between border border-border shadow-xl rounded-b-xl ring-1 ring-muted/30">
-      <div className="flex flex-col gap-1">
+    <header className="sticky top-0 z-30 bg-background/90 backdrop-blur-md text-foreground px-6 py-1 flex items-center justify-between border-b border-border shadow-xl rounded-b-xl ring-1 ring-muted/30">
+      <div className="flex flex-col ">
         <div className="flex items-center gap-4">
      <button
   className="p-1 rounded-md bg-muted hover:bg-muted/60 transition text-primary"
@@ -116,7 +116,7 @@ const Header = ({
 </button>
           <h2 className="text-sm text-muted-foreground tracking-wide lowercase">{breadcrumb}</h2>
         </div>
-        <h1 className="lg:ml-11  text-lg font-bold tracking-tight text-primary">
+        <h1 className="lg:ml-11  text-base font-bold tracking-tight text-primary">
           {pageTitle}
         </h1>
       </div>
@@ -124,11 +124,11 @@ const Header = ({
       <div className="relative">
         <div className="flex items-center gap-5">
           <FiSearch
-            className="w-5 h-5 cursor-pointer text-muted-foreground hover:text-primary transition"
+            className="w-4 h-4 cursor-pointer text-muted-foreground hover:text-primary transition"
             onClick={() => alert("Search clicked")}
           />
           <FaBell
-            className="w-5 h-5 cursor-pointer text-muted-foreground hover:text-primary transition"
+            className="w-4 h-4 cursor-pointer text-muted-foreground hover:text-primary transition"
             onClick={() => navigate("/admin-notifications")}
           />
           <button
@@ -145,45 +145,45 @@ const Header = ({
         </div>
 
         {showDropdown && (
-          <div
-            ref={dropdownRef}
-            className="absolute right-0 mt-2 w-64 bg-white border border-slate-400 rounded-lg shadow-md text-sm z-50"
-          >
-            <div className="p-2 divide-y divide-border">
-              <div className="py-2">
-                <DropdownItem icon={<FaUserCog />} label="Profile" onClick={() => navigate("/admin/profile")} />
-                <DropdownItem icon={<FaBell />} label="Notifications" onClick={() => navigate("/admin-notifications")} />
-              </div>
+  <div
+    ref={dropdownRef}
+    className="absolute right-0 mt-2 w-64 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#1f1f2f] shadow-xl text-sm z-50 animate-fadeIn"
+  >
+    <div className="p-2 divide-y divide-border">
+      <div className="py-2">
+        <DropdownItem icon={<FaUserCog />} label="Profile" onClick={() => navigate("/admin/profile")} />
+        <DropdownItem icon={<FaBell />} label="Notifications" onClick={() => navigate("/admin-notifications")} />
+      </div>
 
-              <div className="py-2">
-                <SectionTitle title="Settings" />
-                <DropdownItem icon={<FiSettings />} label="Account Settings" onClick={() => navigate("/admin-account-settings")} />
-              </div>
+      <div className="py-2">
+        <SectionTitle title="Settings" />
+        <DropdownItem icon={<FiSettings />} label="Account Settings" onClick={() => navigate("/admin-account-settings")} />
+      </div>
 
-              <div className="py-2">
-                <SectionTitle title="Management" />
-                <DropdownItem icon={<FaChartPie />} label="Dashboard" onClick={() => navigate("/admin/dashboard")} />
-                <DropdownItem icon={<FaUsers />} label="User Management" onClick={() => navigate("/admin-users")} />
-                <DropdownItem icon={<FaBriefcase />} label="Job Management" onClick={() => navigate("/manage-jobs")} />
-                <DropdownItem icon={<FaGlobe />} label="Global Config" onClick={() => navigate("/admin/global-config")} />
-              </div>
+      <div className="py-2">
+        <SectionTitle title="Management" />
+        <DropdownItem icon={<FaChartPie />} label="Dashboard" onClick={() => navigate("/admin/dashboard")} />
+        <DropdownItem icon={<FaUsers />} label="User Management" onClick={() => navigate("/admin-users")} />
+        <DropdownItem icon={<FaBriefcase />} label="Job Management" onClick={() => navigate("/manage-jobs")} />
+        <DropdownItem icon={<FaGlobe />} label="Global Config" onClick={() => navigate("/admin/global-config")} />
+      </div>
 
-              <div className="py-2">
-                <SectionTitle title="Support" />
-                <DropdownItem icon={<FiHelpCircle />} label="Help & Support" onClick={() => navigate("/admin-help")} />
-                <DropdownItem
-                  icon={<FiLogOut />}
-                  label="Logout"
-                  className="text-destructive hover:bg-destructive/20"
-                  onClick={() => {
-                    setShowDropdown(false);
-                    setOpenLogoutDialog(true);
-                  }}
-                />
-              </div>
-            </div>
-          </div>
-        )}
+      <div className="py-2">
+        <SectionTitle title="Support" />
+        <DropdownItem icon={<FiHelpCircle />} label="Help & Support" onClick={() => navigate("/admin-help")} />
+        <DropdownItem
+          icon={<FiLogOut />}
+          label="Logout"
+          className="text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30"
+          onClick={() => {
+            setShowDropdown(false);
+            setOpenLogoutDialog(true);
+          }}
+        />
+      </div>
+    </div>
+  </div>
+)}
       </div>
     </header>
   );

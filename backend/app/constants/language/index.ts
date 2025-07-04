@@ -41,7 +41,7 @@ export async function initLanguage() {
     msg = langCode === 'es' ? esMsg : enMsg;
 
     console.log(`✅ Language set to '${langCode}' from DB`);
-    console.log(`✔️ Sample message after setting: ${msg.common.requiredAllFields}`);
+    console.log(`✔️ Sample message in index file: ${msg.common.requiredAllFields}`);
   } catch (error) {
     console.error('❌ Failed to load language from DB:', error);
     msg = enMsg;

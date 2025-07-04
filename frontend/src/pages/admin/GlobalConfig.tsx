@@ -40,18 +40,28 @@ const GlobalConfigPage = () => {
   };
 
   // Fetch full config when slug changes
-  const fetchConfigBySlug = async (slug: string) => {
-    try {
-      setLoadingConfig(true);
-      const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/global-config/${slug}`);
-      const data = res.data?.data;
-      setSelectedConfig(data || null);
-    } catch (error) {
-      toast.error("Failed to load config details");
-    } finally {
-      setLoadingConfig(false);
-    }
-  };
+const fetchConfigBySlug = async (slug: string) => {
+  try {
+    setLoadingConfig(true);
+
+    // Simulate a visible loading delay
+    setTimeout(async () => {
+      try {
+        const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/global-config/${slug}`);
+        const data = res.data?.data;
+        setSelectedConfig(data || null);
+      } catch (error) {
+        toast.error("Failed to load config details");
+      } finally {
+        setLoadingConfig(false);
+      }
+    }, 1000); // 1-second delay for loader visibility
+  } catch (error) {
+    toast.error("Something went wrong");
+    setLoadingConfig(false);
+  }
+};
+
 
   useEffect(() => {
     fetchSections();

@@ -1,4 +1,3 @@
-// src/layouts/AdminLayout.tsx
 import { useEffect, useContext, useState, useRef } from "react";
 import { AdminDataContext } from "@/context/AdminContext";
 import { Outlet, useNavigate } from "react-router-dom";
@@ -7,8 +6,6 @@ import { toast } from "react-toastify";
 import Sidebar from "@/components/shared/sidebar";
 import Header from "@/components/shared/header";
 import Footer from "@/components/shared/footer";
-
-
 
 const AdminLayout = () => {
   const navigate = useNavigate();
@@ -92,7 +89,8 @@ const AdminLayout = () => {
   };
 
   return (
-    <div className="flex">
+    <div className="flex min-h-screen">
+      {/* Sidebar */}
       <Sidebar
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
@@ -100,36 +98,46 @@ const AdminLayout = () => {
         toggleCollapse={toggleCollapse}
       />
 
+      {/* Main content area */}
       <div
-        className={`flex-1 min-h-screen bg-[#f2eff32d] text-[#1d2226] font-sans text-[15px] transition-all duration-300 ${
-          isCollapsed ? "ml-16" : "ml-[200px]"
+        className={`flex flex-col flex-1 min-h-screen bg-[#f2eff32d] text-[#1d2226] font-sans text-[15px] transition-all duration-300 ${
+          isCollapsed ? "ml-20" : "ml-[180px]"
         }`}
       >
+        {/* Loading overlay */}
         {isLoading && (
           <div className="fixed inset-0 bg-black bg-opacity-20 flex items-center justify-center z-50">
             <div className="text-blue-600 text-lg font-semibold">Loading...</div>
           </div>
         )}
 
+        {/* Header */}
         <Header
           setSidebarOpen={setSidebarOpen}
           setOpenLogoutDialog={setOpenLogoutDialog}
           isCollapsed={isCollapsed}
           toggleCollapse={toggleCollapse}
         />
-        <div className="h-3 w-full">
 
-        </div>
+        {/* Spacer (optional) */}
+        <div className="h-2 w-full"></div>
 
+        {/* Main content */}
         <main className="flex-1">
-        <Outlet context={{ admin }} />
-      </main>
+          <Outlet context={{ admin }} />
+        </main>
 
+        {/* Footer always at bottom */}
+        <Footer />
+
+        {/* Logout Confirmation Dialog */}
         {openLogoutDialog && (
           <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
             <div className="bg-gray-600 rounded p-6 w-[90%] max-w-sm shadow-lg text-sm">
               <h3 className="text-md font-semibold mb-2">Confirm Logout</h3>
-              <p className="text-gray-300 mb-4">Are you sure you want to logout?</p>
+              <p className="text-gray-300 mb-4">
+                Are you sure you want to logout?
+              </p>
               <div className="flex justify-end gap-2">
                 <button
                   className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
@@ -147,8 +155,6 @@ const AdminLayout = () => {
             </div>
           </div>
         )}
-
-        <Footer />
       </div>
     </div>
   );

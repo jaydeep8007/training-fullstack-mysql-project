@@ -17,7 +17,7 @@ const AdminDashboard  = () => {
  const { admin } = useContext(AdminDataContext)!;
 
   return (
-    <div className="w-full pb-1 h-[calc(100vh-80px)] overflow-hidden bg-background text-foreground text-xs">
+    <div className="w-full pb-1 h-[calc(100vh-80px)] overflow-hidden bg-background text-foreground text-sm">
       <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-3 h-full p-2 overflow-hidden">
 
         {/* Left Section */}

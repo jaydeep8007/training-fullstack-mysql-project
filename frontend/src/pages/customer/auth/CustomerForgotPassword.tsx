@@ -5,11 +5,13 @@ import { useNavigate } from "react-router-dom";
 
 const CustomerForgotPassword = () => {
   const [email, setEmail] = useState("");
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrors({});
     setLoading(true);
 
     try {
@@ -21,7 +23,19 @@ const CustomerForgotPassword = () => {
       toast.success(res.data.message || "Reset link sent!");
       navigate("/customer-login");
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || "Something went wrong");
+      const backendErrors = error?.response?.data?.errors;
+
+      if (Array.isArray(backendErrors)) {
+        const fieldErrors: Record<string, string> = {};
+        backendErrors.forEach((err: any) => {
+          if (err.path && err.message) {
+            fieldErrors[err.path[0]] = err.message;
+          }
+        });
+        setErrors(fieldErrors);
+      } else {
+        toast.error(error?.response?.data?.message || "Something went wrong");
+      }
     } finally {
       setLoading(false);
     }
@@ -38,14 +52,18 @@ const CustomerForgotPassword = () => {
           Enter your email to receive a password reset link.
         </p>
 
-        <input
-          type="email"
-          className="w-full px-4 py-3 bg-gray-800 rounded-xl outline-none border-0 text-sm md:text-base"
-          placeholder="Enter your email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
+        <div className="w-full flex flex-col gap-1">
+          <input
+            type="email"
+            className="w-full px-4 py-3 bg-gray-800 rounded-xl outline-none border-0 text-sm md:text-base"
+            placeholder="Enter your email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          {errors.cus_email && (
+            <span className="text-sm text-red-400">{errors.cus_email}</span>
+          )}
+        </div>
 
         <button
           type="submit"
