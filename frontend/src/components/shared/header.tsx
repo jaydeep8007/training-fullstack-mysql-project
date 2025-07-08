@@ -1,5 +1,4 @@
 import {
-  FiSettings,
   FiLogOut,
   FiHelpCircle,
   FiChevronLeft,
@@ -12,16 +11,15 @@ import {
   FaUserCircle,
   FaBell,
   FaUserCog,
-  FaChartPie,
-  FaUsers,
-  FaBriefcase,
   FaGlobe,
+  FaHome,
 } from "react-icons/fa";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
+import { appBreadcrumbs } from "@/routes"; // 👈 Make sure to export this from routes/index.ts
 
 interface HeaderProps {
-  setSidebarOpen: (val: boolean) => void;
+  setSidebarOpen?: (val: boolean) => void;
   setOpenLogoutDialog: (val: boolean) => void;
   isCollapsed: boolean;
   toggleCollapse: () => void;
@@ -38,50 +36,33 @@ const Header = ({
   const navigate = useNavigate();
   const location = useLocation();
 
-  const pageTitle = getPageTitle(location.pathname);
+  // Get breadcrumb trail from central route config
   const breadcrumb = getBreadcrumbPath(location.pathname);
 
-  function getPageTitle(path: string): string {
-    const map: Record<string, string> = {
-      "/admin/home": "Dashboard",
-      "/admin/profile": "Profile",
-      "/admin-account-settings": "Account Settings",
-      "/admin-users": "User Management",
-      "/manage-jobs": "Job Management",
-      "/admin-help": "Help & Support",
-      "/admin-notifications": "Notifications",
-      "/admin/dashboard": "Dashboard",
-      "/admin/global-config": "Global Config",
-      "/admin-settings": "Settings",
-    };
-    return map[path] || "Admin Panel";
+  // Get page title from last breadcrumb
+  const pageTitle = breadcrumb[breadcrumb.length - 1]?.label || "Admin Panel";
+
+  // Match route segments with breadcrumb labels
+  function getBreadcrumbPath(pathname: string) {
+    const segments = pathname.split("/").filter(Boolean);
+    let cumulativePath = "";
+    return segments.map((segment) => {
+      cumulativePath += `/${segment}`;
+      const match = appBreadcrumbs.find(
+        (b) => b.path === cumulativePath || (b.path.includes(":") && cumulativePath.startsWith(b.path.split("/:")[0]))
+      );
+      return {
+        label: match?.breadcrumb || segment.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+        path: cumulativePath,
+      };
+    });
   }
 
-  function getBreadcrumbPath(path: string): string {
-    const labelMap: Record<string, string> = {
-      admin: "Admin",
-      dashboard: "Dashboard",
-      profile: "Profile",
-      "account-settings": "Account Settings",
-      "global-config": "Global Config",
-      "home": "Dashboard",
-      "users": "User Management",
-      "notifications": "Notifications",
-      "help": "Help & Support",
-      "manage-jobs": "Job Management",
-    };
-
-    const segments = path.split("/").filter(Boolean);
-    const readable = segments.map((seg) =>
-      labelMap[seg] || seg.charAt(0).toUpperCase() + seg.slice(1).replace(/-/g, " ")
-    );
-    return readable.join(" > ");
-  }
-
+  // Theme logic
   useEffect(() => {
-    const savedTheme = localStorage.getItem("theme");
+    const saved = localStorage.getItem("theme");
     const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    const useDark = savedTheme === "dark" || (!savedTheme && prefersDark);
+    const useDark = saved === "dark" || (!saved && prefersDark);
     document.documentElement.classList.toggle("dark", useDark);
     setIsDark(useDark);
   }, []);
@@ -93,34 +74,55 @@ const Header = ({
     document.documentElement.classList.toggle("dark", newTheme === "dark");
   };
 
+  // Close dropdown on outside click
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    const handler = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setShowDropdown(false);
       }
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
   }, []);
 
   return (
     <header className="sticky top-0 z-30 bg-background/90 backdrop-blur-md text-foreground px-6 py-1 flex items-center justify-between border-b border-border shadow-xl rounded-b-xl ring-1 ring-muted/30">
-      <div className="flex flex-col ">
+      {/* Left Section */}
+      <div className="flex flex-col">
         <div className="flex items-center gap-4">
-     <button
-  className="p-1 rounded-md bg-muted hover:bg-muted/60 transition text-primary"
-  onClick={toggleCollapse}
-  title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
->
-  {isCollapsed ? <FiChevronRight size={20} /> : <FiChevronLeft size={20} />}
-</button>
-          <h2 className="text-sm text-muted-foreground tracking-wide lowercase">{breadcrumb}</h2>
+          <button
+            className="p-1 rounded-md bg-muted hover:bg-muted/60 transition text-primary"
+            onClick={toggleCollapse}
+            title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+          >
+            {isCollapsed ? <FiChevronRight size={20} /> : <FiChevronLeft size={20} />}
+          </button>
+
+   <div className="text-sm text-muted-foreground tracking-wide flex items-center gap-2 flex-wrap">
+  {breadcrumb.map((crumb, idx) => (
+    <div key={crumb.path} className="flex items-center gap-2">
+      {idx !== 0 && <span>/</span>}
+      {idx !== breadcrumb.length - 1 ? (
+        <button
+          onClick={() => navigate(crumb.path)}
+          className="text-primary hover:underline flex items-center gap-1"
+        >
+          {idx === 0 ? <FaHome className="w-4 h-4" /> : crumb.label}
+        </button>
+      ) : (
+        <span className="font-medium text-foreground">
+          {idx === 0 ? <FaHome className="w-4 h-4" /> : crumb.label}
+        </span>
+      )}
+    </div>
+  ))}
+</div>
         </div>
-        <h1 className="lg:ml-11  text-base font-bold tracking-tight text-primary">
-          {pageTitle}
-        </h1>
+
+        <h1 className="text-base font-bold tracking-tight text-primary lg:ml-11">{pageTitle}</h1>
       </div>
 
+      {/* Right Section */}
       <div className="relative">
         <div className="flex items-center gap-5">
           <FiSearch
@@ -145,63 +147,53 @@ const Header = ({
         </div>
 
         {showDropdown && (
-  <div
-    ref={dropdownRef}
-    className="absolute right-0 mt-2 w-64 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#1f1f2f] shadow-xl text-sm z-50 animate-fadeIn"
-  >
-    <div className="p-2 divide-y divide-border">
-      <div className="py-2">
-        <DropdownItem icon={<FaUserCog />} label="Profile" onClick={() => navigate("/admin/profile")} />
-        <DropdownItem icon={<FaBell />} label="Notifications" onClick={() => navigate("/admin-notifications")} />
-      </div>
-
-      <div className="py-2">
-        <SectionTitle title="Settings" />
-        <DropdownItem icon={<FiSettings />} label="Account Settings" onClick={() => navigate("/admin-account-settings")} />
-      </div>
-
-      <div className="py-2">
-        <SectionTitle title="Management" />
-        <DropdownItem icon={<FaChartPie />} label="Dashboard" onClick={() => navigate("/admin/dashboard")} />
-        <DropdownItem icon={<FaUsers />} label="User Management" onClick={() => navigate("/admin-users")} />
-        <DropdownItem icon={<FaBriefcase />} label="Job Management" onClick={() => navigate("/manage-jobs")} />
-        <DropdownItem icon={<FaGlobe />} label="Global Config" onClick={() => navigate("/admin/global-config")} />
-      </div>
-
-      <div className="py-2">
-        <SectionTitle title="Support" />
-        <DropdownItem icon={<FiHelpCircle />} label="Help & Support" onClick={() => navigate("/admin-help")} />
-        <DropdownItem
-          icon={<FiLogOut />}
-          label="Logout"
-          className="text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30"
-          onClick={() => {
-            setShowDropdown(false);
-            setOpenLogoutDialog(true);
-          }}
-        />
-      </div>
-    </div>
-  </div>
-)}
+          <div
+            ref={dropdownRef}
+            className="absolute right-0 mt-2 w-64 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#1f1f2f] shadow-xl text-sm z-50 animate-fadeIn"
+          >
+            <div className="p-2 divide-y divide-border">
+              <div className="py-2">
+                <DropdownItem icon={<FaUserCog />} label="Profile" onClick={() => navigate("/admin/profile")} />
+                <DropdownItem icon={<FaBell />} label="Notifications" onClick={() => navigate("/admin-notifications")} />
+              </div>
+             
+              <div className="py-2">
+                <SectionTitle title="Management" />
+                
+                <DropdownItem icon={<FaGlobe />} label="Global Config" onClick={() => navigate("/admin/global-config")} />
+              </div>
+              <div className="py-2">
+                <SectionTitle title="Support" />
+                <DropdownItem icon={<FiHelpCircle />} label="Help & Support" onClick={() => navigate("/admin-help")} />
+                <DropdownItem
+                  icon={<FiLogOut />}
+                  label="Logout"
+                  className="text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30"
+                  onClick={() => {
+                    setShowDropdown(false);
+                    setOpenLogoutDialog(true);
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </header>
   );
 };
-
-interface DropdownItemProps {
-  icon: React.ReactNode;
-  label: string;
-  onClick: () => void;
-  className?: string;
-}
 
 const DropdownItem = ({
   icon,
   label,
   onClick,
   className = "",
-}: DropdownItemProps) => (
+}: {
+  icon: React.ReactNode;
+  label: string;
+  onClick: () => void;
+  className?: string;
+}) => (
   <button
     onClick={onClick}
     className={`flex items-center gap-3 w-full px-4 py-2 text-left rounded-md transition-colors hover:bg-muted ${className}`}

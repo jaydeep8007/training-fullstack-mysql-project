@@ -3,6 +3,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { buildZodSchemaFromFields } from "@/helper/buildZodSchemaFromFields";
 import BigCenterLoader from "../shared/loader";
+import SkeletonGlobalConfigForm from "../skeletons/globalConfigForm.skeleton";
 
 interface SelectOption {
   label: string;
@@ -36,6 +37,7 @@ const GlobalConfigForm = ({ config }: GlobalConfigFormProps) => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
 
   const fields: ConfigField[] = Array.isArray(config.global_config_fields)
     ? config.global_config_fields.map((fieldObj) => {
@@ -47,14 +49,17 @@ const GlobalConfigForm = ({ config }: GlobalConfigFormProps) => {
       })
     : [];
 
+  useEffect(() => {
+    setFormData(config.global_config_json_value || {});
+    if (config.global_config_json_value) {
+      setInitialLoading(false);
+    }
+  }, [config]);
+
   const handleChange = (key: string, value: string) => {
     setFormData((prev) => ({ ...prev, [key]: value }));
     setErrors((prev) => ({ ...prev, [key]: "" }));
   };
-
-  useEffect(() => {
-    setFormData(config.global_config_json_value || {});
-  }, [config]);
 
   const handleSubmit = async () => {
     try {
@@ -89,6 +94,8 @@ const GlobalConfigForm = ({ config }: GlobalConfigFormProps) => {
       setLoading(false);
     }
   };
+
+  if (initialLoading) return <SkeletonGlobalConfigForm />;
 
   return (
     <div className="relative border border-border p-6 rounded-xl bg-card shadow-lg ring-1 ring-muted/30 overflow-hidden">
@@ -146,7 +153,9 @@ const GlobalConfigForm = ({ config }: GlobalConfigFormProps) => {
                 )}
 
                 {errors[field.key] && (
-                  <span className="text-sm text-red-500 mt-1">{errors[field.key]}</span>
+                  <span className="text-sm text-red-500 mt-1">
+                    {errors[field.key]}
+                  </span>
                 )}
               </div>
             ))}
@@ -154,7 +163,7 @@ const GlobalConfigForm = ({ config }: GlobalConfigFormProps) => {
         )}
       </div>
 
-      {/* Buttons */}
+      {/* Action Buttons */}
       <div className="mt-6 flex gap-4">
         {isEditing ? (
           <>
@@ -186,7 +195,7 @@ const GlobalConfigForm = ({ config }: GlobalConfigFormProps) => {
         )}
       </div>
 
-      {/* Loader Overlay */}
+      {/* Loader overlay while saving */}
       {loading && (
         <div className="absolute inset-0 bg-background/60 backdrop-blur-sm flex items-center justify-center z-20 rounded-xl">
           <BigCenterLoader message="Saving configuration..." />

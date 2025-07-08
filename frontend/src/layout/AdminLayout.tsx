@@ -1,4 +1,10 @@
-import { useEffect, useContext, useState, useRef } from "react";
+import {
+  useEffect,
+  useContext,
+  useState,
+  useRef,
+  Suspense, // ✅ import Suspense
+} from "react";
 import { AdminDataContext } from "@/context/AdminContext";
 import { Outlet, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -6,6 +12,7 @@ import { toast } from "react-toastify";
 import Sidebar from "@/components/shared/sidebar";
 import Header from "@/components/shared/header";
 import Footer from "@/components/shared/footer";
+import SkeletonPage from "@/components/skeletons/customer.skeleton";
 
 const AdminLayout = () => {
   const navigate = useNavigate();
@@ -119,15 +126,19 @@ const AdminLayout = () => {
           toggleCollapse={toggleCollapse}
         />
 
-        {/* Spacer (optional) */}
-        <div className="h-2 w-full"></div>
+        {/* Spacer */}
+        <div className="h-2 w-full" />
 
-        {/* Main content */}
+        {/* Main content wrapped in Suspense for lazy loading */}
         <main className="flex-1">
-          <Outlet context={{ admin }} />
+          <Suspense
+            fallback={<SkeletonPage />}
+          >
+            <Outlet context={{ admin }} />
+          </Suspense>
         </main>
 
-        {/* Footer always at bottom */}
+        {/* Footer */}
         <Footer />
 
         {/* Logout Confirmation Dialog */}

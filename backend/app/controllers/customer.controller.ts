@@ -73,17 +73,20 @@ const getCustomers = async (req: Request, res: Response, next: NextFunction) => 
 
     const filter = {}; // add filters if needed (e.g. { isActive: true })
 
-    const options = {
-      limit:results_per_page,
-      offset,
-      include: [
-        {
-          model: employeeModel,
-          as: 'employee',
-          required: false,
-        },
-      ],
-    };
+const options = {
+  limit: results_per_page,
+  offset,
+  order: [['createdAt', 'DESC']], // ⬅️ Add this line to sort by latest
+  // Customer.find().sort({ createdAt: -1 }).skip(offset).limit(limit); in mongodb for sorting 
+  include: [
+    {
+      model: employeeModel,
+      as: 'employee',
+      required: false,
+    },
+  ],
+};
+
 
     const data = await customerQuery.getAll(filter, options);
 
