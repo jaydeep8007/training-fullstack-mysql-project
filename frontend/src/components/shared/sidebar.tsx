@@ -73,7 +73,7 @@ const Sidebar = ({
         >
           <div className="flex items-center gap-2">
             <img
-              src="/google-logo.png"
+              src="/company-logo.png"
               alt="Company Logo"
               className="w-8 h-8 rounded-full"
             />

@@ -112,22 +112,50 @@ const customerLoginSchema = z.object({
 
 const customerUpdateSchema = z
   .object({
-    cus_firstname: z.string().min(2).max(50).optional(),
-    cus_lastname: z.string().min(2).max(50).optional(),
-    cus_email: z.string().email(msg.validation.email.invalid).optional(),
+    cus_firstname: z
+  .string()
+  .trim()
+  .optional()
+  .refine((val) => !val || val.length >= 2, {
+    message: msg.validation.firstName.required,
+  })
+  .refine((val) => !val || val.length <= 50, {
+    message: msg.validation.firstName.max,
+  })
+  .refine((val) => !val || /^[A-Za-z\s]+$/.test(val), {
+    message: msg.validation.firstName.regex,
+  }),
+
+    cus_lastname: z
+      .string()
+      .trim()
+      .min(2, msg.validation.lastName.required)
+      .max(50, msg.validation.lastName.max)
+      .regex(/^[A-Za-z\s]+$/, msg.validation.lastName.regex)
+      .optional(),
+
+    cus_email: z
+      .string()
+      .trim()
+      .email(msg.validation.email.invalid)
+      .transform((email) => email.toLowerCase())
+      .optional(),
+
     cus_phone_number: z
       .string()
       .length(10, msg.validation.phone.exactLength)
       .regex(/^\d+$/, msg.validation.phone.onlyDigits)
       .optional(),
+
     cus_password: z
       .string()
       .min(8, msg.validation.password.min)
       .regex(
-        /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+]).*$/,
-        msg.validation.password.pattern,
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+])/,
+        msg.validation.password.pattern
       )
       .optional(),
+
     cus_status: z
       .enum(['active', 'inactive', 'restricted', 'blocked'], {
         errorMap: () => ({
@@ -137,6 +165,7 @@ const customerUpdateSchema = z
       .optional(),
   })
   .strict();
+
 
 const forgotPasswordSchema = z
   .object({

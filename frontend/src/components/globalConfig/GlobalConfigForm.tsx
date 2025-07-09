@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { buildZodSchemaFromFields } from "@/helper/buildZodSchemaFromFields";
+import { buildZodSchemaFromFields } from "@/helper/globalConfigZodSchemaFromFields";
 import BigCenterLoader from "../shared/loader";
 import SkeletonGlobalConfigForm from "../skeletons/globalConfigForm.skeleton";
 

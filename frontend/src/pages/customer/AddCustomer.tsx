@@ -66,6 +66,7 @@ const AddCustomer = ({ onSuccess }: AddCustomerProps) => {
       });
 
       toast.success("✅ Customer created successfully!");
+      navigate("/admin/customers"); // go back to list page
       if (onSuccess) onSuccess();
       else navigate("/admin/customers");
     } catch (err: any) {
@@ -78,6 +79,7 @@ const AddCustomer = ({ onSuccess }: AddCustomerProps) => {
       setLoading(false);
     }
   };
+  
 
   return (
     <div className="w-full max-w-full mx-auto bg-background border border-border rounded-lg px-4 md:px-6 py-6 shadow-sm">

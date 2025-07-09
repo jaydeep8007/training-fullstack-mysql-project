@@ -7,6 +7,7 @@ import { resCode } from '../constants/resCode';
 import { responseHandler } from '../services/responseHandler.service';
 import { msg } from '../constants/language/en.constant';
 import commonQuery from '../services/commonQuery.service';
+import jobModel from '../models/job.model';
 
 // 🔸 Initialize queries
 const employeeQuery = commonQuery(employeeModel);
@@ -83,6 +84,53 @@ const getAllEmployees = async (req: Request, res: Response, next: NextFunction) 
     return next(error);
   }
 };
+
+// const getAllEmployees = async (req: Request, res: Response, next: NextFunction) => {
+//   try {
+//     const page = parseInt(req.query.page as string, 10) || 1;
+//     const results_per_page = parseInt(req.query.results_per_page as string, 10) || 10;
+//     const offset = (page - 1) * results_per_page;
+
+//     const filter = {}; // Optional filters (e.g. { status: 'active' })
+
+//     const options = {
+//       limit: results_per_page,
+//       offset,
+//       include: [
+//         {
+//           model: customerModel,
+//           as: 'customer',
+//           attributes: ['cus_id', 'cus_firstname', 'cus_lastname', 'cus_email'],
+//         },
+//         {
+//           model: jobModel,
+//           as: 'job',
+//           attributes: ['job_id', 'job_title', 'job_description'],
+//         },
+//       ],
+//     };
+
+//     // Fetch employees with customer + job
+//     const employees = await employeeQuery.getAll(filter, options);
+
+//     // Total count
+//     const count = await employeeQuery.countDocuments(employeeModel, filter);
+
+//     // Response
+//     return responseHandler.success(
+//       res,
+//       msg.employee.fetchSuccess,
+//       {
+//         count,
+//         rows: employees,
+//       },
+//       resCode.OK
+//     );
+//   } catch (error) {
+//     return next(error);
+//   }
+// };
+
 
 /* ============================================================================
  * 🗑️ Delete Employee by ID
