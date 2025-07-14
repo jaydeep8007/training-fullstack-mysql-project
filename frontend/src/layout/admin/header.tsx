@@ -16,7 +16,7 @@ import {
 } from "react-icons/fa";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
-import { appBreadcrumbs } from "@/routes"; // 👈 Make sure to export this from routes/index.ts
+import { appBreadcrumbs } from "@/routes";
 
 interface HeaderProps {
   setSidebarOpen?: (val: boolean) => void;
@@ -36,45 +36,43 @@ const Header = ({
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Get breadcrumb trail from central route config
   const breadcrumb = getBreadcrumbPath(location.pathname);
-
-  // Get page title from last breadcrumb
   const pageTitle = breadcrumb[breadcrumb.length - 1]?.label || "Admin Panel";
 
-  // Match route segments with breadcrumb labels
   function getBreadcrumbPath(pathname: string) {
     const segments = pathname.split("/").filter(Boolean);
     let cumulativePath = "";
     return segments.map((segment) => {
       cumulativePath += `/${segment}`;
       const match = appBreadcrumbs.find(
-        (b) => b.path === cumulativePath || (b.path.includes(":") && cumulativePath.startsWith(b.path.split("/:")[0]))
+        (b) =>
+          b.path === cumulativePath ||
+          (b.path.includes(":") && cumulativePath.startsWith(b.path.split("/:")[0]))
       );
       return {
-        label: match?.breadcrumb || segment.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+        label:
+          match?.breadcrumb ||
+          segment.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
         path: cumulativePath,
       };
     });
   }
 
-  // Theme logic
   useEffect(() => {
     const saved = localStorage.getItem("theme");
     const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
     const useDark = saved === "dark" || (!saved && prefersDark);
-    document.documentElement.classList.toggle("dark", useDark);
     setIsDark(useDark);
+    document.querySelector(".admin-theme")?.classList.toggle("dark", useDark);
   }, []);
 
   const toggleTheme = () => {
     const newTheme = isDark ? "light" : "dark";
     setIsDark(!isDark);
     localStorage.setItem("theme", newTheme);
-    document.documentElement.classList.toggle("dark", newTheme === "dark");
+    document.querySelector(".admin-theme")?.classList.toggle("dark", newTheme === "dark");
   };
 
-  // Close dropdown on outside click
   useEffect(() => {
     const handler = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -86,7 +84,7 @@ const Header = ({
   }, []);
 
   return (
-    <header className="sticky top-0 z-30 bg-background/90 backdrop-blur-md text-foreground px-6 py-1 flex items-center justify-between border-b border-border shadow-xl rounded-b-xl ring-1 ring-muted/30">
+    <header className="sticky top-0 z-30 bg-background/90  backdrop-blur-md text-foreground px-6 py-1 flex items-center justify-between border-b border-border shadow-xl rounded-b-xl ring-1 ring-muted/30">
       {/* Left Section */}
       <div className="flex flex-col">
         <div className="flex items-center gap-4">
@@ -98,25 +96,25 @@ const Header = ({
             {isCollapsed ? <FiChevronRight size={20} /> : <FiChevronLeft size={20} />}
           </button>
 
-   <div className="text-sm text-muted-foreground tracking-wide flex items-center gap-2 flex-wrap">
-  {breadcrumb.map((crumb, idx) => (
-    <div key={crumb.path} className="flex items-center gap-2">
-      {idx !== 0 && <span>/</span>}
-      {idx !== breadcrumb.length - 1 ? (
-        <button
-          onClick={() => navigate(crumb.path)}
-          className="text-primary hover:underline flex items-center gap-1"
-        >
-          {idx === 0 ? <FaHome className="w-4 h-4" /> : crumb.label}
-        </button>
-      ) : (
-        <span className="font-medium text-foreground">
-          {idx === 0 ? <FaHome className="w-4 h-4" /> : crumb.label}
-        </span>
-      )}
-    </div>
-  ))}
-</div>
+          <div className="text-sm text-muted-foreground tracking-wide flex items-center gap-2 flex-wrap">
+            {breadcrumb.map((crumb, idx) => (
+              <div key={crumb.path} className="flex items-center gap-2">
+                {idx !== 0 && <span>/</span>}
+                {idx !== breadcrumb.length - 1 ? (
+                  <button
+                    onClick={() => navigate(crumb.path)}
+                    className="text-primary hover:underline flex items-center gap-1"
+                  >
+                    {idx === 0 ? <FaHome className="w-4 h-4" /> : crumb.label}
+                  </button>
+                ) : (
+                  <span className="font-medium text-foreground">
+                    {idx === 0 ? <FaHome className="w-4 h-4" /> : crumb.label}
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
 
         <h1 className="text-base font-bold tracking-tight text-primary lg:ml-11">{pageTitle}</h1>
@@ -149,26 +147,26 @@ const Header = ({
         {showDropdown && (
           <div
             ref={dropdownRef}
-            className="absolute right-0 mt-2 w-64 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#1f1f2f] shadow-xl text-sm z-50 animate-fadeIn"
+            className="absolute right-0 mt-2 w-64 rounded-xl border border-border bg-background shadow-xl text-sm z-50 animate-fadeIn"
           >
             <div className="p-2 divide-y divide-border">
               <div className="py-2">
                 <DropdownItem icon={<FaUserCog />} label="Profile" onClick={() => navigate("/admin/profile")} />
                 <DropdownItem icon={<FaBell />} label="Notifications" onClick={() => navigate("/admin-notifications")} />
               </div>
-             
+
               <div className="py-2">
                 <SectionTitle title="Management" />
-                
                 <DropdownItem icon={<FaGlobe />} label="Global Config" onClick={() => navigate("/admin/global-config")} />
               </div>
+
               <div className="py-2">
                 <SectionTitle title="Support" />
                 <DropdownItem icon={<FiHelpCircle />} label="Help & Support" onClick={() => navigate("/admin-help")} />
                 <DropdownItem
                   icon={<FiLogOut />}
                   label="Logout"
-                  className="text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30"
+                  className="text-red-600 hover:bg-muted"
                   onClick={() => {
                     setShowDropdown(false);
                     setOpenLogoutDialog(true);

@@ -28,6 +28,7 @@ export const msg = {
     languageUpdateSuccess: 'Language settings updated successfully',
     noChanges: 'No changes detected in the provided data.',
     resetLinkSend: 'Reset link sent to your email.',
+    
   },
   admin: {
     createSuccess: 'Admin created successfully.',
@@ -70,6 +71,7 @@ export const msg = {
     passwordResetSuccess: 'Password reset successfully.',
     profileFetchSuccess: 'profile feched succesfully',
     resetTokenSent: 'Password reset token sent to your email.',
+    forbidden: "Access denied. You do not have permission to perform this action.",
   },
   employee: {
     createSuccess: 'Employee created successfully.',

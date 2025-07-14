@@ -114,34 +114,33 @@ const CustomerList = () => {
   ) => {
     setEditData({ ...editData, [e.target.name]: e.target.value });
   };
-const saveEdit = async (id: number) => {
-  try {
-    const result = customerEditSchema.safeParse(editData);
+  const saveEdit = async (id: number) => {
+    try {
+      const result = customerEditSchema.safeParse(editData);
 
-    if (!result.success) {
-      const newErrors: Record<string, string> = {};
-      result.error.errors.forEach((err) => {
-        if (err.path[0]) newErrors[err.path[0] as string] = err.message;
-      });
-      setEditErrors(newErrors);
-      return;
+      if (!result.success) {
+        const newErrors: Record<string, string> = {};
+        result.error.errors.forEach((err) => {
+          if (err.path[0]) newErrors[err.path[0] as string] = err.message;
+        });
+        setEditErrors(newErrors);
+        return;
+      }
+
+      await axios.put(
+        `${import.meta.env.VITE_BASE_URL}/customer/${id}`,
+        editData,
+        { withCredentials: true }
+      );
+      toast.success("Customer updated successfully.");
+      setEditCustomerId(null);
+      setEditErrors({});
+      fetchCustomers();
+    } catch (error: any) {
+      const res = error.response?.data;
+      toast.error(res?.message || "Failed to update customer.");
     }
-
-    await axios.put(
-      `${import.meta.env.VITE_BASE_URL}/customer/${id}`,
-      editData,
-      { withCredentials: true }
-    );
-    toast.success("Customer updated successfully.");
-    setEditCustomerId(null);
-    setEditErrors({});
-    fetchCustomers();
-  } catch (error: any) {
-    const res = error.response?.data;
-    toast.error(res?.message || "Failed to update customer.");
-  }
-};
-
+  };
 
   useEffect(() => {
     fetchCustomers();
@@ -168,9 +167,9 @@ const saveEdit = async (id: number) => {
         </div>
       )}
 
-      <div className="overflow-x-auto shadow border rounded-lg mb-6">
-        <table className="min-w-full text-sm text-left border-collapse">
-          <thead className="bg-muted text-muted-foreground uppercase text-xs tracking-wider">
+      <div className="overflow-x-auto shadow border border-border rounded-lg mb-6">
+        <table className="min-w-full text-sm text-left  border-collapse">
+          <thead className="bg-muted  text-muted-foreground uppercase text-xs tracking-wider">
             <tr>
               <th className="px-4 py-3">Name</th>
               <th className="px-4 py-3">Email</th>
@@ -185,7 +184,7 @@ const saveEdit = async (id: number) => {
               <>
                 <tr
                   key={cust.cus_id}
-                  className="border-b odd:bg-background even:bg-muted/40 hover:bg-muted transition"
+                  className="border-b border-border odd:bg-background even:bg-muted/40 hover:bg-muted transition"
                 >
                   <td className="px-4 py-3 font-medium text-foreground whitespace-nowrap min-w-[180px]">
                     {editCustomerId === cust.cus_id ? (
@@ -336,19 +335,19 @@ const saveEdit = async (id: number) => {
                     </div>
                   </td>
                 </tr>
-                  {/* Common Error Message */}
-          {editCustomerId === cust.cus_id && Object.keys(editErrors).length > 0 && (
-  <tr>
-    <td colSpan={6}>
-      <div className="flex justify-center items-center py-3">
-        <div className="bg-red-100 text-red-700 text-sm font-medium px-4 py-2 rounded-md border border-red-300 shadow-sm max-w-md text-center">
-          {Object.values(editErrors)[0]}
-        </div>
-      </div>
-    </td>
-  </tr>
-)}
-
+                {/* Common Error Message */}
+                {editCustomerId === cust.cus_id &&
+                  Object.keys(editErrors).length > 0 && (
+                    <tr>
+                      <td colSpan={6}>
+                        <div className="flex justify-center items-center py-3">
+                          <div className="bg-red-100 text-red-700 text-sm font-medium px-4 py-2 rounded-md border border-red-300 shadow-sm max-w-md text-center">
+                            {Object.values(editErrors)[0]}
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
 
                 {/* Conditional Employee Row */}
                 {visibleEmployees === cust.cus_id && (
@@ -402,7 +401,7 @@ const saveEdit = async (id: number) => {
       </div>
 
       {/* Pagination Info & Controls */}
-      <div className="mt-auto w-full flex justify-between items-center px-4 py-3 border-t bg-background sticky bottom-0 z-40">
+      <div className="mt-auto w-full flex justify-between items-center px-4 py-3 border-t border-border bg-background sticky bottom-0 z-40">
         {/* Left: Showing data info */}
         <div className="text-sm text-muted-foreground">
           Showing {(page - 1) * resultsPerPage + 1} -{" "}
@@ -420,7 +419,7 @@ const saveEdit = async (id: number) => {
                 className={`px-3 py-1 rounded text-sm border ${
                   page === pageNum
                     ? "bg-primary text-white"
-                    : "bg-white hover:bg-muted"
+                    : "bg-white text-blue-800 hover:bg-muted"
                 }`}
               >
                 {pageNum}

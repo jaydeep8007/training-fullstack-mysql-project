@@ -68,6 +68,7 @@ export const msg = {
     passwordResetSuccess: 'Contraseña restablecida con éxito.',
     profileFetchSuccess: 'Perfil obtenido con éxito.',
     resetTokenSent: 'Token de restablecimiento enviado a tu correo.',
+        forbidden: " spanish",
   },
   employee: {
     createSuccess: 'Empleado creado exitosamente.',

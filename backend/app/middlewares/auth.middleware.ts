@@ -16,13 +16,11 @@ declare global {
 }
 
 const authCustomer = async (req: Request, res: Response, next: NextFunction) => {
-  // ✅ Reuse token verification from service
   authToken.verifyAuthToken(req, res, async () => {
     try {
       const decoded = (req as any).user;
       console.log("Decoded token:", decoded);
 
-      // ✅ SQL version: Use Sequelize's findByPk
       const customer = await customerModel.findByPk(decoded.id);
 
       if (!customer) {
@@ -31,12 +29,14 @@ const authCustomer = async (req: Request, res: Response, next: NextFunction) => 
 
       const customerData = customer.get();
 
-      // ✅ Attach full customer info to req.user
+      // ✅ Add userType to req.user
       req.user = {
+        userType: decoded.userType, // 👈 ADD THIS LINE
         cus_id: customerData.cus_id,
         cus_email: customerData.cus_email,
         cus_firstname: customerData.cus_firstname,
       };
+
       console.log("Authenticated customer:", req.user);
 
       next();
@@ -47,13 +47,13 @@ const authCustomer = async (req: Request, res: Response, next: NextFunction) => 
   });
 };
 
+
 const authAdmin = async (req: Request, res: Response, next: NextFunction) => {
   authToken.verifyAuthToken(req, res, async () => {
     try {
       const decoded = (req as any).user;
       console.log("Decoded token:", decoded);
 
-      // 🔍 Fetch admin by ID
       const admin = await adminModel.findByPk(decoded.id);
 
       if (!admin) {
@@ -62,12 +62,14 @@ const authAdmin = async (req: Request, res: Response, next: NextFunction) => {
 
       const adminData = admin.get();
 
-      // ✅ Attach admin details to req.user
+      // ✅ Add userType to req.user
       req.user = {
+        // role: decoded.role, // 👈 ADD THIS LINE
         admin_id: adminData.admin_id,
         admin_email: adminData.admin_email,
         admin_firstname: adminData.admin_firstname,
       };
+
       console.log("Authenticated admin:", req.user);
 
       next();
@@ -77,6 +79,7 @@ const authAdmin = async (req: Request, res: Response, next: NextFunction) => {
     }
   });
 };
+
 
 
 export default {

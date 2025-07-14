@@ -55,7 +55,11 @@ const employeeModel = sequelize.define(
       primaryKey: true,
       autoIncrement: true,
     },
-    emp_name: {
+    emp_firstname: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+      emp_lastname: {
       type: DataTypes.STRING,
       allowNull: false,
     },

@@ -146,3 +146,9 @@ now the real chalange begins now i want to create dynamic pages in frontend with
   ],
   "global_config_view": true
 } okey so this is one smtp setting with slug i want to get to one page toanothe page yes this is after showing page but want to first get data from this global config and then if there is 3 settings it shows 3 settings if i add 4th setting in my db it automatically set this page to frontend so give me step by step path how to acheave this from backend to frontend which api i need to create and all okey 
+
+
+
+roles and permission 
+
+rate limiting --> token bucket (easily exploid by greedy client) , leaky bucket

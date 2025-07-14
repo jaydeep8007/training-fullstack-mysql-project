@@ -42,14 +42,13 @@ const createEmployee = async (req: Request, res: Response, next: NextFunction) =
  * 📥 Get All Employees with Associated Customers
  * ============================================================================
  */
-
 const getAllEmployees = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const page = parseInt(req.query.page as string, 10) || 1;
     const results_per_page = parseInt(req.query.results_per_page as string, 10) || 10;
     const offset = (page - 1) * results_per_page;
 
-    const filter = {}; // Add conditions if needed (e.g. { isActive: true })
+    const filter = {}; // Add filter conditions if needed
 
     const options = {
       limit: results_per_page,
@@ -60,17 +59,17 @@ const getAllEmployees = async (req: Request, res: Response, next: NextFunction) 
           as: 'customer',
           attributes: ['cus_id', 'cus_firstname', 'cus_lastname', 'cus_email'],
         },
+        {
+          model: jobModel,
+          as: 'job',
+          attributes: ['job_id', 'job_name', 'job_category'],
+        },
       ],
     };
 
-    // ✅ Get employees using commonQuerySQL.getAll
-    const employees = await employeeQuery.getAll( filter, options);
-
-    // ✅ Count total records using countDocuments
+    const employees = await employeeQuery.getAll(filter, options);
     const count = await employeeQuery.countDocuments(employeeModel, filter);
 
-
-    // ✅ Send formatted response
     return responseHandler.success(
       res,
       msg.employee.fetchSuccess,
@@ -84,6 +83,7 @@ const getAllEmployees = async (req: Request, res: Response, next: NextFunction) 
     return next(error);
   }
 };
+
 
 // const getAllEmployees = async (req: Request, res: Response, next: NextFunction) => {
 //   try {

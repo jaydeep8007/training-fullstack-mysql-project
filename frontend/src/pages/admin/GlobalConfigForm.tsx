@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { buildZodSchemaFromFields } from "@/helper/globalConfigZodSchemaFromFields";
-import BigCenterLoader from "../shared/loader";
-import SkeletonGlobalConfigForm from "../skeletons/globalConfigForm.skeleton";
+import BigCenterLoader from "../../layout/admin/loader";
+import SkeletonGlobalConfigForm from "../../components/skeletons/globalConfigForm.skeleton";
+import { AdminDataContext } from "@/context/AdminContext";
 
 interface SelectOption {
   label: string;
@@ -38,6 +39,10 @@ const GlobalConfigForm = ({ config }: GlobalConfigFormProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
+   const { admin } = useContext(AdminDataContext);
+
+
+
 
   const fields: ConfigField[] = Array.isArray(config.global_config_fields)
     ? config.global_config_fields.map((fieldObj) => {
@@ -63,7 +68,9 @@ const GlobalConfigForm = ({ config }: GlobalConfigFormProps) => {
 
   const handleSubmit = async () => {
     try {
-      const schema = buildZodSchemaFromFields(config.global_config_fields || []);
+      const schema = buildZodSchemaFromFields(
+        config.global_config_fields || []
+      );
       const result = schema.safeParse(formData);
 
       if (!result.success) {
@@ -82,7 +89,9 @@ const GlobalConfigForm = ({ config }: GlobalConfigFormProps) => {
       setLoading(true);
 
       await axios.put(
-        `${import.meta.env.VITE_BASE_URL}/global-config/${config.global_config_slug}`,
+        `${import.meta.env.VITE_BASE_URL}/global-config/${
+          config.global_config_slug
+        }`,
         { global_config_json_value: formData }
       );
 
@@ -103,7 +112,11 @@ const GlobalConfigForm = ({ config }: GlobalConfigFormProps) => {
         {config.global_config_label}
       </h2>
 
-      <div className={`relative ${loading ? "pointer-events-none opacity-50" : ""}`}>
+      <div
+        className={`relative ${
+          loading ? "pointer-events-none opacity-50" : ""
+        }`}
+      >
         {fields.length === 0 ? (
           <p className="text-sm text-muted-foreground">
             No fields available for this configuration.
@@ -114,7 +127,9 @@ const GlobalConfigForm = ({ config }: GlobalConfigFormProps) => {
               <div key={field.key} className="flex flex-col">
                 <label className="text-sm font-medium text-muted-foreground mb-1">
                   {field.label}
-                  {field.required && <span className="text-red-500 ml-1">*</span>}
+                  {field.required && (
+                    <span className="text-red-500 ml-1">*</span>
+                  )}
                 </label>
 
                 {field.type === "select" ? (
@@ -164,36 +179,41 @@ const GlobalConfigForm = ({ config }: GlobalConfigFormProps) => {
       </div>
 
       {/* Action Buttons */}
-      <div className="mt-6 flex gap-4">
-        {isEditing ? (
-          <>
-            <button
-              onClick={handleSubmit}
-              disabled={loading}
-              className="px-5 py-2 text-sm font-medium rounded bg-green-600 text-white hover:bg-green-700 disabled:opacity-50"
-            >
-              {loading ? "Saving..." : "Save"}
-            </button>
-            <button
-              onClick={() => {
-                setIsEditing(false);
-                setErrors({});
-                setFormData(config.global_config_json_value || {});
-              }}
-              className="px-5 py-2 text-sm font-medium rounded bg-gray-600 text-white hover:bg-gray-700"
-            >
-              Cancel
-            </button>
-          </>
-        ) : (
+      {/* Top-right Edit button */}
+      
+      {!isEditing && admin?.role === "admin" && (
+        <div className="absolute top-4 right-4 z-10">
           <button
             onClick={() => setIsEditing(true)}
-            className="px-5 py-2 text-sm font-medium rounded bg-primary text-white hover:bg-primary/90"
+            className="px-4 py-1.5 text-sm font-medium rounded bg-primary text-white hover:bg-primary/90"
           >
             Edit
           </button>
-        )}
-      </div>
+        </div>
+      )}
+
+      {/* Bottom Save/Cancel Buttons */}
+      {isEditing && (
+        <div className="mt-6 flex gap-4">
+          <button
+            onClick={handleSubmit}
+            disabled={loading}
+            className="px-5 py-2 text-sm font-medium rounded bg-green-600 text-white hover:bg-green-700 disabled:opacity-50"
+          >
+            {loading ? "Saving..." : "Save"}
+          </button>
+          <button
+            onClick={() => {
+              setIsEditing(false);
+              setErrors({});
+              setFormData(config.global_config_json_value || {});
+            }}
+            className="px-5 py-2 text-sm font-medium rounded bg-gray-600 text-white hover:bg-gray-700"
+          >
+            Cancel
+          </button>
+        </div>
+      )}
 
       {/* Loader overlay while saving */}
       {loading && (

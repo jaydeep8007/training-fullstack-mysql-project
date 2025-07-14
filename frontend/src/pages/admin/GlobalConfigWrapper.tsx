@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
-import GlobalConfigForm from "@/components/globalConfig/GlobalConfigForm";
+import GlobalConfigForm from "@/pages/admin/GlobalConfigForm";
 import SkeletonGlobalConfigForm from "@/components/skeletons/globalConfigForm.skeleton"; // ✅ Import skeleton
 
 interface ConfigSection {
@@ -27,7 +27,9 @@ const GlobalConfigPage = () => {
   // Fetch section list on mount
   const fetchSections = async () => {
     try {
-      const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/global-config`);
+      const res = await axios.get(
+        `${import.meta.env.VITE_BASE_URL}/global-config`
+      );
       const data = res.data?.data || [];
       setSections(data);
       if (data.length > 0) {
@@ -48,7 +50,9 @@ const GlobalConfigPage = () => {
       // Optional: simulate a visible loading delay
       setTimeout(async () => {
         try {
-          const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/global-config/${slug}`);
+          const res = await axios.get(
+            `${import.meta.env.VITE_BASE_URL}/global-config/${slug}`
+          );
           const data = res.data?.data;
           setSelectedConfig(data || null);
         } catch (error) {
@@ -74,14 +78,18 @@ const GlobalConfigPage = () => {
   }, [selectedSlug]);
 
   return (
-    <div className="flex h-full border rounded-lg shadow bg-background overflow-hidden">
+    <div className="flex h-full border border-border rounded-lg shadow bg-background overflow-hidden">
       {/* Left panel: Section list */}
-      <div className="w-64 border-r bg-muted p-4 space-y-3">
-        <h2 className="text-lg font-semibold text-primary mb-3">Config Sections</h2>
+      <div className="w-64 border-r border-border bg-muted p-4 space-y-3">
+        <h2 className="text-lg font-semibold text-primary mb-3">
+          Config Sections
+        </h2>
         {loadingSections ? (
           <p className="text-sm text-muted-foreground">Loading sections...</p>
         ) : sections.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No config sections found.</p>
+          <p className="text-sm text-muted-foreground">
+            No config sections found.
+          </p>
         ) : (
           sections.map(({ global_config_slug, global_config_label }) => (
             <button

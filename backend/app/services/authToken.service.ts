@@ -41,6 +41,7 @@ const generateAuthToken = (user: any) => {
   const payload = {
     id: user.user_id,
     email: user.email,
+     role: user.role, // ✅ Add this
   };
   return jwt.sign(payload, config.SECURITY_TOKEN as string, { expiresIn: config.TOKEN_EXPIRES_IN });
 };
@@ -52,6 +53,7 @@ const generateRefreshAuthToken = (user: any) => {
   const payload = {
     id: user.user_id,
     email: user.email,
+     role: user.role, // ✅ Add this
   };
 
   return jwt.sign(payload, config.SECURITY_TOKEN as string, {

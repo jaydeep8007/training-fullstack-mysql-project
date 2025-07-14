@@ -34,8 +34,9 @@ const Sidebar = ({
       items: [
         { label: "Customers", route: "/admin/customers", icon: <FiUsers /> },
         { label: "Employees", route: "/admin/employees", icon: <FiGrid /> },
-        { label: "Jobs", route: "/manage-jobs", icon: <FiBriefcase /> },
-        { label: "Assignments", route: "/assignments", icon: <FiClipboard /> },
+        { label: "Create Job", route: "/admin/create-job", icon: <FiBriefcase /> },
+        { label: "Assign Job", route: "/admin/assign-job", icon: <FiClipboard /> },
+        { label: "Manage Jobs", route: "/admin/manage-job", icon: <FiClipboard /> },
       ],
     },
     {

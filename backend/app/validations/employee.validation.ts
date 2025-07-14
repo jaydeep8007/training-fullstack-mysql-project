@@ -31,10 +31,14 @@ export const validateStrongPassword = (val: string, ctx: z.RefinementCtx) => {
 
 const employeeCreateSchema = z
   .object({
-    emp_name: z
+    emp_firstname: z
       .string()
       .min(1, msg.validation.firstName.required)
       .max(50, msg.validation.firstName.max),
+          emp_lastname: z
+      .string()
+      .min(1, msg.validation.lastName.required)
+      .max(50, msg.validation.lastName.max),
     emp_email: z
       .string()
       .email(msg.validation.email.invalid)

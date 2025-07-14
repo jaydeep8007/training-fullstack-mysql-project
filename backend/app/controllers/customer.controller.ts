@@ -76,7 +76,7 @@ const getCustomers = async (req: Request, res: Response, next: NextFunction) => 
 const options = {
   limit: results_per_page,
   offset,
-  order: [['createdAt', 'DESC']], // ⬅️ Add this line to sort by latest
+  order: [['createdAt', 'DESC']], // ⬅️ Add this line to sort by latest (descending order) ASC for ascending 
   // Customer.find().sort({ createdAt: -1 }).skip(offset).limit(limit); in mongodb for sorting 
   include: [
     {

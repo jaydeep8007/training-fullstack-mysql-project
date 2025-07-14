@@ -1,10 +1,15 @@
 import { Navigate } from "react-router-dom";
-import AdminLayout from "@/layout/AdminLayout";
+import AdminLayout from "@/layout/admin/AdminLayout";
+import AdminProtectedWrapper from "@/pages/admin/auth/AdminProtectedWrapper";
 import { lazy } from "react";
+import AddEmployee from "@/pages/employee/AddEmployee";
+import AssignJob from "@/pages/job/AssignJob";
+import CreateJob from "@/pages/job/CreateJob";
+import ManageJobs from "@/pages/job/ManageJob";
 
 const AdminDashboard = lazy(() => import("@/pages/admin/AdminDashboard"));
 const AdminProfile = lazy(() => import("@/pages/admin/AdminProfile"));
-const GlobalConfigPage = lazy(() => import("@/pages/admin/GlobalConfig"));
+const GlobalConfigPage = lazy(() => import("@/pages/admin/GlobalConfigWrapper"));
 
 const CustomerList = lazy(() => import("@/pages/customer/CustomerList"));
 const EmployeeList = lazy(() => import("@/pages/employee/EmployeeList"));
@@ -21,7 +26,11 @@ export const adminBreadcrumbs = [
 
 export const adminRoutes = {
   path: "/admin",
-  element: <AdminLayout />,
+  element: (
+    <AdminProtectedWrapper>
+      <AdminLayout />
+    </AdminProtectedWrapper>
+  ),
   children: [
     { index: true, element: <Navigate to="dashboard" replace /> },
     { path: "dashboard", element: <AdminDashboard /> },
@@ -30,6 +39,9 @@ export const adminRoutes = {
     { path: "customers", element: <CustomerList /> },
     { path: "customers/add", element: <CustomerList /> },
     { path: "employees", element: <EmployeeList /> },
-    { path: "employees/add", element: <EmployeeList /> },
+    { path: "employees/add", element: <AddEmployee /> },
+    { path: "create-job", element: <CreateJob /> },
+    { path: "assign-job", element: <AssignJob /> },
+    { path: "manage-job", element: <ManageJobs /> },
   ],
 };

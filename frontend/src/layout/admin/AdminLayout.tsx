@@ -1,18 +1,15 @@
-import {
-  useEffect,
-  useContext,
-  useState,
-  useRef,
-  Suspense, // ✅ import Suspense
-} from "react";
+import { useEffect, useContext, useState, useRef, Suspense } from "react";
 import { AdminDataContext } from "@/context/AdminContext";
 import { Outlet, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
-import Sidebar from "@/components/shared/sidebar";
-import Header from "@/components/shared/header";
-import Footer from "@/components/shared/footer";
+import Sidebar from "@/layout/admin/sidebar";
+import Header from "@/layout/admin/header";
+import Footer from "@/layout/admin/footer";
 import SkeletonPage from "@/components/skeletons/customer.skeleton";
+
+// 👇 Import your admin-specific theme CSS
+import "./AdminLayout.css";
 
 const AdminLayout = () => {
   const navigate = useNavigate();
@@ -95,8 +92,11 @@ const AdminLayout = () => {
     }
   };
 
+  // Determine theme mode
+  const themeMode = admin?.theme === "dark" ? "dark" : "light";
+
   return (
-    <div className="flex min-h-screen">
+    <div className={`admin-theme ${themeMode} flex min-h-screen`}>
       {/* Sidebar */}
       <Sidebar
         sidebarOpen={sidebarOpen}
@@ -107,14 +107,16 @@ const AdminLayout = () => {
 
       {/* Main content area */}
       <div
-        className={`flex flex-col flex-1 min-h-screen bg-[#f2eff32d] text-[#1d2226] font-sans text-[15px] transition-all duration-300 ${
+        className={`flex flex-col flex-1 min-h-screen font-sans text-[15px] transition-all duration-300 bg-background text-foreground ${
           isCollapsed ? "ml-20" : "ml-[180px]"
         }`}
       >
         {/* Loading overlay */}
         {isLoading && (
           <div className="fixed inset-0 bg-black bg-opacity-20 flex items-center justify-center z-50">
-            <div className="text-blue-600 text-lg font-semibold">Loading...</div>
+            <div className="text-blue-600 text-lg font-semibold">
+              Loading...
+            </div>
           </div>
         )}
 
@@ -131,9 +133,7 @@ const AdminLayout = () => {
 
         {/* Main content wrapped in Suspense for lazy loading */}
         <main className="flex-1">
-          <Suspense
-            fallback={<SkeletonPage />}
-          >
+          <Suspense fallback={<SkeletonPage />}>
             <Outlet context={{ admin }} />
           </Suspense>
         </main>

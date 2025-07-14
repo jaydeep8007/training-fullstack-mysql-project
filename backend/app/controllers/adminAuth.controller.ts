@@ -55,11 +55,13 @@ const signupAdmin = async (req: Request, res: Response, next: NextFunction) => {
     const accessToken = authToken.generateAuthToken({
       user_id: adminData.admin_id,
       email: adminData.admin_email,
+       role: "admin",
     });
 
     const refreshToken = authToken.generateRefreshAuthToken({
       user_id: adminData.admin_id,
       email: adminData.admin_email,
+       role: "admin",
     });
 
     await adminAuthQuery.create({
@@ -126,11 +128,13 @@ const signinAdmin = async (req: Request, res: Response, next: NextFunction) => {
     const accessToken = authToken.generateAuthToken({
       user_id: adminData.admin_id,
       email: adminData.admin_email,
+       role: "admin", // ✅ Add this line for role 
     });
 
     const refreshToken = authToken.generateRefreshAuthToken({
       user_id: adminData.admin_id,
       email: adminData.admin_email,
+       role: "admin", // ✅ Add this line
     });
 
     // 💾 Save tokens
@@ -156,6 +160,7 @@ const signinAdmin = async (req: Request, res: Response, next: NextFunction) => {
           admin_firstname: adminData.admin_firstname,
           admin_lastname: adminData.admin_lastname,
           admin_email: adminData.admin_email,
+           role: "admin", // ✅ Add this line for role 
         },
       },
       resCode.OK
