@@ -53,6 +53,7 @@ const getAllEmployees = async (req: Request, res: Response, next: NextFunction) 
     const options = {
       limit: results_per_page,
       offset,
+       order: [['createdAt', 'DESC']], // ⬅️ Add this line to sort by latest (descending order) ASC for ascending 
       include: [
         {
           model: customerModel,
@@ -65,6 +66,7 @@ const getAllEmployees = async (req: Request, res: Response, next: NextFunction) 
           attributes: ['job_id', 'job_name', 'job_category'],
         },
       ],
+
     };
 
     const employees = await employeeQuery.getAll(filter, options);
