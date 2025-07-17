@@ -18,6 +18,7 @@ router.get('/:id', adminController.getAdminById);
 router.put('/:id', adminController.updateAdmin);
 router.delete('/:id', adminController.deleteAdminById);
 
+
 // 🔐 Auth routes for admin
 router.use('/auth', adminAuthRoutes);
 

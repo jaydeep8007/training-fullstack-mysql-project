@@ -8,7 +8,7 @@ interface AdminAttributes {
   admin_email: string;
   admin_phone_number: string;
   admin_password: string;
- 
+  role_id?: number; // ✅ NEW: Optional role_id field
 }
 
 type AdminCreationAttributes = Optional<AdminAttributes, 'admin_id'>;
@@ -23,7 +23,7 @@ class adminModel
   public admin_email!: string;
   public admin_phone_number!: string;
   public admin_password!: string;
-
+  public role_id?: number; // ✅ NEW
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -74,7 +74,14 @@ adminModel.init(
         },
       },
     },
-  
+    role_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: 'roles', // ✅ assumes roles table exists
+        key: 'role_id',
+      },
+    },
   },
   {
     sequelize,

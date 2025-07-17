@@ -39,7 +39,7 @@ const GlobalConfigForm = ({ config }: GlobalConfigFormProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
-   const { admin } = useContext(AdminDataContext);
+  //  const { admin } = useContext(AdminDataContext);
 
 
 
@@ -181,7 +181,7 @@ const GlobalConfigForm = ({ config }: GlobalConfigFormProps) => {
       {/* Action Buttons */}
       {/* Top-right Edit button */}
       
-      {!isEditing && admin?.role === "admin" && (
+      {/* {!isEditing && admin?.role === "admin" && ( */}
         <div className="absolute top-4 right-4 z-10">
           <button
             onClick={() => setIsEditing(true)}
@@ -190,7 +190,7 @@ const GlobalConfigForm = ({ config }: GlobalConfigFormProps) => {
             Edit
           </button>
         </div>
-      )}
+      {/* )} */}
 
       {/* Bottom Save/Cancel Buttons */}
       {isEditing && (

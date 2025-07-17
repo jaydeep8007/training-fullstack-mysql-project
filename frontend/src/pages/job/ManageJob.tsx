@@ -14,7 +14,7 @@ const ManageJob = () => {
   const [editRowId, setEditRowId] = useState<number | null>(null);
   const [editJobValue, setEditJobValue] = useState<string>("");
 
-  useEffect(() => {
+
     const fetchData = async () => {
       try {
         const [empRes, jobRes] = await Promise.all([
@@ -35,58 +35,68 @@ const ManageJob = () => {
       }
     };
 
-    fetchData();
-  }, []);
+    useEffect(() => {
+      fetchData();
+    }, [])
+    
+   
+
 
   const handleAssign = async () => {
-    if (!selectedJob || selectedEmployees.length === 0) {
-      return toast.error("⚠️ Please select a job and employee(s)");
-    }
+  if (!selectedJob || selectedEmployees.length === 0) {
+    return toast.error("⚠️ Please select a job and employee(s)");
+  }
 
-    setAssigning(true);
-    try {
-      const job_id = Number(selectedJob);
+  setAssigning(true);
+  try {
+    const job_id = Number(selectedJob);
 
-      if (selectedEmployees.length === 1) {
-        const emp_id = Number(selectedEmployees[0]);
-        await axios.post(`${import.meta.env.VITE_BASE_URL}/employee-job`, {
-          emp_id,
+    if (selectedEmployees.length === 1) {
+      const emp_id = Number(selectedEmployees[0]);
+      await axios.post(`${import.meta.env.VITE_BASE_URL}/employee-job`, {
+        emp_id,
+        job_id,
+      });
+    } else {
+      const emp_ids = selectedEmployees.map((id) => Number(id));
+      await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/employee-job/assign-many`,
+        {
+          emp_ids,
           job_id,
-        });
-      } else {
-        const emp_ids = selectedEmployees.map((id) => Number(id));
-        await axios.post(
-          `${import.meta.env.VITE_BASE_URL}/employee-job/assign-many`,
-          {
-            emp_ids,
-            job_id,
-          }
-        );
-      }
-
-      toast.success("✅ Job assigned successfully");
-      setSelectedEmployees([]);
-      setSelectedJob("");
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || "❌ Failed to assign job");
-    } finally {
-      setAssigning(false);
-    }
-  };
-
-  const handleUnassign = async (emp_id: number) => {
-    try {
-      await axios.delete(
-        `${import.meta.env.VITE_BASE_URL}/employee-job/${emp_id}`
+        }
       );
-      toast.success("❎ Job unassigned successfully");
-      setEmployees((prev) =>
-        prev.map((e) => (e.emp_id === emp_id ? { ...e, job_id: null } : e))
-      );
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || "❌ Failed to unassign job");
     }
-  };
+
+    toast.success("✅ Job assigned successfully");
+
+    // ✅ Reset selection
+    setSelectedEmployees([]);
+    setSelectedJob("");
+
+    // ✅ 🔄 Refresh updated employee list from server
+    await fetchData(); // ⬅️ make sure this is defined and working
+  } catch (error: any) {
+    toast.error(error.response?.data?.message || "❌ Failed to assign job");
+  } finally {
+    setAssigning(false);
+  }
+};
+
+
+  // const handleUnassign = async (emp_id: number) => {
+  //   try {
+  //     await axios.delete(
+  //       `${import.meta.env.VITE_BASE_URL}/employee-job/${emp_id}`
+  //     );
+  //     toast.success("❎ Job unassigned successfully");
+  //     setEmployees((prev) =>
+  //       prev.map((e) => (e.emp_id === emp_id ? { ...e, job_id: null } : e))
+  //     );
+  //   } catch (error: any) {
+  //     toast.error(error.response?.data?.message || "❌ Failed to unassign job");
+  //   }
+  // };
 
   if (isLoading) {
     return (

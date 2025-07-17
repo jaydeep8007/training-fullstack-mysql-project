@@ -18,7 +18,7 @@ interface Employee {
     cus_email: string;
   };
   job?: {
-    job_title: string;
+    job_name: string;
     job_description?: string;
   };
 }
@@ -29,36 +29,37 @@ const EmployeeList = () => {
   const [editErrors, setEditErrors] = useState<Record<string, string>>({});
   const [showAddForm, setShowAddForm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-const [employeeToDelete, setEmployeeToDelete] = useState<Employee | null>(null);
-const [page, setPage] = useState(1);
-const [resultsPerPage] = useState(10); // or make it dynamic later
-const [totalEmployees, setTotalEmployees] = useState(0);
+  const [employeeToDelete, setEmployeeToDelete] = useState<Employee | null>(
+    null
+  );
+  const [page, setPage] = useState(1);
+  const [resultsPerPage] = useState(10); // or make it dynamic later
+  const [totalEmployees, setTotalEmployees] = useState(0);
 
+  const fetchEmployees = async () => {
+    try {
+      const res = await axios.get(
+        `${
+          import.meta.env.VITE_BASE_URL
+        }/employee?page=${page}&limit=${resultsPerPage}`,
+        {
+          withCredentials: true,
+        }
+      );
+      const rows = res.data?.data?.rows || res.data?.data || [];
+      const total = res.data?.data?.count || 0;
 
-const fetchEmployees = async () => {
-  try {
-    const res = await axios.get(
-      `${import.meta.env.VITE_BASE_URL}/employee?page=${page}&limit=${resultsPerPage}`,
-      {
-        withCredentials: true,
-      }
-    );
-    const rows = res.data?.data?.rows || res.data?.data || [];
-    const total = res.data?.data?.count || 0;
+      setEmployees(Array.isArray(rows) ? rows : []);
+      setTotalEmployees(total);
+    } catch (err) {
+      console.error("Failed to fetch employees", err);
+      setEmployees([]);
+    }
+  };
 
-    setEmployees(Array.isArray(rows) ? rows : []);
-    setTotalEmployees(total);
-  } catch (err) {
-    console.error("Failed to fetch employees", err);
-    setEmployees([]);
-  }
-};
-
-useEffect(() => {
-  fetchEmployees();
-}, [page]);
-
-
+  useEffect(() => {
+    fetchEmployees();
+  }, [page]);
 
   const handleEdit = (emp: Employee) => {
     setEditEmployeeId(emp.emp_id);
@@ -102,17 +103,17 @@ useEffect(() => {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    try {
-      await axios.delete(`${import.meta.env.VITE_BASE_URL}/employee/${id}`, {
-        withCredentials: true,
-      });
-      toast.success("Employee deleted successfully.");
-      fetchEmployees();
-    } catch {
-      toast.error("Failed to delete employee.");
-    }
-  };
+  // const handleDelete = async (id: number) => {
+  //   try {
+  //     await axios.delete(`${import.meta.env.VITE_BASE_URL}/employee/${id}`, {
+  //       withCredentials: true,
+  //     });
+  //     toast.success("Employee deleted successfully.");
+  //     fetchEmployees();
+  //   } catch {
+  //     toast.error("Failed to delete employee.");
+  //   }
+  // };
 
   useEffect(() => {
     fetchEmployees();
@@ -152,6 +153,7 @@ useEffect(() => {
               <th className="px-4 py-3">Mobile</th>
               <th className="px-4 py-3">Company</th>
               <th className="px-4 py-3">Customer</th>
+              <th className="px-4 py-3">Job</th>
               <th className="px-4 py-3">Actions</th>
             </tr>
           </thead>
@@ -240,6 +242,20 @@ useEffect(() => {
                     )}
                   </td>
                   <td className="px-4 py-3">
+  {emp.job ? (
+    <div>
+      <div className="font-medium">{emp.job.job_name}</div>
+      {emp.job.job_description && (
+        <div className="text-xs text-muted-foreground">
+          {emp.job.job_description}
+        </div>
+      )}
+    </div>
+  ) : (
+    "—"
+  )}
+</td>
+                  <td className="px-4 py-3">
                     <div className="flex gap-2 items-center">
                       {editEmployeeId === emp.emp_id ? (
                         <>
@@ -267,16 +283,16 @@ useEffect(() => {
                           >
                             <Pencil className="w-4 h-4" />
                           </button>
-                       <button
-  className="hover:text-red-600 transition"
-  title="Delete"
-  onClick={() => {
-    setEmployeeToDelete(emp);
-    setShowDeleteConfirm(true);
-  }}
->
-  <Trash2 className="w-4 h-4" />
-</button>
+                          <button
+                            className="hover:text-red-600 transition"
+                            title="Delete"
+                            onClick={() => {
+                              setEmployeeToDelete(emp);
+                              setShowDeleteConfirm(true);
+                            }}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
                         </>
                       )}
                     </div>
@@ -299,87 +315,91 @@ useEffect(() => {
             ))}
           </tbody>
         </table>
+      </div>
+
+      {totalEmployees > 0 && (
+        <div className="mt-auto w-full flex justify-between items-center px-4 py-3 border-t border-border bg-background sticky bottom-0 z-40">
+          {/* Left: Showing info */}
+          <div className="text-sm text-muted-foreground">
+            Showing {(page - 1) * resultsPerPage + 1} -{" "}
+            {Math.min(page * resultsPerPage, totalEmployees)} of{" "}
+            {totalEmployees} employees
+          </div>
+
+          {/* Right: Pagination buttons */}
+          <div className="flex space-x-1">
+            {[...Array(Math.ceil(totalEmployees / resultsPerPage))].map(
+              (_, index) => {
+                const pageNum = index + 1;
+                return (
+                  <button
+                    key={pageNum}
+                    onClick={() => setPage(pageNum)}
+                    className={`px-3 py-1 rounded text-sm border ${
+                      page === pageNum
+                        ? "bg-primary text-white"
+                        : "bg-white text-blue-800 hover:bg-muted"
+                    }`}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              }
+            )}
+          </div>
         </div>
+      )}
 
-        {totalEmployees > 0 && (
-  <div className="mt-auto w-full flex justify-between items-center px-4 py-3 border-t border-border bg-background sticky bottom-0 z-40">
-    {/* Left: Showing info */}
-    <div className="text-sm text-muted-foreground">
-      Showing {(page - 1) * resultsPerPage + 1} -{" "}
-      {Math.min(page * resultsPerPage, totalEmployees)} of {totalEmployees} employees
+      {showDeleteConfirm && employeeToDelete && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
+          <div className="bg-white dark:bg-background rounded-xl shadow-lg p-6 w-full max-w-md border border-border">
+            <h3 className="text-lg font-semibold text-foreground mb-2">
+              Confirm Delete
+            </h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Are you sure you want to delete{" "}
+              <span className="font-medium">
+                {employeeToDelete.emp_firstname} {employeeToDelete.emp_lastname}
+              </span>
+              ?
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setShowDeleteConfirm(false);
+                  setEmployeeToDelete(null);
+                }}
+                className="px-4 py-1.5 text-sm border border-border rounded-md hover:bg-muted"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  try {
+                    await axios.delete(
+                      `${import.meta.env.VITE_BASE_URL}/employee/${
+                        employeeToDelete.emp_id
+                      }`,
+                      { withCredentials: true }
+                    );
+                    toast.success("Employee deleted successfully.");
+                    fetchEmployees();
+                  } catch {
+                    toast.error("Failed to delete employee.");
+                  } finally {
+                    setShowDeleteConfirm(false);
+                    setEmployeeToDelete(null);
+                  }
+                }}
+                className="px-4 py-1.5 text-sm bg-red-600 text-white rounded-md hover:bg-red-700"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
-
-    {/* Right: Pagination buttons */}
-    <div className="flex space-x-1">
-      {[...Array(Math.ceil(totalEmployees / resultsPerPage))].map((_, index) => {
-        const pageNum = index + 1;
-        return (
-          <button
-            key={pageNum}
-            onClick={() => setPage(pageNum)}
-            className={`px-3 py-1 rounded text-sm border ${
-              page === pageNum
-                ? "bg-primary text-white"
-                : "bg-white text-blue-800 hover:bg-muted"
-            }`}
-          >
-            {pageNum}
-          </button>
-        );
-      })}
-    </div>
-  </div>
-)}
-
-        {showDeleteConfirm && employeeToDelete && (
-  <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
-    <div className="bg-white dark:bg-background rounded-xl shadow-lg p-6 w-full max-w-md border border-border">
-      <h3 className="text-lg font-semibold text-foreground mb-2">
-        Confirm Delete
-      </h3>
-      <p className="text-sm text-muted-foreground mb-4">
-        Are you sure you want to delete{" "}
-        <span className="font-medium">
-          {employeeToDelete.emp_firstname} {employeeToDelete.emp_lastname}
-        </span>
-        ?
-      </p>
-      <div className="flex justify-end gap-3">
-        <button
-          onClick={() => {
-            setShowDeleteConfirm(false);
-            setEmployeeToDelete(null);
-          }}
-          className="px-4 py-1.5 text-sm border border-border rounded-md hover:bg-muted"
-        >
-          Cancel
-        </button>
-        <button
-          onClick={async () => {
-            try {
-              await axios.delete(
-                `${import.meta.env.VITE_BASE_URL}/employee/${employeeToDelete.emp_id}`,
-                { withCredentials: true }
-              );
-              toast.success("Employee deleted successfully.");
-              fetchEmployees();
-            } catch {
-              toast.error("Failed to delete employee.");
-            } finally {
-              setShowDeleteConfirm(false);
-              setEmployeeToDelete(null);
-            }
-          }}
-          className="px-4 py-1.5 text-sm bg-red-600 text-white rounded-md hover:bg-red-700"
-        >
-          Delete
-        </button>
-      </div>
-    </div>
-  </div>
-)}
-      </div>
-
   );
 };
 

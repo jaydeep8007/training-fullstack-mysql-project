@@ -67,6 +67,8 @@ const adminCreateSchema = z
       .string()
       .min(8, msg.validation.confirmPassword.required),
 
+    role_id: z.number().int().positive({ message: "role required" }),
+
    
   })
   .strict()
@@ -108,6 +110,8 @@ const adminLoginSchema = z.object({
     .transform((email) => email.toLowerCase()),
 
   admin_password: z.string(),
+
+  
 });
 
 const adminUpdateSchema = z
@@ -135,6 +139,7 @@ const adminUpdateSchema = z
         }),
       })
       .optional(),
+      role_id: z.number().int().positive({ message: "role required" }).optional(),
   })
   .strict();
 

@@ -12,6 +12,7 @@ import commonQuery from '../services/commonQuery.service';
 import { adminValidations } from '../validations/admin.validation';
 import nodemailer from "nodemailer";
 import { getSmtpSettings } from '../utils/utils.getSmtpSettings';
+import roleModel from '../models/role.model';
 
 const envConfig = get(process.env.NODE_ENV);
 
@@ -37,6 +38,7 @@ const signupAdmin = async (req: Request, res: Response, next: NextFunction) => {
       admin_email,
       admin_phone_number,
       admin_password,
+      role_id
     } = parsed.data;
 
     const hashedPassword = await hashPassword(admin_password);
@@ -48,20 +50,27 @@ const signupAdmin = async (req: Request, res: Response, next: NextFunction) => {
       admin_phone_number,
       admin_password: hashedPassword,
       admin_status: 'active',
+       role_id: 2
     });
 
     const adminData = newAdmin.get();
 
+    const role = await roleModel.findByPk(role_id);
+    console.log("role..../" , role)
+if (!role) {
+  return responseHandler.error(res, "Invalid role selected", resCode.BAD_REQUEST);
+}
+ console.log("....role" , role)
     const accessToken = authToken.generateAuthToken({
       user_id: adminData.admin_id,
       email: adminData.admin_email,
-       role: "admin",
+       role: role.role_name,
     });
 
     const refreshToken = authToken.generateRefreshAuthToken({
       user_id: adminData.admin_id,
       email: adminData.admin_email,
-       role: "admin",
+       role: role.role_name,
     });
 
     await adminAuthQuery.create({
@@ -75,16 +84,19 @@ const signupAdmin = async (req: Request, res: Response, next: NextFunction) => {
       ...envConfig.COOKIE_OPTIONS,
     });
 
-    // ✅ Return accessToken and admin data
-    return responseHandler.success(
-      res,
-      msg.auth.registerSuccess,
-      {
-        admin: adminData,
-        accessToken,
-      },
-      resCode.CREATED
-    );
+
+  return responseHandler.success(
+  res,
+  msg.auth.registerSuccess,
+  {
+    accessToken,
+    admin: {
+      ...adminData,
+      role: role.role_name, 
+    },
+  },
+  resCode.CREATED
+);
   } catch (error) {
     if (error instanceof ValidationError) {
       const messages = error.errors.map((err) => err.message);
@@ -128,13 +140,13 @@ const signinAdmin = async (req: Request, res: Response, next: NextFunction) => {
     const accessToken = authToken.generateAuthToken({
       user_id: adminData.admin_id,
       email: adminData.admin_email,
-       role: "admin", // ✅ Add this line for role 
+      
     });
 
     const refreshToken = authToken.generateRefreshAuthToken({
       user_id: adminData.admin_id,
       email: adminData.admin_email,
-       role: "admin", // ✅ Add this line
+      
     });
 
     // 💾 Save tokens
@@ -160,7 +172,7 @@ const signinAdmin = async (req: Request, res: Response, next: NextFunction) => {
           admin_firstname: adminData.admin_firstname,
           admin_lastname: adminData.admin_lastname,
           admin_email: adminData.admin_email,
-           role: "admin", // ✅ Add this line for role 
+         
         },
       },
       resCode.OK

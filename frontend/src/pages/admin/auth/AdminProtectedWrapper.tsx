@@ -2,18 +2,9 @@
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { jwtDecode } from "jwt-decode";
 
 interface AdminProtectedWrapperProps {
   children: ReactNode;
-}
-
-// Define your expected token payload
-interface DecodedToken {
-  user_id: string | number;
-  email: string;
-  role: string; // ✅ add this if you're sending it from backend
-  exp?: number;
 }
 
 const AdminProtectedWrapper = ({ children }: AdminProtectedWrapperProps) => {
@@ -26,23 +17,8 @@ const AdminProtectedWrapper = ({ children }: AdminProtectedWrapperProps) => {
     if (!token) {
       navigate("/admin-login");
       setIsAuthorized(false);
-      return;
-    }
-
-    try {
-      const decoded = jwtDecode<DecodedToken>(token);
-      console.log("Decoded token:", decoded);
-
-      if (decoded.role !== "admin") {
-        navigate("/admin-login");
-        setIsAuthorized(false);
-      } else {
-        setIsAuthorized(true);
-      }
-    } catch (err) {
-      console.error("Token decode failed:", err);
-      navigate("/admin-login");
-      setIsAuthorized(false);
+    } else {
+      setIsAuthorized(true);
     }
   }, [navigate]);
 

@@ -37,4 +37,5 @@ flow chart
 smtp settings 
 language setings 
 
+roles and permissions , user management system , all admins by default sub admin , one super admin manualy add , 
 

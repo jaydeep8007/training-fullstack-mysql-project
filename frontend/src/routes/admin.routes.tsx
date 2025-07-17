@@ -6,6 +6,8 @@ import AddEmployee from "@/pages/employee/AddEmployee";
 import AssignJob from "@/pages/job/AssignJob";
 import CreateJob from "@/pages/job/CreateJob";
 import ManageJobs from "@/pages/job/ManageJob";
+import RolesAndPermissions from "@/pages/rolesAndPermissions/RolesAndPermissions";
+import AddRole from "@/pages/rolesAndPermissions/AddRoles";
 
 const AdminDashboard = lazy(() => import("@/pages/admin/AdminDashboard"));
 const AdminProfile = lazy(() => import("@/pages/admin/AdminProfile"));
@@ -43,5 +45,7 @@ export const adminRoutes = {
     { path: "create-job", element: <CreateJob /> },
     { path: "assign-job", element: <AssignJob /> },
     { path: "manage-job", element: <ManageJobs /> },
+    { path: "roles-and-permissions", element: <RolesAndPermissions /> },
+    { path: "roles-and-permissions/add-roles", element: <AddRole /> },
   ],
 };

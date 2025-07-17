@@ -7,6 +7,9 @@ import empoyeeRoutes from './employee.route';
 import jobRoutes from './job.route';
 import employeeJobRoutes from './employeeJob.route';
 import globalConfigRoutes from './globalConfig.route';
+import permissionRoutes from './permission.route'
+import roleRoutes from './role.route'
+import resourceRoutes from './resource.route'
 
 router.use('/admin',adminRoutes)
 router.use('/customer', customerRoutes);
@@ -14,5 +17,9 @@ router.use('/employee', empoyeeRoutes);
 router.use('/job', jobRoutes);
 router.use('/employee-job', employeeJobRoutes);
 router.use('/global-config', globalConfigRoutes);
+router.use('/permission', permissionRoutes);
+router.use('/role', roleRoutes);
+router.use('/resources', resourceRoutes);
+
 
 export default router;

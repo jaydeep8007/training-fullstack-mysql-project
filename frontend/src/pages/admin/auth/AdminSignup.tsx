@@ -19,18 +19,24 @@ const AdminSignup = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [roleId, setRoleId] = useState("");
+
 
   const togglePassword = () => setShowPassword(!showPassword);
   const toggleConfirmPassword = () => setShowConfirmPassword(!showConfirmPassword);
 
   const navigate = useNavigate();
-  const { updateAdmin, setIsLoading, isLoading, setError } = useContext(AdminDataContext)!;
+  const {  admin: currentAdmin, updateAdmin, setIsLoading, isLoading, setError } = useContext(AdminDataContext)!;
 
   const [message, setMessage] = useState<{ type: string; content: string | string[] }>({
     type: "",
     content: "",
   });
 
+  if (currentAdmin?.role_id === 1 && !roleId) {
+  setMessage({ type: "error", content: "Please select a role for the admin." });
+  return;
+}
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -41,6 +47,7 @@ const AdminSignup = () => {
       admin_phone_number: phoneNumber,
       admin_password: password,
       admin_confirm_password: confirmPassword,
+
     };
 
     try {
@@ -168,6 +175,21 @@ const AdminSignup = () => {
             />
           )}
         </div>
+        
+  {/* <div className="flex items-center gap-2 bg-gray-800 p-2 rounded-xl">
+    <select
+      value={roleId}
+      onChange={(e) => setRoleId(e.target.value)}
+      required
+      className="bg-transparent border-0 outline-none w-full text-sm placeholder-gray-400 text-white"
+    >
+      <option value="" disabled>-- Select Role --</option>
+      <option value="1">Super Admin</option>
+      <option value="2">Sub Admin</option>
+    </select>
+  </div> */}
+
+
 
         <button
           type="submit"

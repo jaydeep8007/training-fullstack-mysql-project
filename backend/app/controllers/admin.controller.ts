@@ -8,6 +8,8 @@ import { msg } from '../constants/language';
 import adminModel from '../models/admin.model';
 import employeeModel from '../models/employee.model';
 import commonQuery from '../services/commonQuery.service';
+import roleModel from '../models/role.model';
+import permissionModel from '../models/permission.model';
 
 // 🔸 Initialize admin-specific query service
 const adminQuery = commonQuery(adminModel);
@@ -57,6 +59,72 @@ const addAdmin = async (req: Request, res: Response, next: NextFunction) => {
  * 📄 Get All Admins
  * ============================================================================
  */
+// const getAdmins = async (req: Request, res: Response, next: NextFunction) => {
+//   try {
+//     const page = parseInt(req.query.page as string, 10) || 1;
+//     const results_per_page = parseInt(req.query.results_per_page as string, 10) || 10;
+//     const offset = (page - 1) * results_per_page;
+
+//     const filter = {};
+//     const options = {
+//       limit: results_per_page,
+//       offset,
+      
+//     };
+
+//     const data = await adminQuery.getAll(filter, options);
+//     const count = await adminQuery.countDocuments(adminModel, filter);
+
+//     return responseHandler.success(
+//       res,
+//       msg.admin.fetchSuccess,
+//       { count, rows: data },
+//       resCode.OK,
+//     );
+//   } catch (error) {
+//     return next(error);
+//   }
+// };
+
+// const getAdmins = async (req: Request, res: Response, next: NextFunction) => {
+//   try {
+//     const page = parseInt(req.query.page as string, 10) || 1;
+//     const results_per_page = parseInt(req.query.results_per_page as string, 10) || 10;
+//     const offset = (page - 1) * results_per_page;
+
+//     const filter = {};
+
+//     const include = [
+//       {
+//         model: roleModel,
+//         as: "role",
+//         attributes: ["role_id", "role_name"], // only the fields you need
+//       },
+//     ];
+
+//     const options = {
+//       limit: results_per_page,
+//       offset,
+//       include,
+//       attributes: {
+//         exclude: ["admin_password"], // optional: hide sensitive fields
+//       },
+//       order: [["admin_id", "ASC"]],
+//     };
+
+//     const data = await adminQuery.getAll(filter, options);
+//     const count = await adminQuery.countDocuments(adminModel, filter);
+
+//     return responseHandler.success(
+//       res,
+//       msg.admin.fetchSuccess,
+//       { count, rows: data },
+//       resCode.OK,
+//     );
+//   } catch (error) {
+//     return next(error);
+//   }
+// };
 const getAdmins = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const page = parseInt(req.query.page as string, 10) || 1;
@@ -64,10 +132,31 @@ const getAdmins = async (req: Request, res: Response, next: NextFunction) => {
     const offset = (page - 1) * results_per_page;
 
     const filter = {};
+
+    const include = [
+      {
+        model: roleModel,
+        as: "roles",
+        attributes: ["role_id", "role_name"],
+        include: [
+          {
+            model: permissionModel,
+            as: "permissions",
+            attributes: ["permission_id", "permission_slug"],
+            through: { attributes: [] }, // Exclude join table
+          },
+        ],
+      },
+    ];
+
     const options = {
       limit: results_per_page,
       offset,
-      
+      include,
+      attributes: {
+        exclude: ["admin_password"],
+      },
+      order: [["admin_id", "ASC"]],
     };
 
     const data = await adminQuery.getAll(filter, options);
@@ -80,9 +169,11 @@ const getAdmins = async (req: Request, res: Response, next: NextFunction) => {
       resCode.OK,
     );
   } catch (error) {
+    console.error("❌ Error in getAdmins:", error);
     return next(error);
   }
 };
+
 
 /* ============================================================================
  * 📄 Get Admin by ID
@@ -180,10 +271,49 @@ const deleteAdminById = async (req: Request, res: Response, next: NextFunction) 
   }
 };
 
+
+export const getAllAdminsWithPermissions = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const admins = await adminModel.findAll({
+      attributes: { exclude: ["admin_password"] },
+      include: [
+        {
+          model: roleModel,
+          as: "role",
+          attributes: ["role_id", "role_name"],
+          include: [
+            {
+              model: permissionModel,
+              as: "permissions",
+              attributes: ["permission_id", "permission_slug"],
+              through: { attributes: [] },
+            },
+          ],
+        },
+      ],
+      order: [["admin_id", "ASC"]],
+    });
+
+    return responseHandler.success(
+      res,
+      "Admins with roles and permissions fetched successfully",
+      admins,
+      resCode.OK
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
 export default {
   addAdmin,
   getAdmins,
   getAdminById,
   updateAdmin,
   deleteAdminById,
+  getAllAdminsWithPermissions
 };

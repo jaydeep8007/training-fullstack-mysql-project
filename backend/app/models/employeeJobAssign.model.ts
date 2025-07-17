@@ -29,6 +29,12 @@ const employeeJobModel = sequelize.define(
   {
     tableName: 'employeeJob',
     timestamps: true,
+    indexes: [
+      {
+        unique: true,
+        fields: ['emp_id'], // ✅ Enforce one job per employee
+      },
+    ],
   },
 );
 

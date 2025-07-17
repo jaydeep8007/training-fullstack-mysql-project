@@ -6,6 +6,12 @@ import employeeJobModel from './employeeJobAssign.model';
 import customerModel from './customer.model';
 import customerAuthModel from './customerAuth.model';
 // import globalConfigModel from './globalConfig.model';
+import adminModel from './admin.model';
+import roleModel from './role.model';
+import permissionModel from './permission.model';
+// import rolePermissionModel from './rolePermission.model';
+
+
 
 // Associations
 
@@ -41,6 +47,20 @@ employeeModel.belongsTo(customerModel, {
   as: 'customer',
 });
 
+// ✅ Admin belongs to Role
+adminModel.belongsTo(roleModel, {
+  foreignKey: 'role_id',
+  as: 'roles',
+});
+
+roleModel.hasMany(adminModel, {
+  foreignKey: 'role_id',
+  as: 'admins',
+});
+
+
+
+
 export default {
   sequelize,
   employeeModel,
@@ -48,5 +68,7 @@ export default {
   employeeJobModel,
   customerModel,
   customerAuthModel,
-  // globalConfigModel
+roleModel,
+// rolePermissionModel,
+permissionModel
 };

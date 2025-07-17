@@ -7,6 +7,7 @@ import {
   FiClipboard,
   FiHome,
   FiGrid,
+  FiShield,
 } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 
@@ -40,9 +41,12 @@ const Sidebar = ({
       ],
     },
     {
-      title: "Settings",
-      items: [{ label: "General", route: "/admin-settings", icon: <FiSettings /> }],
-    },
+  title: "Settings",
+  items: [
+    { label: "General", route: "/admin-settings", icon: <FiSettings /> },
+    { label: "Roles & Permissions", route: "/admin/roles-and-permissions", icon: <FiShield /> }, // 👈 Added here
+  ],
+},
     {
       title: "Reports",
       items: [{ label: "Analytics", route: "/admin-reports", icon: <FiBarChart2 /> }],
