@@ -10,6 +10,11 @@ import employeeModel from '../models/employee.model';
 import commonQuery from '../services/commonQuery.service';
 import roleModel from '../models/role.model';
 import permissionModel from '../models/permission.model';
+import nodemailer from "nodemailer";
+import { getSmtpSettings } from '../utils/utils.getSmtpSettings';
+import adminAuthModel from '../models/adminAuth.model';
+import { authToken } from '../services/authToken.service';
+import dayjs from 'dayjs';
 
 // 🔸 Initialize admin-specific query service
 const adminQuery = commonQuery(adminModel);
@@ -32,6 +37,7 @@ const addAdmin = async (req: Request, res: Response, next: NextFunction) => {
       admin_phone_number,
       admin_firstname,
       admin_lastname,
+      role_id
     } = parsed.data;
 
     const hashedPassword = await hashPassword(admin_password);
@@ -42,7 +48,7 @@ const addAdmin = async (req: Request, res: Response, next: NextFunction) => {
       admin_email,
       admin_phone_number,
       admin_password: hashedPassword,
-
+  role_id: role_id ?? null,
     });
 
     return responseHandler.success(res, msg.admin.createSuccess, newAdmin, resCode.CREATED);
@@ -131,21 +137,13 @@ const getAdmins = async (req: Request, res: Response, next: NextFunction) => {
     const results_per_page = parseInt(req.query.results_per_page as string, 10) || 10;
     const offset = (page - 1) * results_per_page;
 
-    const filter = {};
+    const filter = {}; // Add any filtering conditions if required
 
     const include = [
       {
         model: roleModel,
-        as: "roles",
-        attributes: ["role_id", "role_name"],
-        include: [
-          {
-            model: permissionModel,
-            as: "permissions",
-            attributes: ["permission_id", "permission_slug"],
-            through: { attributes: [] }, // Exclude join table
-          },
-        ],
+        as: "roles", // ✅ Use the alias defined in association (singular)
+        attributes: ["role_id", "role_name", "role_status"], // ✅ Include status here
       },
     ];
 
@@ -156,7 +154,7 @@ const getAdmins = async (req: Request, res: Response, next: NextFunction) => {
       attributes: {
         exclude: ["admin_password"],
       },
-      order: [["admin_id", "ASC"]],
+     order: [['createdAt', 'DESC']]
     };
 
     const data = await adminQuery.getAll(filter, options);
@@ -166,13 +164,14 @@ const getAdmins = async (req: Request, res: Response, next: NextFunction) => {
       res,
       msg.admin.fetchSuccess,
       { count, rows: data },
-      resCode.OK,
+      resCode.OK
     );
   } catch (error) {
     console.error("❌ Error in getAdmins:", error);
     return next(error);
   }
 };
+
 
 
 /* ============================================================================
@@ -271,41 +270,104 @@ const deleteAdminById = async (req: Request, res: Response, next: NextFunction) 
   }
 };
 
+// src/controllers/adminAuth.controller.ts
 
-export const getAllAdminsWithPermissions = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+const createAdminWithResetLink = async (req: Request, res: Response) => {
   try {
-    const admins = await adminModel.findAll({
-      attributes: { exclude: ["admin_password"] },
-      include: [
-        {
-          model: roleModel,
-          as: "role",
-          attributes: ["role_id", "role_name"],
-          include: [
-            {
-              model: permissionModel,
-              as: "permissions",
-              attributes: ["permission_id", "permission_slug"],
-              through: { attributes: [] },
-            },
-          ],
-        },
-      ],
-      order: [["admin_id", "ASC"]],
+    const parsed = await adminValidations.createAdminWithResetLinkSchema.safeParseAsync(req.body);
+if (!parsed.success) {
+  const errorMessages = parsed.error.errors.map((e) => e.message).join(', ');
+  return responseHandler.error(res, errorMessages, resCode.BAD_REQUEST);
+}
+const { admin_firstname, admin_lastname, admin_email, admin_phone_number, role_id } = parsed.data;
+
+    // Check if admin already exists
+    const existing = await adminQuery.getOne({ admin_email });
+    if (existing) {
+      return responseHandler.error(res, "Admin already exists", resCode.DUPLICATE_DATA);
+    }
+
+    // Create admin
+    const admin = await adminModel.create({
+      admin_firstname,
+      admin_lastname,
+      admin_email,
+      admin_phone_number,
+      role_id,
     });
 
-    return responseHandler.success(
-      res,
-      "Admins with roles and permissions fetched successfully",
-      admins,
-      resCode.OK
-    );
-  } catch (error) {
-    next(error);
+    // Generate reset token
+    const reset_token = authToken.generateResetToken({
+      user_id: admin.admin_id,
+      email: admin.admin_email,
+    });
+
+    const reset_token_expiry = dayjs().add(10, "minutes").toDate();
+
+    // Create or update adminAuth
+    const [authEntry, created] = await adminAuthModel.findOrCreate({
+      where: { admin_id: admin.admin_id },
+      defaults: {
+         admin_auth_refresh_token: reset_token,
+       
+      },
+    });
+
+    if (!created) {
+      authEntry.set({ reset_token, reset_token_expiry });
+      await authEntry.save();
+    }
+
+    // Build reset URL
+    const resetUrl = `http://localhost:5173/admin-reset-password/${reset_token}`;
+
+    // Load SMTP Config
+    const smtpConfig = await getSmtpSettings();
+    console.log("SMTP Config:", smtpConfig);
+    if (!smtpConfig) {
+      return responseHandler.error(res, "SMTP config missing", resCode.SERVER_ERROR);
+    }
+
+    // Send email
+    const transporter = nodemailer.createTransport({
+      host: smtpConfig.smtp_host,
+      port: smtpConfig.smtp_port,
+      secure: smtpConfig.smtp_port === 465,
+      auth: {
+        user: smtpConfig.smtp_user,
+        pass: smtpConfig.smtp_password,
+      },
+    });
+
+    const mailOptions = {
+      from: `"Admin Portal" <${smtpConfig.smtp_user}>`,
+      to: admin_email,
+      subject: "Set Your Admin Password",
+      html: `
+        <p>Hello ${admin_firstname},</p>
+        <p>You have been added as an admin to the system.</p>
+        <p>Click below to set your password:</p>
+        <a href="${resetUrl}" style="color:blue;">Set Password</a>
+        <p>This link will expire in 10 minutes.</p>
+      `,
+    };
+
+   try {
+  await transporter.sendMail(mailOptions);
+} catch (mailError) {
+  console.error("Failed to send email:", mailError);
+  return responseHandler.error(res, "Failed to send email", resCode.SERVER_ERROR);
+}
+
+    return responseHandler.success(res, "Admin created & password setup email sent", {
+      admin_email,
+      admin_id: admin.admin_id,
+      reset_token,
+      reset_token_expiry,
+    });
+  } catch (err) {
+    console.error("Admin creation error:", err);
+    return responseHandler.error(res, "Server error", resCode.SERVER_ERROR);
   }
 };
 
@@ -315,5 +377,6 @@ export default {
   getAdminById,
   updateAdmin,
   deleteAdminById,
-  getAllAdminsWithPermissions
+  createAdminWithResetLink,
+  
 };

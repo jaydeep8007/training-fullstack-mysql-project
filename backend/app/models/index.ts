@@ -9,11 +9,25 @@ import customerAuthModel from './customerAuth.model';
 import adminModel from './admin.model';
 import roleModel from './role.model';
 import permissionModel from './permission.model';
+import adminAuthModel from './adminAuth.model';
 // import rolePermissionModel from './rolePermission.model';
 
 
 
 // Associations
+
+// 4. Admin and AdminAuth (One-to-One)
+adminModel.hasOne(adminAuthModel, {
+  foreignKey: 'admin_id',
+  as: 'auth',
+  onDelete: 'CASCADE',
+  onUpdate: 'CASCADE',
+});
+
+adminAuthModel.belongsTo(adminModel, {
+  foreignKey: 'admin_id',
+  as: 'admin',
+});
 
 // 1. Customer and CustomerAuth (One-to-One)
 customerModel.hasOne(customerAuthModel, {
@@ -55,7 +69,7 @@ adminModel.belongsTo(roleModel, {
 
 roleModel.hasMany(adminModel, {
   foreignKey: 'role_id',
-  as: 'admins',
+  as: 'admin',
 });
 
 

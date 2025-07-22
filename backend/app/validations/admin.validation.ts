@@ -67,7 +67,7 @@ const adminCreateSchema = z
       .string()
       .min(8, msg.validation.confirmPassword.required),
 
-    role_id: z.number().int().positive({ message: "role required" }),
+    role_id: z.number().optional().nullable(),
 
    
   })
@@ -182,10 +182,48 @@ const resetPasswordSchema = z
     path: ['confirm_password'],
   });
 
+const createAdminWithResetLinkSchema = z
+  .object({
+    admin_firstname: z
+      .string()
+      .trim()
+      .min(1, msg.validation.firstName.required)
+      .max(50, msg.validation.firstName.max)
+      .regex(/^[A-Za-z\s]+$/, msg.validation.firstName.regex),
+
+    admin_lastname: z
+      .string()
+      .trim()
+      .min(1, msg.validation.lastName.required)
+      .max(50, msg.validation.lastName.max)
+      .regex(/^[A-Za-z\s]+$/, msg.validation.lastName.regex),
+
+    admin_email: z
+      .string()
+      .trim()
+      .email(msg.validation.email.invalid)
+      .transform((email) => email.toLowerCase()),
+
+    admin_phone_number: z
+      .string()
+      .length(10, msg.validation.phone.exactLength)
+      .regex(/^\d+$/, msg.validation.phone.onlyDigits),
+
+role_id: z
+  .number({
+    required_error: "role required",
+    invalid_type_error: "role id must be a number",
+  })
+  })
+  .strict()
+ 
+
+
 export const adminValidations = {
   adminCreateSchema,
   adminLoginSchema,
   adminUpdateSchema,
   forgotPasswordSchema,
   resetPasswordSchema,
+  createAdminWithResetLinkSchema
 };

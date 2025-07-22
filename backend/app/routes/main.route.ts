@@ -7,7 +7,7 @@ import empoyeeRoutes from './employee.route';
 import jobRoutes from './job.route';
 import employeeJobRoutes from './employeeJob.route';
 import globalConfigRoutes from './globalConfig.route';
-import permissionRoutes from './permission.route'
+import permissionRoutes from './adminPermission.route'
 import roleRoutes from './role.route'
 import resourceRoutes from './resource.route'
 

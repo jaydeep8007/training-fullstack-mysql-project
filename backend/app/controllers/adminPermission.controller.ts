@@ -1,6 +1,6 @@
 // src/controllers/permission.controller.ts
 import { Request, Response, NextFunction } from "express";
-import permissionModel from "../models/permission.model";
+import adminPermissionModel from "../models/permission.model";
 import { responseHandler } from "../services/responseHandler.service";
 import { resCode } from "../constants/resCode";
 import roleModel from "../models/role.model";
@@ -12,10 +12,10 @@ const addPermission = async (req: Request, res: Response, next: NextFunction) =>
     const {
       role_id,
       resource_id,
-      can_create = false,
-      can_read = false,
-      can_update = false,
-      can_delete = false,
+      admin_permission_can_create = false,
+      admin_permission_can_read = false,
+      admin_permission_can_update = false,
+      admin_permission_can_delete = false,
     } = req.body;
 
     // Validate role and resource existence
@@ -33,7 +33,7 @@ const addPermission = async (req: Request, res: Response, next: NextFunction) =>
     }
 
     // Optional: check if permission already exists
-    const existingPermission = await permissionModel.findOne({
+    const existingPermission = await adminPermissionModel.findOne({
       where: { role_id, resource_id },
     });
 
@@ -42,13 +42,13 @@ const addPermission = async (req: Request, res: Response, next: NextFunction) =>
     }
 
     // Create the permission
-    const newPermission = await permissionModel.create({
+    const newPermission = await adminPermissionModel.create({
       role_id,
       resource_id,
-      can_create,
-      can_read,
-      can_update,
-      can_delete,
+      admin_permission_can_create,
+    admin_permission_can_read,
+    admin_permission_can_update,
+    admin_permission_can_delete,
     });
 
     return responseHandler.success(res, 'Permission added successfully', newPermission);
@@ -60,7 +60,7 @@ const addPermission = async (req: Request, res: Response, next: NextFunction) =>
 
 const getPermissions = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const permissions = await permissionModel.findAll({
+    const permissions = await adminPermissionModel.findAll({
       order: [['permission_id', 'ASC']], // Optional: sort by ID
     });
 

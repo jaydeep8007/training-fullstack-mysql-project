@@ -1,9 +1,10 @@
+import { FaUserShield } from "react-icons/fa";
 import {
   FiX,
   FiSettings,
   FiBarChart2,
   FiUsers,
-  FiBriefcase,
+  // FiBriefcase,
   FiClipboard,
   FiHome,
   FiGrid,
@@ -33,9 +34,11 @@ const Sidebar = ({
     {
       title: "Management",
       items: [
+         { label: "Roles & Permissions", route: "/admin/roles-and-permissions", icon: <FiShield /> }, 
+         { label: "User Management", route: "/admin/user-management", icon: <FaUserShield /> }, 
         { label: "Customers", route: "/admin/customers", icon: <FiUsers /> },
         { label: "Employees", route: "/admin/employees", icon: <FiGrid /> },
-        { label: "Create Job", route: "/admin/create-job", icon: <FiBriefcase /> },
+        // { label: "Create Job", route: "/admin/create-job", icon: <FiBriefcase /> },
         // { label: "Assign Job", route: "/admin/assign-job", icon: <FiClipboard /> },
         { label: "Manage Jobs", route: "/admin/manage-job", icon: <FiClipboard /> },
       ],
@@ -44,7 +47,7 @@ const Sidebar = ({
   title: "Settings",
   items: [
     { label: "General", route: "/admin-settings", icon: <FiSettings /> },
-    { label: "Roles & Permissions", route: "/admin/roles-and-permissions", icon: <FiShield /> }, // 👈 Added here
+   
   ],
 },
     {
@@ -96,7 +99,7 @@ const Sidebar = ({
         </div>
 
         {/* Navigation */}
-        <nav className="flex flex-col gap-5 p-4 text-sm">
+        <nav className="flex flex-col gap-5 py-4 px-1 text-xs">
           {sectionedNav.map((section) => (
             <div key={section.title}>
               {!isCollapsed && (
@@ -111,7 +114,7 @@ const Sidebar = ({
                     navigate(item.route);
                     setSidebarOpen(false);
                   }}
-                  className="group flex items-center gap-3 w-full px-3 py-2 rounded-lg text-left transition-all 
+                  className="group  flex items-center gap-3 w-full px-3 py-2 rounded-lg text-left transition-all 
                              hover:bg-gray-100 dark:hover:bg-gray-800
                              hover:text-blue-600 dark:hover:text-blue-400 
                              text-gray-600 dark:text-gray-300"
@@ -120,7 +123,7 @@ const Sidebar = ({
                     {item.icon}
                   </span>
                   {!isCollapsed && (
-                    <span className="text-sm font-medium group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                    <span className="text-xs font-medium group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                       {item.label}
                     </span>
                   )}

@@ -1,5 +1,6 @@
 import { DataTypes, Model, Optional } from 'sequelize';
 import sequelize from '../config/sequelize';
+import adminAuthModel from './adminAuth.model';
 
 interface AdminAttributes {
   admin_id: string;
@@ -66,7 +67,7 @@ adminModel.init(
     },
     admin_password: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
       validate: {
         len: {
           args: [6, 100],
@@ -77,10 +78,13 @@ adminModel.init(
     role_id: {
       type: DataTypes.INTEGER,
       allowNull: true,
+        defaultValue: 2, // ✅ default role_id
       references: {
-        model: 'roles', // ✅ assumes roles table exists
+        model: 'roles', // 👈 Make sure this matches your actual SQL table name
         key: 'role_id',
       },
+      onUpdate: 'CASCADE',
+      onDelete: 'SET NULL',
     },
   },
   {
@@ -99,7 +103,9 @@ adminModel.init(
         fields: ['admin_phone_number'],
       },
     ],
-  }
+  },
 );
+
+
 
 export default adminModel;

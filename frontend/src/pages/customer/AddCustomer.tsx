@@ -62,8 +62,10 @@ const AddCustomer = ({ onSuccess }: AddCustomerProps) => {
     try {
       setLoading(true);
       await axios.post(`${import.meta.env.VITE_BASE_URL}/customer`, formData, {
-        withCredentials: true,
-      });
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("adminAccessToken")}`,
+          },
+        });
 
       toast.success("✅ Customer created successfully!");
       navigate("/admin/customers"); // go back to list page

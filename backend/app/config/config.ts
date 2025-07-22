@@ -28,6 +28,7 @@ var config: any = {
       DIALECT: 'mysql',
       LOGGING: false,
     },
+    SUPER_ADMIN_EMAIL: 'jay@gmail.com',
     SECURITY_TOKEN: 'ServerSecurityKey',
     SERVER_PORT: '3000',
     TOKEN_EXPIRES_IN: 60 * 60 * 24, // 1 day in seconds

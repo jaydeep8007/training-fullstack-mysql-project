@@ -64,8 +64,10 @@ const AddEmployee = ({ onSuccess }: AddEmployeeProps) => {
         ...formData,
         cus_id: Number(formData.cus_id), // ensure cus_id is a number
       }, {
-        withCredentials: true,
-      });
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("adminAccessToken")}`,
+          },
+        });
 
       toast.success("✅ Employee created successfully!");
       if (onSuccess) onSuccess();

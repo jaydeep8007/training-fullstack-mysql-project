@@ -25,6 +25,8 @@ interface HeaderProps {
   toggleCollapse: () => void;
 }
 
+
+
 const Header = ({
   setOpenLogoutDialog,
   isCollapsed,
@@ -40,23 +42,31 @@ const Header = ({
   const pageTitle = breadcrumb[breadcrumb.length - 1]?.label || "Admin Panel";
 
   function getBreadcrumbPath(pathname: string) {
-    const segments = pathname.split("/").filter(Boolean);
-    let cumulativePath = "";
-    return segments.map((segment) => {
-      cumulativePath += `/${segment}`;
-      const match = appBreadcrumbs.find(
-        (b) =>
-          b.path === cumulativePath ||
-          (b.path.includes(":") && cumulativePath.startsWith(b.path.split("/:")[0]))
-      );
-      return {
-        label:
-          match?.breadcrumb ||
-          segment.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
-        path: cumulativePath,
-      };
-    });
+  const segments = pathname.split("/").filter(Boolean);
+
+  // Remove last segment if it's numeric (likely an ID)
+  const cleanedSegments = [...segments];
+  const lastSegment = cleanedSegments[cleanedSegments.length - 1];
+  if (!isNaN(Number(lastSegment))) {
+    cleanedSegments.pop();
   }
+
+  let cumulativePath = "";
+  return cleanedSegments.map((segment) => {
+    cumulativePath += `/${segment}`;
+    const match = appBreadcrumbs.find(
+      (b) =>
+        b.path === cumulativePath ||
+        (b.path.includes(":") && cumulativePath.startsWith(b.path.split("/:")[0]))
+    );
+    return {
+      label:
+        match?.breadcrumb ||
+        segment.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+      path: cumulativePath,
+    };
+  });
+}
 
   useEffect(() => {
     const saved = localStorage.getItem("theme");

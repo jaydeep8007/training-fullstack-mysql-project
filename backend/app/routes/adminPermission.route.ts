@@ -6,8 +6,8 @@ dotenv.config();
 
 const router = express.Router();
 
-import permissionController from '../controllers/permission.controller';
+import adminPermissionController from '../controllers/adminPermission.controller';
 
-router.post("/add", permissionController.addPermission);
+router.post("/add", adminPermissionController.addPermission);
 // router.get("/get", permissionController.);
 export default router;

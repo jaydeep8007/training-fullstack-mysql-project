@@ -1,5 +1,6 @@
 import sequelize from '../config/sequelize';
 import { DataTypes } from 'sequelize';
+import adminModel from './admin.model';
 
 const adminAuthModel = sequelize.define(
   'adminAuth',
@@ -41,5 +42,7 @@ const adminAuthModel = sequelize.define(
     ],
   }
 );
+
+
 
 export default adminAuthModel;

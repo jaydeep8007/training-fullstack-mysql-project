@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation} from "react-router-dom";
 import {
   CheckCircle,
   XCircle,
@@ -52,19 +52,24 @@ const CustomerList = () => {
   // const navigate = useNavigate();
 
   const fetchCustomers = async () => {
-    try {
-      const res = await axios.get(
-        `${
-          import.meta.env.VITE_BASE_URL
-        }/customer?page=${page}&results_per_page=${resultsPerPage}`,
-        { withCredentials: true }
-      );
-      setCustomers(res.data.data.rows);
-      setTotal(res.data.data.count);
-    } catch (err) {
-      console.error("Failed to fetch customers", err);
-    }
-  };
+  try {
+    const token = localStorage.getItem("adminAccessToken");
+
+    const res = await axios.get(
+      `${import.meta.env.VITE_BASE_URL}/customer?page=${page}&results_per_page=${resultsPerPage}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`, // ✅ send token in header
+        },
+      }
+    );
+
+    setCustomers(res.data.data.rows);
+    setTotal(res.data.data.count);
+  } catch (err) {
+    console.error("Failed to fetch customers", err);
+  }
+};
 
   const handleDelete = (cus_id: number) => {
     setShowDeleteModal(true);
@@ -309,6 +314,13 @@ const CustomerList = () => {
                         </>
                       ) : (
                         <>
+                           <Link
+                            to={`/customer/${cust.cus_id}`}
+                            className="hover:text-green-600 transition"
+                            title="View Profile"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Link>
                           <button
                             className="hover:text-blue-600 transition"
                             title="Edit"
@@ -323,13 +335,7 @@ const CustomerList = () => {
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
-                          <Link
-                            to={`/customer/${cust.cus_id}`}
-                            className="hover:text-green-600 transition"
-                            title="View Profile"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </Link>
+                       
                         </>
                       )}
                     </div>

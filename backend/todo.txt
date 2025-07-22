@@ -39,3 +39,4 @@ language setings
 
 roles and permissions , user management system , all admins by default sub admin , one super admin manualy add , 
 
+ui changes admin reset pass , button trigger on only add and send with invite , smart table , font size small , 

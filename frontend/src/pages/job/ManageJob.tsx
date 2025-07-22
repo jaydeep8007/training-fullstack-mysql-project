@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { Pencil, Trash } from "lucide-react";
+import { Pencil } from "lucide-react";
 
 const ManageJob = () => {
   const [employees, setEmployees] = useState<any[]>([]);
@@ -15,26 +15,31 @@ const ManageJob = () => {
   const [editJobValue, setEditJobValue] = useState<string>("");
 
 
-    const fetchData = async () => {
-      try {
-        const [empRes, jobRes] = await Promise.all([
-          axios.get(`${import.meta.env.VITE_BASE_URL}/employee`),
-          axios.get(`${import.meta.env.VITE_BASE_URL}/job`),
-        ]);
+  const fetchData = async () => {
+  try {
+    const token = localStorage.getItem("adminAccessToken"); // or customerToken, employeeToken, etc.
 
-        setEmployees(
-          Array.isArray(empRes.data?.data?.rows) ? empRes.data.data.rows : []
-        );
-        setJobs(
-          Array.isArray(jobRes.data?.data?.rows) ? jobRes.data.data.rows : []
-        );
-      } catch (error) {
-        toast.error("❌ Failed to load employees or jobs");
-      } finally {
-        setIsLoading(false);
-      }
+    const headers = {
+      Authorization: `Bearer ${token}`,
     };
 
+    const [empRes, jobRes] = await Promise.all([
+      axios.get(`${import.meta.env.VITE_BASE_URL}/employee`, { headers }),
+      axios.get(`${import.meta.env.VITE_BASE_URL}/job`, { headers }),
+    ]);
+
+    setEmployees(
+      Array.isArray(empRes.data?.data?.rows) ? empRes.data.data.rows : []
+    );
+    setJobs(
+      Array.isArray(jobRes.data?.data?.rows) ? jobRes.data.data.rows : []
+    );
+  } catch (error) {
+    toast.error("❌ Failed to load employees or jobs");
+  } finally {
+    setIsLoading(false);
+  }
+};
     useEffect(() => {
       fetchData();
     }, [])

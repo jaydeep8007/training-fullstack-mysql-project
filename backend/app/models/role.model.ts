@@ -4,6 +4,7 @@ import sequelize from '../config/sequelize';
 class roleModel extends Model {
   public role_id!: number;
   public role_name!: string;
+  public role_status!: 'active' | 'inactive';
 }
 
 roleModel.init(
@@ -14,21 +15,32 @@ roleModel.init(
       autoIncrement: true,
     },
     role_name: {
-      type: DataTypes.STRING(100), // Set max length explicitly
+      type: DataTypes.STRING(100),
       allowNull: false,
-      unique: true, // This is fine, only 1 unique key
+      unique: false, // ✅ Only this is needed
+    },
+    // role_slug:{
+    //   type:DataTypes.STRING,
+    //   allowNull:false,
+    //   unique: true,
+    // },
+     role_status: {
+      type: DataTypes.ENUM('active', 'inactive'),
+      allowNull: false,
+      defaultValue: 'active',
     },
   },
   {
     sequelize,
     tableName: 'roles',
     timestamps: false,
-    indexes: [
-      {
-        unique: true,
-        fields: ['role_name'], // ensures one clean unique index
-      },
-    ],
+// indexes: [
+//       {
+//         unique: true,
+//         fields: ['role_name'],
+//         name: 'unique_role_name', // ✅ Must match the name used in the column definition
+//       },
+//     ],
   }
 );
 

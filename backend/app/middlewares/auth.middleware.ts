@@ -31,7 +31,7 @@ const authCustomer = async (req: Request, res: Response, next: NextFunction) => 
 
       // ✅ Add userType to req.user
       req.user = {
-        userType: decoded.userType, // 👈 ADD THIS LINE
+        
         cus_id: customerData.cus_id,
         cus_email: customerData.cus_email,
         cus_firstname: customerData.cus_firstname,
@@ -52,8 +52,9 @@ const authAdmin = async (req: Request, res: Response, next: NextFunction) => {
   authToken.verifyAuthToken(req, res, async () => {
     try {
       const decoded = (req as any).user;
-      console.log("Decoded token:", decoded);
+      console.log("Decoded token auth midd:", decoded);
 
+      // ✅ Use decoded.id based on your token structure
       const admin = await adminModel.findByPk(decoded.id);
 
       if (!admin) {
@@ -61,13 +62,14 @@ const authAdmin = async (req: Request, res: Response, next: NextFunction) => {
       }
 
       const adminData = admin.get();
+      console.log("Admin data upper:", adminData);
 
-      // ✅ Add userType to req.user
+      // ✅ Attach relevant admin details to req.user
       req.user = {
-        // role: decoded.role, // 👈 ADD THIS LINE
         admin_id: adminData.admin_id,
         admin_email: adminData.admin_email,
         admin_firstname: adminData.admin_firstname,
+        role_id: adminData.role_id, // ✅ Include role_id
       };
 
       console.log("Authenticated admin:", req.user);

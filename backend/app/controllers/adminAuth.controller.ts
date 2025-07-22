@@ -18,12 +18,12 @@ const envConfig = get(process.env.NODE_ENV);
 
 const adminQuery = commonQuery(adminModel);
 const adminAuthQuery = commonQuery(adminAuthModel);
+const DEFAULT_ADMIN_ROLE_ID = 2; // Replace with your actual admin role_id
 
 /* ============================================================================
  * 📝 Admin Signup
  * ============================================================================
  */
-
 const signupAdmin = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const parsed = await adminValidations.adminCreateSchema.safeParseAsync(req.body);
@@ -38,8 +38,10 @@ const signupAdmin = async (req: Request, res: Response, next: NextFunction) => {
       admin_email,
       admin_phone_number,
       admin_password,
-      role_id
+
     } = parsed.data;
+    const isSuperAdmin = admin_email === envConfig.SUPER_ADMIN_EMAIL;
+    const role_id = isSuperAdmin ? 1 : DEFAULT_ADMIN_ROLE_ID; // Use 1 for super admin, otherwise default role_id
 
     const hashedPassword = await hashPassword(admin_password);
 
@@ -50,27 +52,27 @@ const signupAdmin = async (req: Request, res: Response, next: NextFunction) => {
       admin_phone_number,
       admin_password: hashedPassword,
       admin_status: 'active',
-       role_id: 2
+role_id: role_id
     });
 
-    const adminData = newAdmin.get();
+    const adminData = await adminModel.findOne({where :{admin_id : newAdmin.admin_id}, attributes: ['admin_id', 'admin_email', 'role_id']});
 
-    const role = await roleModel.findByPk(role_id);
-    console.log("role..../" , role)
-if (!role) {
-  return responseHandler.error(res, "Invalid role selected", resCode.BAD_REQUEST);
-}
- console.log("....role" , role)
+    // const role = await roleModel.findByPk(role_id);
+    // console.log("role..../" , role)
+// if (!role) {
+//   return responseHandler.error(res, "Invalid role selected", resCode.BAD_REQUEST);
+// }
+//  console.log("....role" , role)
     const accessToken = authToken.generateAuthToken({
       user_id: adminData.admin_id,
       email: adminData.admin_email,
-       role: role.role_name,
+       role_id: adminData.role_id,
     });
 
     const refreshToken = authToken.generateRefreshAuthToken({
       user_id: adminData.admin_id,
       email: adminData.admin_email,
-       role: role.role_name,
+ role_id: adminData.role_id,
     });
 
     await adminAuthQuery.create({
@@ -92,7 +94,7 @@ if (!role) {
     accessToken,
     admin: {
       ...adminData,
-      role: role.role_name, 
+      role_id: adminData.role_id, // Include role_id in the response
     },
   },
   resCode.CREATED
@@ -123,7 +125,7 @@ const signinAdmin = async (req: Request, res: Response, next: NextFunction) => {
     const { admin_email, admin_password } = parsed.data;
 
     // 🔍 Find admin by email
-    const admin = await adminQuery.getOne({ admin_email });
+    const admin = await adminModel.findOne({where: { admin_email } });
     if (!admin) {
       return responseHandler.error(res, msg.admin.notFound, resCode.NOT_FOUND);
     }
@@ -136,17 +138,19 @@ const signinAdmin = async (req: Request, res: Response, next: NextFunction) => {
       return responseHandler.error(res, msg.common.invalidPassword, resCode.UNAUTHORIZED);
     }
 
+     const role_id = adminData.role_id; // ✅ Get role_id directly from admin data
+
     // 🔑 Generate tokens
     const accessToken = authToken.generateAuthToken({
       user_id: adminData.admin_id,
       email: adminData.admin_email,
-      
+      role_id
     });
 
     const refreshToken = authToken.generateRefreshAuthToken({
       user_id: adminData.admin_id,
       email: adminData.admin_email,
-      
+       role_id
     });
 
     // 💾 Save tokens
@@ -172,7 +176,7 @@ const signinAdmin = async (req: Request, res: Response, next: NextFunction) => {
           admin_firstname: adminData.admin_firstname,
           admin_lastname: adminData.admin_lastname,
           admin_email: adminData.admin_email,
-         
+         role_id: adminData.role_id, // ✅ Also return it
         },
       },
       resCode.OK
@@ -322,7 +326,9 @@ const forgotPassword = async (req: Request, res: Response, next: NextFunction) =
     return responseHandler.success(
       res,
       msg.common.resetLinkSend,
-      { email: admin_email },
+      { email: admin_email,
+         reset_token
+       },
       resCode.OK
     );
   } catch (error) {
@@ -368,7 +374,7 @@ const resetPassword = async (req: Request, res: Response, next: NextFunction) =>
     await adminInstance.save();
 
     authEntry.set('admin_auth_refresh_token', '');
-    await authEntry.save();
+   await authEntry.destroy(); // ✅ Completely remove the auth row after successful reset
 
     return responseHandler.success(res, msg.auth.passwordResetSuccess, {}, resCode.OK);
   } catch (error) {
@@ -381,6 +387,9 @@ const resetPassword = async (req: Request, res: Response, next: NextFunction) =>
 };
 
 
+
+
+
 export default {
   signupAdmin,
   signinAdmin,
@@ -388,4 +397,5 @@ export default {
   logoutAdmin,
   forgotPassword,
   resetPassword,
+
 };

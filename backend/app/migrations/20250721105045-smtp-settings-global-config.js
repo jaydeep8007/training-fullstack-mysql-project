@@ -1,0 +1,79 @@
+"use strict";
+
+/** @type {import('sequelize-cli').Migration} */
+module.exports = {
+  async up(queryInterface, Sequelize) {
+    const smtpConfig = {
+      global_config_id: Sequelize.literal('UUID()'), // or use uuid package
+      global_config_label: "SMTP Settings",
+      global_config_slug: "smtp_settings",
+      global_config_sequence: 1,
+      global_config_view: true,
+      global_config_json_value: {
+        smtp_host: "smtp.gmail.com",
+        smtp_port: "587",
+        smtp_user: "",
+        smtp_email: "",
+        smtp_password: ""
+      },
+      global_config_fields: [
+        {
+          smtp_host: {
+            max: 50,
+            min: 1,
+            type: "text",
+            label: "SMTP Host",
+            required: true
+          }
+        },
+        {
+          smtp_port: {
+            max: 50,
+            min: 1,
+            type: "text",
+            label: "SMTP Port",
+            required: true
+          }
+        },
+        {
+          smtp_user: {
+            max: 50,
+            min: 1,
+            type: "text",
+            label: "SMTP User",
+            required: true
+          }
+        },
+        {
+          smtp_password: {
+            max: 50,
+            min: 1,
+            type: "text",
+            label: "SMTP Password",
+            required: true
+          }
+        },
+        {
+          smtp_email: {
+            max: 50,
+            min: 1,
+            type: "text",
+            label: "SMTP Email",
+            regex: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+            required: true
+          }
+        }
+      ],
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+
+    await queryInterface.bulkInsert("globalConfig", [smtpConfig]);
+  },
+
+  async down(queryInterface, Sequelize) {
+    await queryInterface.bulkDelete("globalConfig", {
+      global_config_slug: "smtp_settings"
+    });
+  }
+};

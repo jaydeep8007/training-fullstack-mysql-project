@@ -10,13 +10,15 @@ const router = express.Router();
 
 import adminController from '../controllers/admin.controller';
 import adminAuthRoutes from './adminAuth.route';
+import checkPermission from '../middlewares/checkPermission';
 
 // 📦 Admin CRUD routes
-router.post('/', adminController.addAdmin);
-router.get('/', adminController.getAdmins);
-router.get('/:id', adminController.getAdminById);
-router.put('/:id', adminController.updateAdmin);
-router.delete('/:id', adminController.deleteAdminById);
+router.post('/',checkPermission('User Management', 'create'), adminController.addAdmin);
+router.get('/',checkPermission('User Management', 'read'), adminController.getAdmins);
+router.get('/:id',checkPermission('User Management', 'read'), adminController.getAdminById);
+router.put('/:id',checkPermission('User Management', 'read'), adminController.updateAdmin);
+router.delete('/:id',checkPermission('User Management', 'read'), adminController.deleteAdminById);
+router.post('/create',checkPermission('User Management', 'read'), adminController.createAdminWithResetLink);
 
 
 // 🔐 Auth routes for admin

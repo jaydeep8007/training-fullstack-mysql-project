@@ -3,11 +3,19 @@ import { DataTypes, Model } from 'sequelize';
 import sequelize from '../config/sequelize';
 import roleModel from './role.model';
 import resourceModel from './resourse.model';
-class permissionModel extends Model {}
+class adminPermissionModel extends Model {
+   admin_permission_id?: number;
+  role_id: number;
+  resource_id: number;
+  admin_permission_can_create?: boolean;
+  admin_permission_can_read?: boolean;
+  admin_permission_can_update?: boolean;
+  admin_permission_can_delete?: boolean;
+}
 
-permissionModel.init(
+adminPermissionModel.init(
   {
-    permission_id: {
+    admin_permission_id: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
@@ -28,19 +36,19 @@ permissionModel.init(
         key: 'resource_id',
       },
     },
-    can_create: {
+    admin_permission_can_create: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
-    can_read: {
+    admin_permission_can_read: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
-    can_update: {
+    admin_permission_can_update: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
-    can_delete: {
+    admin_permission_can_delete: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
@@ -53,10 +61,10 @@ permissionModel.init(
 );
 
 // Define associations
-permissionModel.belongsTo(roleModel, { foreignKey: 'role_id', as: 'roles' });
-permissionModel.belongsTo(resourceModel, { foreignKey: 'resource_id', as: 'resource' });
+adminPermissionModel.belongsTo(roleModel, { foreignKey: 'role_id', as: 'roles' });
+adminPermissionModel.belongsTo(resourceModel, { foreignKey: 'resource_id', as: 'resource' });
 
-roleModel.hasMany(permissionModel, { foreignKey: 'role_id', as: 'permissions' });
-resourceModel.hasMany(permissionModel, { foreignKey: 'resource_id', as: 'permissions' });
+roleModel.hasMany(adminPermissionModel, { foreignKey: 'role_id', as: 'permissions' });
+resourceModel.hasMany(adminPermissionModel, { foreignKey: 'resource_id', as: 'permissions' });
 
-export default permissionModel;
+export default adminPermissionModel;

@@ -2,7 +2,7 @@
   "global_config_label": "Email Settings",
   "global_config_slug": "email_settings",
   "global_config_sequence": 2,
-  "global_config_json": {
+  "global_config_json_value": {
     "from_email": "",
     "from_name": "",
     "reply_to": ""

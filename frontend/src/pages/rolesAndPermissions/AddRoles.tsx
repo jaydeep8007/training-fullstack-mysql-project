@@ -5,10 +5,9 @@ import { useNavigate } from "react-router-dom";
 
 const AddRole = () => {
   const [roleName, setRoleName] = useState("");
+  const [status, setStatus] = useState("active");
   const [resources, setResources] = useState<{ resource_id: number; resource_name: string }[]>([]);
-  const [permissions, setPermissions] = useState<{
-    [resourceId: number]: number[]; // [0, 1, 2, 3] → create, read, update, delete
-  }>({});
+  const [permissions, setPermissions] = useState<{ [resourceId: number]: number[] }>({});
 
   const navigate = useNavigate();
 
@@ -21,7 +20,6 @@ const AddRole = () => {
         toast.error("Failed to load resources");
       }
     };
-
     fetchResources();
   }, []);
 
@@ -38,20 +36,21 @@ const AddRole = () => {
   const handleAddRole = async () => {
     const permissionArray = Object.entries(permissions).map(([resourceId, actions]) => ({
       resource_id: parseInt(resourceId),
-      can_create: actions.includes(0),
-      can_read: actions.includes(1),
-      can_update: actions.includes(2),
-      can_delete: actions.includes(3),
+      admin_permission_can_create: actions.includes(0),
+      admin_permission_can_read: actions.includes(1),
+      admin_permission_can_update: actions.includes(2),
+      admin_permission_can_delete: actions.includes(3),
     }));
 
-    if (!roleName || permissionArray.length === 0) {
-      toast.error("Please enter role name and select at least one permission.");
+    if (!roleName || permissionArray.length === 0 || !status) {
+      toast.error("Please enter role name, status and select at least one permission.");
       return;
     }
 
     try {
       const res = await axios.post(`${import.meta.env.VITE_BASE_URL}/role/add`, {
         role_name: roleName,
+        status,
         permissions: permissionArray,
       });
 
@@ -65,49 +64,81 @@ const AddRole = () => {
   const permissionLabels = ["Create", "Read", "Update", "Delete"];
 
   return (
-    <div className="p-6 space-y-4 bg-background text-foreground">
-      <h2 className="text-xl font-bold">Add Role</h2>
+    <div className="max-w-full mx-auto p-6 bg-white dark:bg-gray-900 rounded-xl shadow-md space-y-6">
+      <h2 className="text-2xl font-semibold text-gray-800 dark:text-white">Add New Role</h2>
 
-      <input
-        type="text"
-        placeholder="Enter Role Name"
-        value={roleName}
-        onChange={(e) => setRoleName(e.target.value)}
-        className="w-full p-2 border rounded-md bg-input text-foreground"
-      />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Role Name</label>
+          <input
+            type="text"
+            placeholder="e.g., HR Manager"
+            value={roleName}
+            onChange={(e) => setRoleName(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+          />
+        </div>
 
-      <table className="w-full border text-sm mt-4">
-        <thead>
-          <tr className="bg-muted">
-            <th className="p-2 border">Module</th>
-            {permissionLabels.map((label) => (
-              <th key={label} className="p-2 border">
-                {label}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {resources.map((resource) => (
-            <tr key={resource.resource_id}>
-              <td className="p-2 border">{resource.resource_name}</td>
-              {permissionLabels.map((_, index) => (
-                <td key={index} className="p-2 border text-center">
-                  <input
-                    type="checkbox"
-                    checked={permissions[resource.resource_id]?.includes(index) || false}
-                    onChange={() => handleCheckboxChange(resource.resource_id, index)}
-                  />
-                </td>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
+          <select
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+          >
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <h3 className="text-lg font-semibold text-gray-800 dark:text-white mt-4 mb-2">Module Permissions</h3>
+        <div className="overflow-x-auto rounded-md border border-gray-200 dark:border-gray-700">
+          <table className="min-w-full text-sm text-left">
+            <thead className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
+              <tr>
+                <th className="p-3 border">Module</th>
+                {permissionLabels.map((label) => (
+                  <th key={label} className="p-3 border text-center">
+                    {label}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {resources.map((resource) => (
+                <tr key={resource.resource_id} className="bg-white dark:bg-gray-900 border-t dark:border-gray-700">
+                  <td className="p-3 border text-gray-800 dark:text-gray-200 font-medium">
+                    {resource.resource_name}
+                  </td>
+                  {permissionLabels.map((_, index) => (
+                    <td key={index} className="p-3 border text-center">
+                      <input
+                        type="checkbox"
+                        className="w-4 h-4"
+                        checked={permissions[resource.resource_id]?.includes(index) || false}
+                        onChange={() => handleCheckboxChange(resource.resource_id, index)}
+                      />
+                    </td>
+                  ))}
+                </tr>
               ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+              {resources.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="text-center text-gray-500 p-4">
+                    No modules found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
 
       <button
         onClick={handleAddRole}
-        className="mt-4 px-4 py-2 rounded bg-primary text-primary-foreground hover:bg-primary/80"
+        className="mt-4 w-full sm:w-auto px-6 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow"
       >
         Save Role
       </button>

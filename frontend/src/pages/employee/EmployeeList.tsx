@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
+// import { Link } from "react-router-dom";
 import { Pencil, Save, Trash2, X } from "lucide-react";
 import { toast } from "react-toastify";
 import AddEmployee from "./AddEmployee";
@@ -36,27 +36,36 @@ const EmployeeList = () => {
   const [resultsPerPage] = useState(10); // or make it dynamic later
   const [totalEmployees, setTotalEmployees] = useState(0);
 
-  const fetchEmployees = async () => {
-    try {
-      const res = await axios.get(
-        `${
-          import.meta.env.VITE_BASE_URL
-        }/employee?page=${page}&limit=${resultsPerPage}`,
-        {
-          withCredentials: true,
-        }
-      );
-      const rows = res.data?.data?.rows || res.data?.data || [];
-      const total = res.data?.data?.count || 0;
+ const fetchEmployees = async () => {
+  try {
+    const token = localStorage.getItem("adminAccessToken");
+    const response = await fetch(
+      `${import.meta.env.VITE_BASE_URL}/employee?page=${page}&limit=${resultsPerPage}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
-      setEmployees(Array.isArray(rows) ? rows : []);
-      setTotalEmployees(total);
-    } catch (err) {
-      console.error("Failed to fetch employees", err);
-      setEmployees([]);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
-  };
 
+    const resData = await response.json();
+
+    const rows = resData?.data?.rows || resData?.data || [];
+    const total = resData?.data?.count || 0;
+
+    setEmployees(Array.isArray(rows) ? rows : []);
+    setTotalEmployees(total);
+  } catch (err) {
+    console.error("Failed to fetch employees", err);
+    setEmployees([]);
+  }
+};
   useEffect(() => {
     fetchEmployees();
   }, [page]);

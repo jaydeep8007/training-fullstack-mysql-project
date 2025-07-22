@@ -14,8 +14,8 @@ import authMiddleware from '../middlewares/auth.middleware';
 // 🔐 Admin Auth routes
 router.post('/login', adminAuthController.signinAdmin);
 router.post('/signup', adminAuthController.signupAdmin);
-// router.post('/forget-password', adminAuthController.forgotPassword);
-// router.post('/reset-password', adminAuthController.resetPassword);
+router.post('/forget-password', adminAuthController.forgotPassword);
+router.post('/reset-password', adminAuthController.resetPassword);
 router.post('/logout', authMiddleware.authAdmin, adminAuthController.logoutAdmin);
 router.get('/profile', authMiddleware.authAdmin, adminAuthController.getAdminProfile);
 
