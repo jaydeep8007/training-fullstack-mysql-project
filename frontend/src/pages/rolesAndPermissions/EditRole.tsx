@@ -11,8 +11,28 @@ export const EditRole = () => {
   const [status, setStatus] = useState("active");
   const [resources, setResources] = useState<any[]>([]);
   const [permissions, setPermissions] = useState<{ [key: number]: number[] }>({});
-
+const [loading, setLoading] = useState(false);
   const permissionLabels = ["Create", "Read", "Update", "Delete"];
+
+  const [assignedCount, setAssignedCount] = useState(0);
+
+const fetchAssignedAdminCount = async () => {
+  try {
+    const token = localStorage.getItem("adminAccessToken");
+    const res = await axios.get(
+      `${import.meta.env.VITE_BASE_URL}/role/${id}/assigned-admins`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    setAssignedCount(res.data?.count || 0);
+  } catch (err: any) {
+    console.error("❌ Error fetching assigned admins:", err.response?.data || err.message);
+    toast.error("Failed to check assigned admins");
+  }
+};
 
 const fetchResources = async () => {
   try {
@@ -74,6 +94,7 @@ const fetchRoleData = async () => {
   useEffect(() => {
     fetchResources();
     fetchRoleData();
+     fetchAssignedAdminCount();
   }, [id]);
 
   const handleCheckboxChange = (resourceId: number, permIndex: number) => {
@@ -85,6 +106,27 @@ const fetchRoleData = async () => {
       return { ...prev, [resourceId]: updated };
     });
   };
+
+  const canDeactivateRole = async (): Promise<boolean> => {
+  try {
+    const token = localStorage.getItem("adminAccessToken");
+    const res = await axios.get(
+      `${import.meta.env.VITE_BASE_URL}/role/${id}/assigned-admins`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    const count = res.data?.data?.count || 0;
+    return count === 0; // ✅ true if safe to deactivate
+  } catch (err: any) {
+    console.error("Error checking role assignment:", err.response?.data || err.message);
+    toast.error("Failed to check if role is assigned");
+    return false;
+  }
+};
+
 
 const handleUpdateRole = async () => {
   const permissionArray = Object.entries(permissions).map(([resourceId, perms]) => ({
@@ -107,10 +149,21 @@ const handleUpdateRole = async () => {
   }
 
   try {
+    setLoading(true);
+
+    // 👇 Only check if trying to deactivate
+    if (status === "inactive") {
+      const canDeactivate = await canDeactivateRole();
+      if (!canDeactivate) {
+        toast.error("This role is assigned to users and cannot be deactivated.");
+        return;
+      }
+    }
+
     const res = await axios.put(
       `${import.meta.env.VITE_BASE_URL}/role/${id}`,
       {
-        role_status: status,
+        role_status: status ,
         permissions: permissionArray,
       },
       {
@@ -125,12 +178,15 @@ const handleUpdateRole = async () => {
   } catch (err: any) {
     console.error("Error updating role:", err.response?.data || err.message);
     toast.error(err.response?.data?.message || "Failed to update role");
+  } finally {
+    setLoading(false);
   }
 };
 
+
   return (
     <div className="max-w-full mx-auto p-6 bg-white dark:bg-gray-900 rounded-xl shadow-md space-y-6">
-      <h2 className="text-2xl font-semibold text-gray-800 dark:text-white">Edit Role</h2>
+      {/* <h2 className="text-2xl font-semibold text-gray-800 dark:text-white">Edit Role</h2> */}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
@@ -151,7 +207,9 @@ const handleUpdateRole = async () => {
             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
           >
             <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
+            <option value="inactive" disabled={assignedCount > 0}>
+  Inactive {assignedCount > 0 ? "(Assigned)" : ""}
+</option>
           </select>
         </div>
       </div>
@@ -200,12 +258,22 @@ const handleUpdateRole = async () => {
         </div>
       </div>
 
-      <button
-        onClick={handleUpdateRole}
-        className="mt-4 w-full sm:w-auto px-6 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow"
-      >
-        Update Role
-      </button>
+    <div className="flex justify-end gap-3 mt-6">
+  <button
+    type="submit"
+    onClick={handleUpdateRole}
+    className="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-md text-sm transition"
+  >
+    {loading ? "Updating..." : "Update Role"}
+  </button>
+  <button
+    type="button"
+    onClick={() => navigate("/admin/roles-and-permissions")}
+    className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm transition"
+  >
+    Cancel
+  </button>
+</div>
     </div>
   );
 };

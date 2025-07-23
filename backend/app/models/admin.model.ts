@@ -97,11 +97,7 @@ adminModel.init(
         unique: true,
         fields: ['admin_email'],
       },
-      {
-        name: 'unique_admin_phone_number',
-        unique: true,
-        fields: ['admin_phone_number'],
-      },
+      
     ],
   },
 );

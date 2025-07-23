@@ -106,7 +106,7 @@ const Header = ({
             {isCollapsed ? <FiChevronRight size={20} /> : <FiChevronLeft size={20} />}
           </button>
 
-          <div className="text-sm text-muted-foreground tracking-wide flex items-center gap-2 flex-wrap">
+          <div className="text-xs text-muted-foreground tracking-wide flex items-center gap-2 flex-wrap">
             {breadcrumb.map((crumb, idx) => (
               <div key={crumb.path} className="flex items-center gap-2">
                 {idx !== 0 && <span>/</span>}

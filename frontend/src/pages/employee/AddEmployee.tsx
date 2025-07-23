@@ -5,9 +5,10 @@ import { toast } from "react-toastify";
 
 interface AddEmployeeProps {
   onSuccess?: () => void;
+    onCancel?: () => void; // <-- Add this line
 }
 
-const AddEmployee = ({ onSuccess }: AddEmployeeProps) => {
+const AddEmployee = ({ onSuccess, onCancel }: AddEmployeeProps) => {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -17,7 +18,7 @@ const AddEmployee = ({ onSuccess }: AddEmployeeProps) => {
     emp_password: "",
     emp_company_name: "",
     emp_mobile_number: "",
-    cus_id: "", // ← now user can enter this
+    cus_id: "",
   });
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -60,14 +61,15 @@ const AddEmployee = ({ onSuccess }: AddEmployeeProps) => {
 
     try {
       setLoading(true);
-      await axios.post(`${import.meta.env.VITE_BASE_URL}/employee`, {
-        ...formData,
-        cus_id: Number(formData.cus_id), // ensure cus_id is a number
-      }, {
+      await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/employee`,
+        { ...formData, cus_id: Number(formData.cus_id) },
+        {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("adminAccessToken")}`,
           },
-        });
+        }
+      );
 
       toast.success("✅ Employee created successfully!");
       if (onSuccess) onSuccess();
@@ -84,19 +86,8 @@ const AddEmployee = ({ onSuccess }: AddEmployeeProps) => {
   };
 
   return (
-    <div className="max-w-full mx-auto mt-8 bg-background border border-border rounded-2xl px-6 md:px-8 py-8 shadow-md">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold text-primary">Add New Employee</h2>
-        <button
-          type="button"
-          onClick={() => navigate("/admin/employees")}
-          className="text-sm text-red-500 font-medium hover:underline"
-        >
-          Cancel
-        </button>
-      </div>
-
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-3">
+    <div className="w-full max-w-full mx-auto bg-background border border-border rounded-lg px-4 md:px-6 py-6 shadow-sm">
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* First Name */}
         <div>
           <label className="block text-xs font-medium mb-1">First Name</label>
@@ -105,9 +96,11 @@ const AddEmployee = ({ onSuccess }: AddEmployeeProps) => {
             name="emp_firstname"
             value={formData.emp_firstname}
             onChange={handleChange}
-            className="w-full border border-border px-2 py-1.5 rounded-md text-xs bg-background text-foreground"
+            className="w-full border px-2 py-1.5 rounded-md text-sm"
           />
-          {errors.emp_firstname && <p className="text-red-500 text-xs mt-1">{errors.emp_firstname}</p>}
+          {errors.emp_firstname && (
+            <p className="text-red-500 text-xs mt-1">{errors.emp_firstname}</p>
+          )}
         </div>
 
         {/* Last Name */}
@@ -118,9 +111,11 @@ const AddEmployee = ({ onSuccess }: AddEmployeeProps) => {
             name="emp_lastname"
             value={formData.emp_lastname}
             onChange={handleChange}
-            className="w-full border border-border px-2 py-1.5 rounded-md text-xs bg-background text-foreground"
+            className="w-full border px-2 py-1.5 rounded-md text-sm"
           />
-          {errors.emp_lastname && <p className="text-red-500 text-xs mt-1">{errors.emp_lastname}</p>}
+          {errors.emp_lastname && (
+            <p className="text-red-500 text-xs mt-1">{errors.emp_lastname}</p>
+          )}
         </div>
 
         {/* Email */}
@@ -131,9 +126,11 @@ const AddEmployee = ({ onSuccess }: AddEmployeeProps) => {
             name="emp_email"
             value={formData.emp_email}
             onChange={handleChange}
-            className="w-full border border-border px-2 py-1.5 rounded-md text-xs bg-background text-foreground"
+            className="w-full border px-2 py-1.5 rounded-md text-sm"
           />
-          {errors.emp_email && <p className="text-red-500 text-xs mt-1">{errors.emp_email}</p>}
+          {errors.emp_email && (
+            <p className="text-red-500 text-xs mt-1">{errors.emp_email}</p>
+          )}
         </div>
 
         {/* Password */}
@@ -144,9 +141,11 @@ const AddEmployee = ({ onSuccess }: AddEmployeeProps) => {
             name="emp_password"
             value={formData.emp_password}
             onChange={handleChange}
-            className="w-full border border-border px-2 py-1.5 rounded-md text-xs bg-background text-foreground"
+            className="w-full border px-2 py-1.5 rounded-md text-sm"
           />
-          {errors.emp_password && <p className="text-red-500 text-xs mt-1">{errors.emp_password}</p>}
+          {errors.emp_password && (
+            <p className="text-red-500 text-xs mt-1">{errors.emp_password}</p>
+          )}
         </div>
 
         {/* Company Name */}
@@ -157,9 +156,11 @@ const AddEmployee = ({ onSuccess }: AddEmployeeProps) => {
             name="emp_company_name"
             value={formData.emp_company_name}
             onChange={handleChange}
-            className="w-full border border-border px-2 py-1.5 rounded-md text-xs bg-background text-foreground"
+            className="w-full border px-2 py-1.5 rounded-md text-sm"
           />
-          {errors.emp_company_name && <p className="text-red-500 text-xs mt-1">{errors.emp_company_name}</p>}
+          {errors.emp_company_name && (
+            <p className="text-red-500 text-xs mt-1">{errors.emp_company_name}</p>
+          )}
         </div>
 
         {/* Mobile Number */}
@@ -170,33 +171,50 @@ const AddEmployee = ({ onSuccess }: AddEmployeeProps) => {
             name="emp_mobile_number"
             value={formData.emp_mobile_number}
             onChange={handleChange}
-            className="w-full border border-border px-2 py-1.5 rounded-md text-xs bg-background text-foreground"
+            className="w-full border px-2 py-1.5 rounded-md text-sm"
           />
-          {errors.emp_mobile_number && <p className="text-red-500 text-xs mt-1">{errors.emp_mobile_number}</p>}
+          {errors.emp_mobile_number && (
+            <p className="text-red-500 text-xs mt-1">{errors.emp_mobile_number}</p>
+          )}
         </div>
 
         {/* Customer ID */}
-        <div>
+        <div className="md:col-span-2">
           <label className="block text-xs font-medium mb-1">Customer ID</label>
           <input
             type="number"
             name="cus_id"
             value={formData.cus_id}
             onChange={handleChange}
-            className="w-full border border-border px-2 py-1.5 rounded-md text-xs bg-background text-foreground"
+            className="w-full border px-2 py-1.5 rounded-md text-sm"
           />
-          {errors.cus_id && <p className="text-red-500 text-xs mt-1">{errors.cus_id}</p>}
+          {errors.cus_id && (
+            <p className="text-red-500 text-xs mt-1">{errors.cus_id}</p>
+          )}
         </div>
 
-        {/* Submit Button */}
-        <div className="md:col-span-2 flex justify-end mt-4">
+        {/* Submit + Cancel Buttons */}
+        <div className="md:col-span-2 flex justify-end items-center gap-3 mt-4">
           <button
             type="submit"
             disabled={loading}
-            className="bg-primary hover:bg-primary/90 text-white px-5 py-1.5 rounded-md text-xs font-medium"
+            className="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-md text-sm transition"
           >
             {loading ? "Adding..." : "Add Employee"}
           </button>
+          <button
+  type="button"
+  onClick={() => {
+    if (onCancel) {
+      onCancel(); // Close the form inline
+    } else {
+      navigate("/admin/employees"); // Fallback: navigate if used via route
+    }
+  }}
+  className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm transition"
+>
+  Cancel
+</button>
         </div>
       </form>
     </div>

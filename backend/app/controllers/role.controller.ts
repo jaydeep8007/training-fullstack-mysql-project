@@ -4,6 +4,7 @@ import { responseHandler } from '../services/responseHandler.service'; // Option
 import { resCode } from '../constants/resCode';
 import resourceModel from '../models/resourse.model';
 import adminPermissionModel from '../models/permission.model';
+import adminModel from '../models/admin.model';
 
 export const addRoleWithPermissions = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -308,12 +309,36 @@ export const updateRoleStatusAndPermissions = async (
   }
 };
 
+
+const getAssignedAdminCount = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const roleId = parseInt(req.params.id);
+    if (!roleId || isNaN(roleId)) {
+      return responseHandler.error(res, 'Invalid role ID', resCode.BAD_REQUEST);
+    }
+
+    const count = await adminModel.count({
+      where: {
+        role_id: roleId,
+      },
+    });
+
+    return responseHandler.success(res, 'Assigned admin count fetched successfully', { count });
+  } catch (error) {
+    console.error('Error getting assigned admin count:', error);
+    return responseHandler.error(res, 'Failed to fetch assigned admin count', resCode.SERVER_ERROR);
+  }
+};
+
+
+
 export default {
   // addRole,
+  addRoleWithPermissions,
   getAllRoles,
   getRoleById,
   deleteRole,
-  addRoleWithPermissions,
   updateRoleById,
   updateRoleStatusAndPermissions,
+  getAssignedAdminCount,
 };

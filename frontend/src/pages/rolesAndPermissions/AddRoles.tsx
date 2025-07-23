@@ -65,11 +65,11 @@ const AddRole = () => {
 
   return (
     <div className="max-w-full mx-auto p-6 bg-white dark:bg-gray-900 rounded-xl shadow-md space-y-6">
-      <h2 className="text-2xl font-semibold text-gray-800 dark:text-white">Add New Role</h2>
+      {/* <h2 className="text-2xl font-semibold text-gray-800 dark:text-white">Add New Role</h2> */}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Role Name</label>
+          <label className="block text-xs  text-gray-500 dark:text-gray-300 mb-1">Role Name</label>
           <input
             type="text"
             placeholder="e.g., HR Manager"
@@ -80,7 +80,7 @@ const AddRole = () => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
+          <label className="block text-xs  text-gray-500 dark:text-gray-300 mb-1">Status</label>
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value)}
@@ -93,7 +93,7 @@ const AddRole = () => {
       </div>
 
       <div>
-        <h3 className="text-lg font-semibold text-gray-800 dark:text-white mt-4 mb-2">Module Permissions</h3>
+        <h3 className="text-lg font-medium text-gray-600 dark:text-white mt-4 mb-2">Module Permissions</h3>
         <div className="overflow-x-auto rounded-md border border-gray-200 dark:border-gray-700">
           <table className="min-w-full text-sm text-left">
             <thead className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
@@ -109,7 +109,7 @@ const AddRole = () => {
             <tbody>
               {resources.map((resource) => (
                 <tr key={resource.resource_id} className="bg-white dark:bg-gray-900 border-t dark:border-gray-700">
-                  <td className="p-3 border text-gray-800 dark:text-gray-200 font-medium">
+                  <td className="p-3 border text-gray-600 dark:text-gray-200 font-medium">
                     {resource.resource_name}
                   </td>
                   {permissionLabels.map((_, index) => (
@@ -136,12 +136,21 @@ const AddRole = () => {
         </div>
       </div>
 
-      <button
-        onClick={handleAddRole}
-        className="mt-4 w-full sm:w-auto px-6 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow"
-      >
-        Save Role
-      </button>
+   <div className="md:col-span-2 flex justify-end items-center gap-3 mt-4">
+  <button
+    onClick={handleAddRole}
+    className="px-4 py-2 text-sm font-medium bg-primary text-white rounded-md hover:bg-primary/90 transition"
+  >
+    Save Role
+  </button>
+    <button
+    type="button"
+    onClick={() => navigate("/admin/roles-and-permissions")}
+    className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm transition"
+  >
+    Cancel
+  </button>
+</div>
     </div>
   );
 };

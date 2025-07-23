@@ -88,7 +88,7 @@ const AddCustomer = ({ onSuccess }: AddCustomerProps) => {
       <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* First Name */}
         <div>
-          <label className="block text-xs font-medium mb-1">First Name</label>
+          <label className="block text-xs text-gray-600 font-medium mb-1">First Name</label>
           <input
             type="text"
             name="cus_firstname"
@@ -103,7 +103,7 @@ const AddCustomer = ({ onSuccess }: AddCustomerProps) => {
 
         {/* Last Name */}
         <div>
-          <label className="block text-xs font-medium mb-1">Last Name</label>
+          <label className="block text-xs text-gray-600 font-medium mb-1">Last Name</label>
           <input
             type="text"
             name="cus_lastname"
@@ -118,7 +118,7 @@ const AddCustomer = ({ onSuccess }: AddCustomerProps) => {
 
         {/* Email */}
         <div>
-          <label className="block text-xs font-medium mb-1">Email</label>
+          <label className="block text-xs text-gray-600 font-medium mb-1">Email</label>
           <input
             type="email"
             name="cus_email"
@@ -133,7 +133,7 @@ const AddCustomer = ({ onSuccess }: AddCustomerProps) => {
 
         {/* Phone Number */}
         <div>
-          <label className="block text-xs font-medium mb-1">Phone Number</label>
+          <label className="block text-xs text-gray-600 font-medium mb-1">Phone Number</label>
           <input
             type="tel"
             name="cus_phone_number"
@@ -148,7 +148,7 @@ const AddCustomer = ({ onSuccess }: AddCustomerProps) => {
 
         {/* Password */}
         <div>
-          <label className="block text-xs font-medium mb-1">Password</label>
+          <label className="block text-xs text-gray-600 font-medium mb-1">Password</label>
           <input
             type="password"
             name="cus_password"
@@ -163,7 +163,7 @@ const AddCustomer = ({ onSuccess }: AddCustomerProps) => {
 
         {/* Confirm Password */}
         <div>
-          <label className="block text-xs font-medium mb-1">Confirm Password</label>
+          <label className="block text-xs text-gray-600 font-medium mb-1">Confirm Password</label>
           <input
             type="password"
             name="cus_confirm_password"
@@ -178,12 +178,12 @@ const AddCustomer = ({ onSuccess }: AddCustomerProps) => {
 
         {/* Status */}
         <div className="md:col-span-2">
-          <label className="block text-xs font-medium mb-1">Status</label>
+          <label className="block text-xs text-gray-600 font-medium mb-1">Status</label>
           <select
             name="cus_status"
             value={formData.cus_status}
             onChange={handleChange}
-            className="w-full border px-2 py-1.5 rounded-md text-sm"
+            className="w-full border px-2 py-1.5 rounded-md text-xs"
           >
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
@@ -193,22 +193,23 @@ const AddCustomer = ({ onSuccess }: AddCustomerProps) => {
         </div>
 
         {/* Submit Button */}
-        <div className="md:col-span-2 flex justify-between items-center mt-2">
-          <button
-            type="submit"
-            disabled={loading}
-            className="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-md text-sm"
-          >
-            {loading ? "Adding..." : "Add Customer"}
-          </button>
-          <button
-            type="button"
-            onClick={() => navigate("/admin/customers")}
-            className="text-sm text-red-500 hover:underline"
-          >
-            Cancel
-          </button>
-        </div>
+      <div className="md:col-span-2 flex justify-end items-center gap-3 mt-4">
+  <button
+    type="submit"
+    disabled={loading}
+    className="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-md text-sm transition"
+  >
+    {loading ? "Adding..." : "Add Customer"}
+  </button>
+  <button
+    type="button"
+    onClick={() => navigate("/admin/customers")}
+    className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm transition"
+  >
+    Cancel
+  </button>
+</div>
+
       </form>
     </div>
   );

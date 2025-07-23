@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 // import { Link } from "react-router-dom";
-import { Pencil, Save, Trash2, X } from "lucide-react";
+import { Eye, Pencil, Save, Trash2, X } from "lucide-react";
 import { toast } from "react-toastify";
 import AddEmployee from "./AddEmployee";
+import { Link } from "react-router-dom";
 
 interface Employee {
   emp_id: number;
@@ -130,32 +131,35 @@ const EmployeeList = () => {
 
   return (
     <div className="min-h-screen flex flex-col p-6 pb-24">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-semibold text-primary">Employees</h2>
-        <button
-          onClick={() => setShowAddForm(true)}
-          className="px-4 py-2 text-sm font-medium bg-primary text-white rounded-md hover:bg-primary/90 transition"
-        >
-          Add
-        </button>
-      </div>
+     {!showAddForm && (
+  <div className="flex justify-between items-center mb-4">
+    <h2 className="text-xl font-semibold text-primary">Employees</h2>
+    <button
+      onClick={() => setShowAddForm(true)}
+      className="px-4 py-2 text-sm font-normal bg-primary text-white rounded-md hover:bg-primary/90 transition"
+    >
+      Add
+    </button>
+  </div>
+)}
 
-      {showAddForm && (
-        <div className="mb-4">
-          <AddEmployee
-            onSuccess={() => {
-              setShowAddForm(false); // hide form
-              fetchEmployees(); // refresh list
-            }}
-          />
-          <div className="flex justify-end mt-2"></div>
-        </div>
-      )}
+{showAddForm && (
+  <div className="mb-1">
+    <AddEmployee
+      onSuccess={() => {
+        setShowAddForm(false); // hide form
+        fetchEmployees(); // refresh list
+      }}
+        onCancel={() => setShowAddForm(false)} // 👈 Pass onCancel prop
+    />
+    <div className="flex justify-end mt-2"></div>
+  </div>
+)}
 
       <div className="overflow-x-auto shadow border border-border rounded-lg mb-6">
-        <div className="relative overflow-x-auto shadow border border-border rounded-lg mb-6"></div>
-        <table className="min-w-full text-sm text-left border-collapse">
-          <thead className="bg-muted text-muted-foreground uppercase text-xs tracking-wider">
+       
+        <table className="min-w-full text-xs text-left  border-collapse">
+          <thead className="bg-muted  text-muted-foreground uppercase text-xs tracking-wider">
             <tr>
               <th className="px-4 py-3">Full Name</th>
               <th className="px-4 py-3">Email</th>
@@ -203,10 +207,15 @@ const EmployeeList = () => {
                         name="emp_email"
                         value={editData.emp_email || ""}
                         onChange={handleEditChange}
-                        className="border px-2 py-1 rounded w-full"
+                        className="border px-2 py-1 rounded w-full "
                       />
                     ) : (
-                      emp.emp_email
+                      <a
+                        href={`mailto:${emp.emp_email}?subject=Hello%20${emp.emp_firstname}&body=Hi%20${emp.emp_firstname},`}
+                        className="text-blue-600 cursor-pointer hover:underline"
+                      >
+                        {emp.emp_email}
+                      </a>
                     )}
                   </td>
                   <td className="px-4 py-3">
@@ -242,7 +251,7 @@ const EmployeeList = () => {
                           {emp.customer.cus_firstname}{" "}
                           {emp.customer.cus_lastname}
                         </div>
-                        <div className="text-xs text-muted-foreground">
+                        <div className="text-xs text-muted-foreground ">
                           {emp.customer.cus_email}
                         </div>
                       </div>
@@ -284,25 +293,35 @@ const EmployeeList = () => {
                           </button>
                         </>
                       ) : (
-                        <>
-                          <button
-                            className="hover:text-blue-600 transition"
-                            title="Edit"
-                            onClick={() => handleEdit(emp)}
-                          >
-                            <Pencil className="w-4 h-4" />
-                          </button>
-                          <button
-                            className="hover:text-red-600 transition"
-                            title="Delete"
-                            onClick={() => {
-                              setEmployeeToDelete(emp);
-                              setShowDeleteConfirm(true);
-                            }}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </>
+                   <>
+  <Link
+    to={`/employee/${emp.emp_id}`}
+    className="text-green-500 hover:text-green-600 hover:scale-110 transition-transform duration-200"
+    title="View Profile"
+  >
+    <Eye className="w-4 h-4" />
+  </Link>
+
+  <button
+    className="text-blue-500 hover:text-blue-600 hover:scale-110 transition-transform duration-200"
+    title="Edit"
+    onClick={() => handleEdit(emp)}
+  >
+    <Pencil className="w-4 h-4" />
+  </button>
+
+  <button
+    className="text-red-500 hover:text-red-600 hover:scale-110 transition-transform duration-200"
+    title="Delete"
+    onClick={() => {
+      setEmployeeToDelete(emp);
+      setShowDeleteConfirm(true);
+    }}
+  >
+    <Trash2 className="w-4 h-4" />
+  </button>
+</>
+
                       )}
                     </div>
                   </td>
@@ -327,7 +346,7 @@ const EmployeeList = () => {
       </div>
 
       {totalEmployees > 0 && (
-        <div className="mt-auto w-full flex justify-between items-center px-4 py-3 border-t border-border bg-background sticky bottom-0 z-40">
+        <div className="mt-auto w-full flex justify-between items-center px-4 py-3 border-t border-border bg-background   z-40">
           {/* Left: Showing info */}
           <div className="text-sm text-muted-foreground">
             Showing {(page - 1) * resultsPerPage + 1} -{" "}

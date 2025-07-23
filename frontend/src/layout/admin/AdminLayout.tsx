@@ -107,7 +107,7 @@ const AdminLayout = () => {
 
       {/* Main content area */}
       <div
-        className={`flex flex-col flex-1 min-h-screen font-sans text-[15px] transition-all duration-300 bg-background text-foreground ${
+        className={`flex flex-col flex-1 min-h-screen font-sans text-[12px] transition-all duration-300 bg-background text-foreground ${
           isCollapsed ? "ml-20" : "ml-[180px]"
         }`}
       >
@@ -129,7 +129,7 @@ const AdminLayout = () => {
         />
 
         {/* Spacer */}
-        <div className="h-2 w-full" />
+        <div className="h-1 w-full" />
 
         {/* Main content wrapped in Suspense for lazy loading */}
         <main className="flex-1">

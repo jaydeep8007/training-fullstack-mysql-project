@@ -19,7 +19,7 @@ router.get('/:id',checkPermission('User Management', 'read'), adminController.ge
 router.put('/:id',checkPermission('User Management', 'read'), adminController.updateAdmin);
 router.delete('/:id',checkPermission('User Management', 'read'), adminController.deleteAdminById);
 router.post('/create',checkPermission('User Management', 'read'), adminController.createAdminWithResetLink);
-
+router.post("/create-without-password", adminController.createAdminWithoutPassword);
 
 // 🔐 Auth routes for admin
 router.use('/auth', adminAuthRoutes);

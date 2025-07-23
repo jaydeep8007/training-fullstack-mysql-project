@@ -157,23 +157,27 @@ const CustomerList = () => {
 
   return (
     <div className="min-h-screen flex flex-col p-6 pb-24">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-semibold text-primary">Customers</h2>
-        <Link
-          to="/admin/customers/add"
-          className="px-4 py-2 text-sm font-medium bg-primary text-white rounded-md hover:bg-primary/90 transition"
-        >
-          Add
-        </Link>
-      </div>
-      {location.pathname === "/admin/customers/add" && (
-        <div className="mb-6">
-          <CustomerAddForm />
-        </div>
-      )}
+  {location.pathname !== "/admin/customers/add" && (
+  <div className="flex justify-between items-center mb-4">
+    <h2 className="text-xl text-gray-500 font-semibold  ">Customers</h2>
+    <Link
+      to="/admin/customers/add"
+      className="px-4 py-2 text-sm font-medium bg-primary text-white rounded-md hover:bg-primary/90 transition"
+    >
+      Add
+    </Link>
+  </div>
+)}
+
+{location.pathname === "/admin/customers/add" && (
+  <div className="mb-6">
+    <CustomerAddForm />
+  </div>
+)}
+
 
       <div className="overflow-x-auto shadow border border-border rounded-lg mb-6">
-        <table className="min-w-full text-sm text-left  border-collapse">
+        <table className="min-w-full text-xs text-left  border-collapse">
           <thead className="bg-muted  text-muted-foreground uppercase text-xs tracking-wider">
             <tr>
               <th className="px-4 py-3">Name</th>
@@ -191,7 +195,7 @@ const CustomerList = () => {
                   key={cust.cus_id}
                   className="border-b border-border odd:bg-background even:bg-muted/40 hover:bg-muted transition"
                 >
-                  <td className="px-4 py-3 font-medium text-foreground whitespace-nowrap min-w-[180px]">
+                  <td className="px-4 py-3 font-normal text-foreground whitespace-nowrap min-w-[180px]">
                     {editCustomerId === cust.cus_id ? (
                       <div className="flex gap-2">
                         <div className="w-1/2">
@@ -232,24 +236,32 @@ const CustomerList = () => {
                       `${cust.cus_firstname} ${cust.cus_lastname}`
                     )}
                   </td>
-                  <td className="px-4 py-3">
-                    {editCustomerId === cust.cus_id ? (
-                      <input
-                        type="email"
-                        name="cus_email"
-                        value={editData.cus_email || ""}
-                        onChange={handleEditChange}
-                        className="border px-2 py-1 rounded w-full"
-                      />
-                    ) : (
-                      <a
-                        href={`mailto:${cust.cus_email}?subject=Hello%20${cust.cus_firstname}&body=Hi%20${cust.cus_firstname},`}
-                        className="text-blue-600 hover:underline"
-                      >
-                        {cust.cus_email}
-                      </a>
-                    )}
-                  </td>
+<td className="px-4 py-3">
+  {editCustomerId === cust.cus_id ? (
+    <input
+      type="email"
+      name="cus_email"
+      value={editData.cus_email || ""}
+      onChange={handleEditChange}
+      className="border px-2 py-1 rounded w-full"
+    />
+  ) : (
+    <a
+      href={`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(
+        cust.cus_email
+      )}&su=${encodeURIComponent(`Hello ${cust.cus_firstname}`)}&body=${encodeURIComponent(
+        `Hi ${cust.cus_firstname},`
+      )}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-blue-600 hover:underline"
+    >
+      {cust.cus_email}
+    </a>
+  )}
+</td>
+
+
                   <td className="px-4 py-3">
                     {editCustomerId === cust.cus_id ? (
                       <input
@@ -313,30 +325,32 @@ const CustomerList = () => {
                           </button>
                         </>
                       ) : (
-                        <>
-                           <Link
-                            to={`/customer/${cust.cus_id}`}
-                            className="hover:text-green-600 transition"
-                            title="View Profile"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </Link>
-                          <button
-                            className="hover:text-blue-600 transition"
-                            title="Edit"
-                            onClick={() => handleEdit(cust)}
-                          >
-                            <Pencil className="w-4 h-4" />
-                          </button>
-                          <button
-                            className="hover:text-red-600 transition"
-                            title="Delete"
-                            onClick={() => handleDelete(cust.cus_id)}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                       
-                        </>
+                       <>
+  <Link
+    to={`/customer/${cust.cus_id}`}
+    className="text-green-500 hover:text-green-600 hover:scale-110 transition-transform duration-200 ease-in-out"
+    title="View Profile"
+  >
+    <Eye className="w-4 h-4" />
+  </Link>
+
+  <button
+    className="text-blue-500 hover:text-blue-600 hover:scale-110 transition-transform duration-200 ease-in-out"
+    title="Edit"
+    onClick={() => handleEdit(cust)}
+  >
+    <Pencil className="w-4 h-4" />
+  </button>
+
+  <button
+    className="text-red-500 hover:text-red-600 hover:scale-110 transition-transform duration-200 ease-in-out"
+    title="Delete"
+    onClick={() => handleDelete(cust.cus_id)}
+  >
+    <Trash2 className="w-4 h-4" />
+  </button>
+</>
+
                       )}
                     </div>
                   </td>
@@ -407,7 +421,7 @@ const CustomerList = () => {
       </div>
 
       {/* Pagination Info & Controls */}
-      <div className="mt-auto w-full flex justify-between items-center px-4 py-3 border-t border-border bg-background sticky bottom-0 z-40">
+      <div className="mt-auto w-full flex justify-between items-center px-4 py-3 border-t border-border bg-background  z-40">
         {/* Left: Showing data info */}
         <div className="text-sm text-muted-foreground">
           Showing {(page - 1) * resultsPerPage + 1} -{" "}

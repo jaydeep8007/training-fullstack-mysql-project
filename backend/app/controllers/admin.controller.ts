@@ -154,7 +154,7 @@ const getAdmins = async (req: Request, res: Response, next: NextFunction) => {
       attributes: {
         exclude: ["admin_password"],
       },
-     order: [['createdAt', 'DESC']]
+     order: [['admin_id', 'ASC']]
     };
 
     const data = await adminQuery.getAll(filter, options);
@@ -371,6 +371,44 @@ const { admin_firstname, admin_lastname, admin_email, admin_phone_number, role_i
   }
 };
 
+const createAdminWithoutPassword = async (req: Request, res: Response) => {
+  try {
+    const parsed = await adminValidations.createAdminWithResetLinkSchema.safeParseAsync(req.body);
+    if (!parsed.success) {
+      const errorMessages = parsed.error.errors.map((e) => e.message).join(", ");
+      return responseHandler.error(res, errorMessages, resCode.BAD_REQUEST);
+    }
+
+    const { admin_firstname, admin_lastname, admin_email, admin_phone_number, role_id } = parsed.data;
+
+    // Check if admin already exists
+    const existing = await adminQuery.getOne({ admin_email });
+    if (existing) {
+      return responseHandler.error(res, "Admin already exists", resCode.DUPLICATE_DATA);
+    }
+
+    // Create admin (no password or auth setup)
+    const admin = await adminModel.create({
+      admin_firstname,
+      admin_lastname,
+      admin_email,
+      admin_phone_number,
+      role_id,
+    });
+
+    return responseHandler.success(res, "Admin created successfully", {
+      admin_id: admin.admin_id,
+      admin_email: admin.admin_email,
+    });
+
+  } catch (err) {
+    console.error("Admin direct creation error:", err);
+    return responseHandler.error(res, "Server error", resCode.SERVER_ERROR);
+  }
+};
+
+
+
 export default {
   addAdmin,
   getAdmins,
@@ -378,5 +416,5 @@ export default {
   updateAdmin,
   deleteAdminById,
   createAdminWithResetLink,
-  
+  createAdminWithoutPassword
 };
