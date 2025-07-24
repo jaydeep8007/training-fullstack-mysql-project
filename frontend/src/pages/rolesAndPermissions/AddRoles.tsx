@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 
 const AddRole = () => {
   const [roleName, setRoleName] = useState("");
@@ -64,12 +65,18 @@ const AddRole = () => {
   const permissionLabels = ["Create", "Read", "Update", "Delete"];
 
   return (
-    <div className="max-w-full mx-auto p-6 bg-white dark:bg-gray-900 rounded-xl shadow-md space-y-6">
+    <motion.div
+        initial={{ scale: 0.95, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.4 }}
+     className="max-w-full mx-auto p-6 bg-white dark:bg-gray-900 rounded-xl  space-y-6">
       {/* <h2 className="text-2xl font-semibold text-gray-800 dark:text-white">Add New Role</h2> */}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-xs  text-gray-500 dark:text-gray-300 mb-1">Role Name</label>
+        <label className="block text-xs text-gray-500 dark:text-gray-300 mb-1">
+  Role Name <span className="text-red-500">*</span>
+</label>
           <input
             type="text"
             placeholder="e.g., HR Manager"
@@ -80,7 +87,7 @@ const AddRole = () => {
         </div>
 
         <div>
-          <label className="block text-xs  text-gray-500 dark:text-gray-300 mb-1">Status</label>
+          <label className="block text-xs  text-gray-500 dark:text-gray-300 mb-1">Status <span className="text-red-500">*</span></label>
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value)}
@@ -151,7 +158,7 @@ const AddRole = () => {
     Cancel
   </button>
 </div>
-    </div>
+    </motion.div>
   );
 };
 

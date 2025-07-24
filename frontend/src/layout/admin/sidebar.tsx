@@ -51,8 +51,8 @@ const Sidebar = ({
   ],
 },
     {
-      title: "Reports",
-      items: [{ label: "Analytics", route: "/admin-reports", icon: <FiBarChart2 /> }],
+      title: "Features",
+      items: [{ label: "Premium Planes", route: "/subscription-planes", icon: <FiBarChart2 /> }],
     },
   ];
 

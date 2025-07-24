@@ -7,6 +7,7 @@ import Sidebar from "@/layout/admin/sidebar";
 import Header from "@/layout/admin/header";
 import Footer from "@/layout/admin/footer";
 import SkeletonPage from "@/components/skeletons/customer.skeleton";
+import { AnimatePresence, motion } from "framer-motion";
 
 // 👇 Import your admin-specific theme CSS
 import "./AdminLayout.css";
@@ -132,11 +133,20 @@ const AdminLayout = () => {
         <div className="h-1 w-full" />
 
         {/* Main content wrapped in Suspense for lazy loading */}
-        <main className="flex-1">
-          <Suspense fallback={<SkeletonPage />}>
-            <Outlet context={{ admin }} />
-          </Suspense>
-        </main>
+        <AnimatePresence >
+          <motion.div
+            key={location.pathname} // 👈 this is the key to trigger exit/enter
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            // exit={{ scale: 0.95, opacity: 0 }} // <-- this enables smooth disappear
+            transition={{ duration: 0.3 }}
+            className="flex-1"
+          >
+            <Suspense fallback={<SkeletonPage />}>
+              <Outlet context={{ admin }} />
+            </Suspense>
+          </motion.div>
+        </AnimatePresence>
 
         {/* Footer */}
         <Footer />

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { Pencil } from "lucide-react";
+import { motion } from "framer-motion";
 
 const ManageJob = () => {
   const [employees, setEmployees] = useState<any[]>([]);
@@ -77,7 +78,11 @@ const ManageJob = () => {
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
+     <motion.div
+        initial={{ scale: 0.95, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.4 }}
+        className="max-w-6xl mx-auto p-6">
       <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-md mb-8">
         <h2 className="text-2xl font-semibold mb-6 text-gray-800 dark:text-white">Assign Job</h2>
 
@@ -274,7 +279,7 @@ const ManageJob = () => {
           </table>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

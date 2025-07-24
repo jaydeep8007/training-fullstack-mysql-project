@@ -17,6 +17,7 @@ import {
 import { useNavigate, useLocation } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import { appBreadcrumbs } from "@/routes";
+import { AnimatePresence,motion } from "framer-motion";
 
 interface HeaderProps {
   setSidebarOpen?: (val: boolean) => void;
@@ -154,38 +155,48 @@ const Header = ({
           />
         </div>
 
-        {showDropdown && (
-          <div
-            ref={dropdownRef}
-            className="absolute right-0 mt-2 w-64 rounded-xl border border-border bg-background shadow-xl text-sm z-50 animate-fadeIn"
-          >
-            <div className="p-2 divide-y divide-border">
-              <div className="py-2">
-                <DropdownItem icon={<FaUserCog />} label="Profile" onClick={() => navigate("/admin/profile")} />
-                <DropdownItem icon={<FaBell />} label="Notifications" onClick={() => navigate("/admin-notifications")} />
-              </div>
 
-              <div className="py-2">
-                <SectionTitle title="Management" />
-                <DropdownItem icon={<FaGlobe />} label="Global Config" onClick={() => navigate("/admin/global-config")} />
-              </div>
 
-              <div className="py-2">
-                <SectionTitle title="Support" />
-                <DropdownItem icon={<FiHelpCircle />} label="Help & Support" onClick={() => navigate("/admin-help")} />
-                <DropdownItem
-                  icon={<FiLogOut />}
-                  label="Logout"
-                  className="text-red-600 hover:bg-muted"
-                  onClick={() => {
-                    setShowDropdown(false);
-                    setOpenLogoutDialog(true);
-                  }}
-                />
-              </div>
-            </div>
-          </div>
-        )}
+<AnimatePresence>
+  {showDropdown && (
+    <motion.div
+      initial={{ scale: 0.95, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      exit={{ scale: 0.95, opacity: 0 }} // <-- this enables smooth disappear
+      transition={{ duration: 0.3 }}
+      ref={dropdownRef}
+      className="absolute right-0 mt-2 w-64 rounded-xl border border-border bg-background shadow-xl text-sm z-50"
+    >
+      <div className="p-2 divide-y divide-border">
+        <div className="py-2">
+          <DropdownItem icon={<FaUserCog />} label="Profile" onClick={() => navigate("/admin/profile")} />
+          <DropdownItem icon={<FaBell />} label="Notifications" onClick={() => navigate("/admin-notifications")} />
+        </div>
+
+        <div className="py-2">
+          <SectionTitle title="Management" />
+          <DropdownItem icon={<FaGlobe />} label="Global Config" onClick={() => navigate("/admin/global-config")} />
+        </div>
+
+        <div className="py-2">
+          <SectionTitle title="Support" />
+          <DropdownItem icon={<FiHelpCircle />} label="Help & Support" onClick={() => navigate("/admin-help")} />
+          <DropdownItem
+            icon={<FiLogOut />}
+            label="Logout"
+            className="text-red-600 hover:bg-muted"
+            onClick={() => {
+              setShowDropdown(false);
+              setOpenLogoutDialog(true);
+            }}
+          />
+        </div>
+      </div>
+    </motion.div>
+  )}
+        
+</AnimatePresence>
+
       </div>
     </header>
   );

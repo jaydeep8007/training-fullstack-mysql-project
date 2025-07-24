@@ -3,6 +3,7 @@ import { Pencil, Trash2 } from "lucide-react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { motion } from "framer-motion";
 
 interface Role {
   role_id: number;
@@ -54,7 +55,12 @@ const RolesAndPermissions = () => {
   }, []);
 
 return (
-  <div className="min-h-screen flex flex-col p-6 pb-24">
+  <motion.div
+ initial={{ scale: 0.95, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.4 }}
+    className="min-h-screen flex flex-col p-6 pb-24"
+  >
     <div className="flex justify-between items-center mb-6">
       <h2 className="text-lg text-gray-600 font-semibold">Roles & Permissions</h2>
       <button
@@ -164,7 +170,7 @@ return (
         </div>
       </div>
     )}
-  </div>
+  </motion.div>
 );
 
 };

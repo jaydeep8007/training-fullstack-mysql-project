@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { motion } from "framer-motion";
 
 type Role = {
   role_id: number;
@@ -135,7 +136,11 @@ const AddAdmin = () => {
   };
 
   return (
-    <div className="w-full mt-3 max-w-[97%] mx-auto bg-background border border-border rounded-lg px-4 md:px-6 py-6 shadow-sm">
+     <motion.div
+        initial={{ scale: 0.95, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.4 }}
+     className="w-full mt-3 max-w-[97%] mx-auto bg-background border border-border rounded-lg px-4 md:px-6 py-6 shadow-sm">
       <form
         onSubmit={handleSubmit}
         className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm"
@@ -244,7 +249,7 @@ const AddAdmin = () => {
 </div>
 
       </form>
-    </div>
+    </motion.div>
   );
 };
 

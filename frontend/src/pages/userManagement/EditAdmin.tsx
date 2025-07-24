@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Loader2, Save, X } from "lucide-react";
 import { toast } from "react-toastify";
 import axios from "axios";
+import { motion } from "framer-motion";
 
 interface Admin {
   first_name: string;

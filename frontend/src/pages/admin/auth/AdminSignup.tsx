@@ -311,10 +311,13 @@ const AdminSignup = () => {
   };
 
   return (
-    <div className="w-full min-h-screen flex items-center justify-center bg-gray-100 px-4">
+   <div
+  className="w-full h-screen flex items-center justify-center bg-cover bg-center px-4"
+  style={{ backgroundImage: "url('/background.jpg')" }}
+>
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-md p-6 bg-white text-gray-700 flex flex-col gap-4 rounded-xl shadow-md border border-gray-200"
+        className="w-full max-w-md p-6 bg-blue-300/50 text-gray-700 flex flex-col gap-4 rounded-xl shadow-md border border-blue-200"
       >
         <h2 className="text-xl font-bold text-center text-[#22345d]">Admin Registration</h2>
 
@@ -322,7 +325,7 @@ const AdminSignup = () => {
 <div className="flex gap-2">
   <div className="w-1/2">
     <label className="text-sm font-medium text-gray-600 block mb-1">First Name</label>
-   <div className="flex items-center gap-2 bg-gray-50 p-2 rounded-xl border border-gray-300 hover:border-[#22345d] transition-colors duration-200 ease-out">
+   <div className="flex items-center gap-2 bg-blue-50 p-2 rounded-xl border border-blue-300 hover:border-[#22345d] transition-colors duration-200 ease-out">
       <MdOutlineDriveFileRenameOutline className="text-gray-500" />
       <input
         type="text"

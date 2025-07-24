@@ -14,6 +14,7 @@ import {
 import { toast } from "react-toastify";
 import CustomerAddForm from "./AddCustomer";
 import { customerEditSchema } from "@/helper/updateCustomerValidation";
+import { AnimatePresence, motion } from "framer-motion";
 
 interface Employee {
   emp_id: number;
@@ -156,7 +157,13 @@ const CustomerList = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col p-6 pb-24">
+   <AnimatePresence>
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.95, opacity: 0 }} // <-- this enables smooth disappear
+            transition={{ duration: 0.3 }}
+    className="min-h-screen flex flex-col p-6 pb-24">
   {location.pathname !== "/admin/customers/add" && (
   <div className="flex justify-between items-center mb-4">
     <h2 className="text-xl text-gray-500 font-semibold  ">Customers</h2>
@@ -473,7 +480,8 @@ const CustomerList = () => {
           </div>
         </div>
       )}
-    </div>
+    </motion.div>
+    </AnimatePresence>
   );
 };
 

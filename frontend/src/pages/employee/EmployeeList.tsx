@@ -5,6 +5,7 @@ import { Eye, Pencil, Save, Trash2, X } from "lucide-react";
 import { toast } from "react-toastify";
 import AddEmployee from "./AddEmployee";
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 
 interface Employee {
   emp_id: number;
@@ -130,7 +131,11 @@ const EmployeeList = () => {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col p-6 pb-24">
+    <motion.div
+        initial={{ scale: 0.95, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.4 }}
+    className="min-h-screen flex flex-col p-6 pb-24">
      {!showAddForm && (
   <div className="flex justify-between items-center mb-4">
     <h2 className="text-xl font-semibold text-primary">Employees</h2>
@@ -427,7 +432,7 @@ const EmployeeList = () => {
           </div>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 };
 

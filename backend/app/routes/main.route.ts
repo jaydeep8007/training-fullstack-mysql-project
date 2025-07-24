@@ -10,6 +10,7 @@ import globalConfigRoutes from './globalConfig.route';
 import permissionRoutes from './adminPermission.route'
 import roleRoutes from './role.route'
 import resourceRoutes from './resource.route'
+import stripeRoutes from './stripe.route';
 
 router.use('/admin',adminRoutes)
 router.use('/customer', customerRoutes);
@@ -20,6 +21,6 @@ router.use('/global-config', globalConfigRoutes);
 router.use('/permission', permissionRoutes);
 router.use('/role', roleRoutes);
 router.use('/resources', resourceRoutes);
-
+router.use('/stripe', stripeRoutes);
 
 export default router;

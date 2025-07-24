@@ -229,16 +229,19 @@ const AdminLogin = () => {
   };
 
   return (
-    <div className="w-full h-screen flex items-center justify-center bg-gray-100 px-4">
+<div
+  className="w-full h-screen flex items-center justify-center bg-cover bg-center px-4"
+  style={{ backgroundImage: "url('/background.jpg')" }}
+>
       <form
         onSubmit={submitHandler}
-        className="w-full max-w-md p-6 bg-white rounded-xl shadow-md space-y-6"
+        className="w-full max-w-md p-6 bg-slate-200/50 rounded-xl shadow-md space-y-6"
       >
         <h1 className="text-xl font-semibold text-center text-gray-700">Admin Login</h1>
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">Email Address</label>
+            <label className="block text-sm  text-gray-600 mb-1">Email Address</label>
             <div className="flex items-center px-3 py-2 border border-gray-300 rounded-md bg-white hover:border-[#22345d] transition-colors duration-200 ease-out">
               <MdAlternateEmail className="text-gray-400 mr-2" />
               <input
@@ -253,7 +256,7 @@ const AdminLogin = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">Password</label>
+            <label className="block text-sm  text-gray-600 mb-1">Password</label>
             <div className="flex items-center px-3 py-2 border border-gray-300 rounded-md bg-white relative hover:border-[#22345d] transition-colors duration-200 ease-out">
               <FaFingerprint className="text-gray-400 mr-2" />
               <input
