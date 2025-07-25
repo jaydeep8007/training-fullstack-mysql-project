@@ -62,7 +62,7 @@ const AdminList = () => {
         <h2 className="text-lg font-semibold text-gray-700 dark:text-gray-200">Admin Users</h2>
         <button
           onClick={() => navigate("/admin/user-management/add-admin")}
-          className="px-4 py-2 text-sm font-medium bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition"
+          className="px-4 py-2 text-sm font-medium bg-primary hover:bg-primary text-white rounded-md transition"
         >
           Add
         </button>
@@ -164,7 +164,7 @@ const AdminList = () => {
                     onClick={() => setPage(pageNum)}
                     className={`px-3 py-1 rounded border text-sm transition ${
                       page === pageNum
-                        ? "bg-indigo-600 text-white border-indigo-600"
+                        ? "bg-primary text-white border-indigo-600"
                         : "bg-white dark:bg-gray-800 text-blue-800 dark:text-blue-400 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
                     }`}
                   >
