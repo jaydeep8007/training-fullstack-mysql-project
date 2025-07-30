@@ -155,3 +155,10 @@ rate limiting --> token bucket (easily exploid by greedy client) , leaky bucket
 
 mailiator , putbox 
 useDispatch for api 
+
+| Method                         | Description                         | Use Case                            | UI Customization                       |
+| ------------------------------ | ----------------------------------- | ----------------------------------- | -------------------------------------- |
+| ✅ `checkout.sessions.create()` | Stripe Checkout (hosted page)       | Quick & simple integration          | ❌ Limited customization                |
+| ✅ `paymentIntents.create()`    | Payment Intents API (Element-based) | Full custom UI with Stripe Elements | ✅ Full control                         |
+| ✅ `setupIntents.create()`      | For saving cards without payment    | E.g. "save for later"               | ✅ Custom UI                            |
+| ✅ `subscription.create()`      | For recurring payments              | Subscriptions/memberships           | Depends (can use Checkout or Elements) |

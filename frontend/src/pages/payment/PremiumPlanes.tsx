@@ -2,6 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import { CheckCircle } from "lucide-react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 const plans = [
   {
@@ -36,41 +37,60 @@ const StripeSubscriptionPage = () => {
   const [selectedPlan, setSelectedPlan] = useState(plans[0]);
   const [paymentMethod, setPaymentMethod] = useState<"stripe" | "paypal">("stripe");
   const [loading, setLoading] = useState(false);
+  
+
+  const navigate = useNavigate();
+
+  // const handleStripeSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   setLoading(true);
+
+  //   try {
+  //     const response = await axios.post("http://localhost:3000/api/v1/payment/stripe/create-stripe-order", {
+  //       items: [
+  //         {
+  //           quantity: 1,
+  //           price_data: {
+  //             currency: "USD",
+  //             unit_amount: selectedPlan.amount * 100,
+  //             product_data: {
+  //               name: selectedPlan.name,
+  //               description: selectedPlan.description,
+  //             },
+  //           },
+  //         },
+  //       ],
+  //       success_url: "http://localhost:5173/payment-success",
+  //       cancel_url: "http://localhost:5173/payment-cancel",
+  //     });
+
+  //     if (response.data?.url) {
+  //       window.location.href = response.data.url;
+  //     }
+  //   } catch (error: any) {
+  //     console.error("Stripe error:", error.response?.data || error.message);
+  //     alert("Something went wrong.");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const handleStripeSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  e.preventDefault();
 
-    try {
-      const response = await axios.post("http://localhost:3000/api/v1/payment/stripe/create-stripe-order", {
-        items: [
-          {
-            quantity: 1,
-            price_data: {
-              currency: "USD",
-              unit_amount: selectedPlan.amount * 100,
-              product_data: {
-                name: selectedPlan.name,
-                description: selectedPlan.description,
-              },
-            },
-          },
-        ],
-        success_url: "http://localhost:5173/payment-success",
-        cancel_url: "http://localhost:5173/payment-cancel",
-      });
-
-      if (response.data?.url) {
-        window.location.href = response.data.url;
-      }
-    } catch (error: any) {
-      console.error("Stripe error:", error.response?.data || error.message);
-      alert("Something went wrong.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // Only send amount to next page
+  navigate("/stripe-checkout-page", {
+   state: {
+    plan: {
+      name: selectedPlan.name,
+      description: selectedPlan.description,
+      amount: selectedPlan.amount,
+      features: selectedPlan.features, // optional array
+     
+    },
+  },
+  });
+};
   const handlePaypalSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -97,7 +117,7 @@ const StripeSubscriptionPage = () => {
            initial={{ scale: 0.95, opacity: 0 }}
            animate={{ scale: 1, opacity: 1 }}
            transition={{ duration: 0.4 }}
-    className="max-w-full mx-auto px-4 py-4">
+    className="max-w-full  mx-auto px-4 py-4">
       <h2 className="text-center text-3xl font-bold text-gray-800 mb-8">Choose a Subscription Plan</h2>
 
       {/* Plan Cards */}
@@ -243,5 +263,7 @@ const StripeSubscriptionPage = () => {
     </motion.div>
   );
 };
+
+
 
 export default StripeSubscriptionPage;

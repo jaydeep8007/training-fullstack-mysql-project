@@ -97,9 +97,17 @@ import { initLanguage } from './constants/language';
 
 /* MAIN ROUTES */
 import router from './routes/main.route';
+import { handleStripeWebhook } from './controllers/webhook.controller';
 
 // Initialize Express app
 const app = express();
+
+app.post(
+  '/stripe/webhook', 
+  // '/api/v1/payment/stripe/webhook', 
+  bodyParser.raw({ type: 'application/json' }), // Required for Stripe signature verification
+  handleStripeWebhook
+);
 
 // ✅ Proper CORS setup (must be before any routes or cookies)
 app.use(
@@ -108,7 +116,6 @@ app.use(
     credentials: true,
   })
 );
-
 // ✅ Core Middlewares
 app.use(cookieParser());
 app.use(express.json());
@@ -121,6 +128,7 @@ app.use(logger('dev'));
 
 // ✅ Main API Routes
 app.use('/api/v1', router);
+
 
 // ✅ Start Server
 const PORT = process.env.PORT || 3000;

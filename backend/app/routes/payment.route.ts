@@ -6,12 +6,17 @@ dotenv.config();
 
 const router = express.Router();
 
-import { stripeCreateCheckoutSession } from '../controllers/payment.controller';
+import { createPaymentIntent } from '../controllers/payment.controller';
 import { createPaypalOrder } from '../controllers/payment.controller';
+import { createPayPalSubscription } from '../controllers/payment.controller';
+// import { handleStripeWebhook } from '../controllers/webhook.controller';
 
+router.post('/stripe/create-stripe-order', createPaymentIntent);
 
-router.post('/stripe/create-stripe-order', stripeCreateCheckoutSession);
+router.post('/paypal/create-paypal-order', createPaypalOrder);
 
-router.post("/paypal/create-paypal-order", createPaypalOrder);
+router.post('/create-checkout-session', createPayPalSubscription);
+
+// router.post('/stripe/webhook', express.raw({ type: 'application/json' }), handleStripeWebhook); // ✅ Add this
 
 export default router;
