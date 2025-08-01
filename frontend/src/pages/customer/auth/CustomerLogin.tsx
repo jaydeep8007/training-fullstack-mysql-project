@@ -67,71 +67,65 @@ const CustomerLogin = () => {
     }
   };
 
-  return (
-    <div className="w-full h-screen flex items-center justify-center bg-gradient-to-br from-[#1a1a2e] to-[#16213e] px-4">
-      <form
-        onSubmit={submitHandler}
-        className="w-[90%] max-w-sm md:max-w-md lg:max-w-md p-6 bg-gray-900 text-white flex-col flex items-center gap-4 rounded-xl shadow-slate-700 shadow-xl"
-      >
-        <h1 className="text-lg md:text-xl font-semibold">Welcome Back</h1>
-        <p className="text-xs md:text-sm text-gray-400 text-center">
-          Don't have an account?{" "}
-          <Link to="/customer-signup" className="text-white underline">
-            Sign up
-          </Link>
-        </p>
+return (
+  <div
+    className="w-full h-screen flex items-center justify-center bg-cover bg-center px-4"
+    style={{ backgroundImage: "url('/background.jpg')" }}
+  >
+    <form
+      onSubmit={submitHandler}
+      className="w-full max-w-md p-6 bg-slate-200/50 rounded-xl shadow-md space-y-6"
+    >
+      <h1 className="text-xl font-semibold text-center text-gray-700">Customer Login</h1>
 
-        <div className="w-full flex flex-col gap-3">
-          <div className="w-full flex items-center gap-2 bg-gray-800 p-3 rounded-xl">
-            <MdAlternateEmail className="text-lg" />
+      <div className="space-y-4">
+        <div>
+          <label className="block text-sm text-gray-600 mb-1">Email Address</label>
+          <div className="flex items-center px-3 py-2 border border-gray-300 rounded-md bg-white hover:border-blue-700 transition-colors duration-200 ease-out">
+            <MdAlternateEmail className="text-gray-400 mr-2" />
             <input
               type="email"
-              placeholder="Email address"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="bg-transparent border-0 w-full outline-none text-sm md:text-base"
+              placeholder="Enter your email"
+              className="w-full outline-none text-xs text-gray-800"
             />
           </div>
+        </div>
 
-          <div className="w-full flex items-center gap-2 bg-gray-800 p-3 rounded-xl relative">
-            <FaFingerprint className="text-lg" />
+        <div>
+          <label className="block text-sm text-gray-600 mb-1">Password</label>
+          <div className="flex items-center px-3 py-2 border border-gray-300 rounded-md bg-white relative hover:border-blue-700 transition-colors duration-200 ease-out">
+            <FaFingerprint className="text-gray-400 mr-2" />
             <input
               type={showPassword ? "text" : "password"}
-              placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="bg-transparent border-0 w-full outline-none text-sm md:text-base"
+              placeholder="Enter your password"
+              className="w-full outline-none text-xs text-gray-800"
             />
             {showPassword ? (
               <FaRegEyeSlash
-                className="absolute right-5 cursor-pointer"
+                className="absolute right-3 cursor-pointer text-gray-500 hover:text-blue-700 transition-colors duration-200 ease-out"
                 onClick={togglePasswordView}
               />
             ) : (
               <FaRegEye
-                className="absolute right-5 cursor-pointer"
+                className="absolute right-3 cursor-pointer text-gray-500 hover:text-blue-700 transition-colors duration-200 ease-out"
                 onClick={togglePasswordView}
               />
             )}
           </div>
-
-          {/* ✅ Forgot Password Link */}
-          <div className="w-full text-right text-xs text-blue-400 hover:underline">
-            <Link to="/customer-forget-password">Forgot Password?</Link>
-          </div>
         </div>
 
-        <button
-          type="submit"
-          className="w-full p-2 bg-blue-500 rounded-xl mt-1 hover:bg-blue-600 text-sm md:text-base transition"
-        >
-          Login
-        </button>
+        <div className="text-right text-sm text-blue-600 hover:underline">
+          <Link to="/customer-forget-password">Forgot Password?</Link>
+        </div>
 
         {message.content && (
-          <div className="text-center text-sm text-red-500 mt-1">
+          <div className="text-sm text-red-500 text-center">
             {Array.isArray(message.content) ? (
               message.content.map((msg, i) => <div key={i}>• {msg}</div>)
             ) : (
@@ -139,36 +133,50 @@ const CustomerLogin = () => {
             )}
           </div>
         )}
+      </div>
 
-        <div className="relative w-full flex items-center justify-center py-3">
-          <div className="w-2/5 h-[2px] bg-gray-800"></div>
-          <h3 className="font-lora text-xs md:text-sm px-4 text-gray-500">
-            Or
-          </h3>
-          <div className="w-2/5 h-[2px] bg-gray-800"></div>
-        </div>
+      <button
+        type="submit"
+        className="w-full py-2 px-4 bg-blue-700 hover:bg-blue-800 text-white rounded-md transition text-sm"
+      >
+        Login
+      </button>
 
-        <div className="w-full flex items-center justify-evenly md:justify-between gap-2">
-          <div className="p-2 md:px-6 lg:px-8 bg-slate-700 cursor-pointer rounded-xl hover:bg-slate-800">
-            <BsApple className="text-lg md:text-xl" />
-          </div>
-          <div className="p-1 md:px-6 lg:px-8 bg-slate-700 cursor-pointer rounded-xl hover:bg-slate-800">
-            <img src="/google-logo.png" alt="google" className="w-6 md:w-8" />
-          </div>
-          <div className="p-2 md:px-6 lg:px-8 bg-slate-700 cursor-pointer rounded-xl hover:bg-slate-800">
-            <FaXTwitter className="text-lg md:text-xl" />
-          </div>
-        </div>
-
-        <Link
-          to="/admin-login"
-          className="w-full mt-4 p-2 text-center text-sm bg-purple-600 hover:bg-purple-700 rounded-xl transition"
-        >
-          Sign in as Admin
+      <p className="text-center text-sm text-gray-600">
+        Don't have an account?{" "}
+        <Link to="/customer-signup" className="text-blue-600 hover:underline">
+          Sign up
         </Link>
-      </form>
-    </div>
-  );
+      </p>
+
+      <div className="relative w-full flex items-center justify-center py-3">
+        <div className="w-2/5 h-[2px] bg-gray-300"></div>
+        <h3 className="text-xs px-4 text-gray-500">Or</h3>
+        <div className="w-2/5 h-[2px] bg-gray-300"></div>
+      </div>
+
+      <div className="w-full flex items-center justify-evenly gap-2">
+        <div className="p-2 bg-slate-700 cursor-pointer rounded-xl hover:bg-slate-800">
+          <BsApple className="text-white text-lg md:text-xl" />
+        </div>
+        <div className="p-2 bg-slate-700 cursor-pointer rounded-xl hover:bg-slate-800">
+          <img src="/google-logo.png" alt="google" className="w-6 md:w-8" />
+        </div>
+        <div className="p-2 bg-slate-700 cursor-pointer rounded-xl hover:bg-slate-800">
+          <FaXTwitter className="text-white text-lg md:text-xl" />
+        </div>
+      </div>
+
+      <Link
+        to="/admin-login"
+        className="block w-full text-center mt-2 py-2 text-sm text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-md transition"
+      >
+        Sign in as Admin
+      </Link>
+    </form>
+  </div>
+);
+
 };
 
 export default CustomerLogin;

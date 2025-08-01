@@ -8,6 +8,8 @@ import { Request, Response, NextFunction } from "express";
 import Stripe from "stripe";
 import { responseHandler } from "../services/responseHandler.service";
 import { resCode } from "../constants/resCode";
+import { msg } from "../constants/language";
+import subscriptionModel from "../models/subscription.model";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 
@@ -49,182 +51,79 @@ export const createPaymentIntent = async (
 
 
 
-// Map your product plan and billing interval to Stripe Price IDs
-const priceMap: Record<string, Record<string, string>> = {
-  basic: {
-    monthly: "price_basic_monthly_id",
-    yearly: "price_basic_yearly_id",
-  },
-  pro: {
-    monthly: "price_pro_monthly_id",
-    yearly: "price_pro_yearly_id",
-  },
-  premium: {
-    monthly: "price_premium_monthly_id",
-    yearly: "price_premium_yearly_id",
-  },
-};
 
-import axios from "axios";
-
-export const createPayPalSubscription = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const { planType } = req.body;
-
-    // Example plan IDs mapped to your PayPal plans
-    const planMap: Record<string, string> = {
-      basic: "P-5SU98575AF676020PNCEJEAI",
-      pro: "P-XXXXXXXXXXXXXXX",
-      premium: "P-YYYYYYYYYYYYYYY",
-    };
-
-    const planId = planMap[planType];
-    if (!planId) {
-       res.status(400).json({ message: "Invalid plan type" });
-    }
-
-    // Step 1: Get access token
-    const auth = Buffer.from(`${process.env.PAYPAL_CLIENT_ID}:${process.env.PAYPAL_SECRET}`).toString("base64");
-    const tokenResponse = await axios.post(
-      "https://api-m.sandbox.paypal.com/v1/oauth2/token",
-      "grant_type=client_credentials",
-      {
-        headers: {
-          Authorization: `Basic ${auth}`,
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-      }
-    );
-
-    const accessToken = tokenResponse.data.access_token;
-
-    // Step 2: Create subscription
-    const subscriptionResponse = await axios.post(
-      "https://api-m.sandbox.paypal.com/v1/billing/subscriptions",
-      {
-        plan_id: planId,
-        application_context: {
-          brand_name: "Your SaaS App",
-          user_action: "SUBSCRIBE_NOW",
-          return_url: "http://localhost:5173/payment-success",
-          cancel_url: "http://localhost:5173/payment-cancel",
-        },
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
-
-    // Step 3: Get the approval link and redirect user
-    const approvalLink = subscriptionResponse.data.links.find(
-      (link: any) => link.rel === "approve"
-    );
-
-    if (!approvalLink) {
-       res.status(500).json({ message: "Approval link not found" });
-    }
-
-     res.status(200).json({
-      message: "PayPal subscription created",
-      url: approvalLink.href,
-    });
-  } catch (err) {
-    console.error("PayPal Subscription Error:", err);
-     res.status(500).json({ message: "PayPal subscription failed" });
-  }
-};
-
-
-
-
-
-// export const subscribeCustomer = async (
-//   req: Request,
-//   res: Response,
-//   next: NextFunction
-// ) => {
+// export const createStripeSubscription = async (req: Request, res: Response) => {
 //   try {
-//     const { email, paymentMethodId, plan, interval } = req.body;
+//     const { cus_id, customerEmail } = req.body;
+//     const priceId = "price_1Rqtb1CEaskUm5BGfvrSY2RV"; // Your saved recurring price ID
 
-//     if (!email || !paymentMethodId || !plan || !interval) {
-//       return responseHandler.error(res, "All fields are required", resCode.BAD_REQUEST);
+//     if (!cus_id || !customerEmail) {
+//       return responseHandler.error(res, msg.common.missingFields);
 //     }
 
-//     const priceId = priceMap[plan]?.[interval];
-//     if (!priceId) {
-//       return responseHandler.error(res, "Invalid plan or interval", resCode.BAD_REQUEST);
-//     }
-
-//     // 1. Create customer
+//     // 1. Create Stripe customer
 //     const customer = await stripe.customers.create({
-//       email,
-//       payment_method: paymentMethodId,
-//       invoice_settings: {
-//         default_payment_method: paymentMethodId,
-//       },
+//       email: customerEmail,
 //     });
 
 //     // 2. Create subscription
 //     const subscription = await stripe.subscriptions.create({
 //       customer: customer.id,
 //       items: [{ price: priceId }],
-//       payment_settings: {
-//         payment_method_options: {
-//           card: {
-//             request_three_d_secure: "automatic",
-//           },
-//         },
-//         payment_method_types: ["card"],
-//         save_default_payment_method: "on_subscription",
-//       },
+//       payment_behavior: "default_incomplete",
 //       expand: ["latest_invoice.payment_intent"],
 //     });
 
-//     // 3. Return subscription info
-//     return responseHandler.success(res, 
-//       "Subscription created successfully",
-//       {
-//       subscriptionId: subscription.id,
-//       clientSecret: subscription.latest_invoice?.payment_intent?.client_secret,
-//       status: subscription.status,
+//     let paymentIntent: Stripe.PaymentIntent | undefined;
+//     if (subscription.latest_invoice && typeof subscription.latest_invoice !== "string") {
+//       paymentIntent = (subscription.latest_invoice as any).payment_intent as Stripe.PaymentIntent;
+//     }
+
+//     // 3. Save subscription to MySQL (via Sequelize)
+//     await subscriptionModel.create({
+//       cus_id,
+//       subscription_plan_name: "Basic Plan",
+//       subscription_plan_id: priceId,
+//       subscription_provider_id: subscription.id,
+//       subscription_provider: "stripe",
+//       subscription_amount: 1.99,
+//       subscription_currency: "USD",
+//       subscription_status: subscription.status,
+//       subscription_start_date: new Date(subscription.start_date * 1000),
+//       subscription_end_date: subscription.ended_at ? new Date(subscription.ended_at * 1000) : null,
+//       subscription_trial_end: subscription.trial_end ? new Date(subscription.trial_end * 1000) : null,
+//       subscription_is_cancelled: subscription.cancel_at ? true : false,
+//       subscription_cancel_at_period_end: subscription.cancel_at_period_end || false,
 //     });
-//   } catch (error: any) {
-//     console.error("Stripe subscription error:", error.message);
-//     return responseHandler.error(
+
+//     return responseHandler.success(
 //       res,
-//       error?.message || "Subscription failed",
-//       resCode.SERVER_ERROR
+//       "subscription created sucessfully",
+//       {
+//         clientSecret: paymentIntent.client_secret,
+//         subscriptionId: subscription.id,
+//       },
 //     );
+//   } catch (error: any) {
+//     console.error(error);
+//     return responseHandler.error(res, msg.common.serverError, 500);
 //   }
 // };
 
 
 
-// export const createSubscription = async (
-//   req: Request,
-//   res: Response,
-//   next: NextFunction
-// ) => {
+// export const createStripeSubscription = async (req: Request, res: Response) => {
 //   try {
 //     const { customerEmail, priceId } = req.body;
 
 //     if (!customerEmail || !priceId) {
-//       return responseHandler.error(res, "Email and Price ID are required", resCode.BAD_REQUEST);
+//        res.status(400).json({ message: 'Customer email and Price ID are required' });
 //     }
 
-//     // Create customer
-//     const customer = await stripe.customers.create({
-//       email: customerEmail,
-//     });
+//     // Create a new customer
+//     const customer = await stripe.customers.create({ email: customerEmail });
 
-//     // Create subscription
+//     // Create the subscription for the customer
 //     const subscription = await stripe.subscriptions.create({
 //       customer: customer.id,
 //       items: [{ price: priceId }],
@@ -232,42 +131,106 @@ export const createPayPalSubscription = async (
 //       expand: ['latest_invoice.payment_intent'],
 //     });
 
-//     const clientSecret = subscription.latest_invoice?.payment_intent?.client_secret;
+//     const latestInvoice = subscription.latest_invoice as Stripe.Invoice;
+//     const paymentIntent = (latestInvoice as any).payment_intent as Stripe.PaymentIntent;
 
-//     return responseHandler.success(res, "Subscription created", {
+//     if (!paymentIntent?.client_secret) {
+//        res.status(500).json({ message: 'Failed to retrieve payment intent.' });
+//     }
+
+//     res.status(200).json({
+//       message: 'Subscription created successfully',
 //       subscriptionId: subscription.id,
-//       clientSecret,
-//     });
-//   } catch (error) {
-//     console.error("Subscription error:", error);
-//     return responseHandler.error(res, "Subscription creation failed", resCode.SERVER_ERROR);
-//   }
-// };
-
-// export const stripeCreateCheckoutSession = async (req: Request, res: Response) => {
-//   try {
-//     const { items } = req.body; // items should be an array of { price, quantity }
-//     console.log("stripe" , stripe)
-//     console.log("stripe" , stripe.checkout)
-//     console.log("stripe" , stripe.checkout.sessions)
-
-//     const session = await stripe.checkout.sessions.create({
-//       payment_method_types: ['card',"alipay"],
-//       mode: 'payment',
-//       line_items: items, // data send to url via this line 
-//       success_url: 'http://localhost:5173/payment-success', // your frontend
-//       cancel_url: 'http://localhost:5173/payment-cancel',
+//       clientSecret: paymentIntent.client_secret,
+//       customerId: customer.id,
+//       status: subscription.status
 //     });
 
-//      res.json({ url: session.url });
 //   } catch (error: any) {
-//     console.error('Stripe session error:', error);
-//     res.status(500).json({ error: error.message || 'Stripe checkout error' });
+//     console.error('Error creating subscription:', error);
+//     res.status(500).json({ message: 'Failed to create subscription', error: error.message });
 //   }
 // };
+
+
+export const createStripeSubscription = async (req: Request, res: Response) => {
+  try {
+    const { customerEmail , priceId } = req.body;
+
+    if (!customerEmail) {
+      return responseHandler.error(res, " cus email not get", resCode.BAD_REQUEST);
+    }
+
+    // Step 1: Create Customer (or find if already created)
+    const customer = await stripe.customers.create({
+      email: customerEmail,
+    });
+
+    // Step 2: Create a Stripe Checkout Session for subscription
+    const session = await stripe.checkout.sessions.create({
+      mode: "subscription",
+      payment_method_types: ["card"] ,
+      customer: customer.id,
+      line_items: [
+        {
+          price: priceId, // replace with your actual price ID
+          quantity: 1,
+        },
+      ],
+      success_url: "http://localhost:5173/payment-success?session_id={CHECKOUT_SESSION_ID}",
+      cancel_url: "http://localhost:5173/payment-fail",
+    });
+
+    return responseHandler.success(
+      res,
+     "Subscription created successfully",
+      { checkoutUrl: session.url }
+    );
+  } catch (error: any) {
+    console.error("Stripe Error:", error.message);
+    return responseHandler.error(res,"server error", resCode.SERVER_ERROR);
+  }
+};
+
+
+
+// export const createStripeSubscription = async (req: Request, res: Response) => {
+//   try {
+//     const { customerEmail, priceId, paymentMethodId } = req.body;
+
+//     // Step 1: Create customer
+//     const customer = await stripe.customers.create({
+//       email: customerEmail,
+//       payment_method: paymentMethodId,
+//       invoice_settings: {
+//         default_payment_method: paymentMethodId,
+//       },
+//     });
+
+//     // Step 2: Create subscription
+//     const subscription = await stripe.subscriptions.create({
+//       customer: customer.id,
+//       items: [{ price: priceId }],
+//       expand: ["latest_invoice.payment_intent"],
+//     });
+
+//     return responseHandler.success(res, "Subscription created", { subscription });
+//   } catch (error) {
+//     console.error("Subscription Error", error);
+//     return responseHandler.error(res, "Subscription failed", 500);
+//   }
+// };
+
+
+
+
+
+
+
 
 
 // Example Express handler
+
 export const createPaypalOrder = async (req, res) => {
   const { amount, currency } = req.body;
 

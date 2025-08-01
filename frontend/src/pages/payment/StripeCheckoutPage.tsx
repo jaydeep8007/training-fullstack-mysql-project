@@ -67,7 +67,9 @@ const StripeCheckoutPage = () => {
   const navigate = useNavigate();
   const { plan } = location.state || {};
   const [clientSecret, setClientSecret] = useState("");
+  console.log("Plan from location state:", plan);
 
+  console.log("Plan from state:", plan);
   useEffect(() => {
     if (!plan?.amount) {
       navigate("/subscription-planes");
@@ -106,6 +108,50 @@ const StripeCheckoutPage = () => {
       });
   }, [plan, navigate]);
 
+
+
+// useEffect(() => {
+//   if (!plan?.amount) {
+//     navigate("/subscription-planes");
+//     return;
+//   }
+
+//   const token = localStorage.getItem("adminAccessToken");
+
+//   if (!token) {
+//     console.error("No token found");
+//     return;
+//   }
+
+//   let customerEmail = "";
+//   let cus_id = "";
+
+//   try {
+//     const decoded: any = jwtDecode(token);
+//     customerEmail = decoded?.email;
+//     cus_id = decoded?.id;
+//     console.log("Decoded JWT:", decoded);
+//   } catch (err) {
+//     console.error("Token decode failed:", err);
+//     return;
+//   }
+
+// axios
+//   .post("http://localhost:3000/api/v1/payment/stripe/stripe-subscription", {
+//     customerEmail: "jrparmar8007@gmail.com",        // <-- same as Postman
+//     priceId: "price_1MowQULkdIwHu7ixraBm864M",   // <-- your desired plan's price ID
+//   })
+//   .then((res) => {
+//     const { clientSecret } = res.data.data;
+//     setClientSecret(clientSecret);
+//   })
+//   .catch((err) => {
+//     console.error("Error creating subscription:", err);
+//     navigate("/subscription-planes");
+//   });
+// }, [plan, navigate]);
+
+
   return (
     <div className="min-h-screen bg-zinc-200 dark:bg-zinc-950 flex justify-center items-center px-4 py-10">
       <div className="w-full max-w-5xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-2xl shadow-xl grid grid-cols-1 md:grid-cols-2 overflow-hidden">
@@ -119,7 +165,7 @@ const StripeCheckoutPage = () => {
             <p className="text-sm text-zinc-600 dark:text-zinc-300">{plan?.description}</p>
           </div>
 
-          <div className="text-lg font-bold text-green-600">${plan?.amount?.toFixed(2)}</div>
+          <div className="text-lg font-bold text-green-600">${`${plan?.amount?.toFixed(2)}/Month`}</div>
 
           {plan?.features?.length > 0 && (
             <ul className="list-disc list-inside space-y-1 pt-2 text-sm text-zinc-600 dark:text-zinc-300">

@@ -6,21 +6,24 @@ import { useNavigate } from "react-router-dom";
 
 const plans = [
   {
-    id: "basic",
+    id: "P-5SU98575AF676020PNCEJEAI",
+    priceId : "price_1Rqtb1CEaskUm5BGfvrSY2RV",
     name: "Basic Plan",
     description: "Essential features to get started. Limited access.",
     amount: 1.99,
     features: ["1 active project", "Community support", "Email notifications"],
   },
   {
-    id: "pro",
+    id: "P-2MC60425NR326760XNCFQTNA",
+    priceId :"price_1RrFGkCEaskUm5BGYIReJ61g",
     name: "Pro Plan",
     description: "Ideal for professionals. Extended features included.",
     amount: 4.99,
     features: ["10 active projects", "Priority support", "Analytics access"],
   },
   {
-    id: "premium",
+    id: "P-82P10349T50156043NCFRMNA",
+    priceId:"price_1RrFO9CEaskUm5BGdogSMTO3",
     name: "Premium Plan",
     description: "Full access to all features. VIP support.",
     amount: 9.99,
@@ -33,11 +36,13 @@ const plans = [
   },
 ];
 
+
+
 const StripeSubscriptionPage = () => {
   const [selectedPlan, setSelectedPlan] = useState(plans[0]);
   const [paymentMethod, setPaymentMethod] = useState<"stripe" | "paypal">("stripe");
   const [loading, setLoading] = useState(false);
-  
+  const [stripeOption, setStripeOption] = useState("one-time"); // default
 
   const navigate = useNavigate();
 
@@ -75,22 +80,76 @@ const StripeSubscriptionPage = () => {
   //   }
   // };
 
-  const handleStripeSubmit = async (e: React.FormEvent) => {
+//   const handleStripeSubmit = async (e: React.FormEvent) => {
+//   e.preventDefault();
+
+//   // Only send amount to next page
+//   navigate("/stripe-checkout-page", {
+//    state: {
+//     plan: {
+//       name: selectedPlan.name,
+//       description: selectedPlan.description,
+//       amount: selectedPlan.amount,
+//       features: selectedPlan.features, // optional array
+     
+//     },
+//   },
+//   });
+// };
+
+
+const handleStripeSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
 
-  // Only send amount to next page
-  navigate("/stripe-checkout-page", {
-   state: {
-    plan: {
-      name: selectedPlan.name,
-      description: selectedPlan.description,
-      amount: selectedPlan.amount,
-      features: selectedPlan.features, // optional array
-     
-    },
-  },
-  });
+  if (!selectedPlan) {
+    return alert("Please select a plan.");
+  }
+
+  if (stripeOption === "one-time") {
+    // Just redirect to checkout page with plan details
+    navigate("/stripe-checkout-page", {
+      state: {
+        type: "oneTime",
+        plan: {
+          name: selectedPlan.name,
+          description: selectedPlan.description,
+          amount: selectedPlan.amount,
+          features: selectedPlan.features,
+        },
+      },
+    });
+  }
+
+  else if (stripeOption === "subscription") {
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/api/v1/payment/stripe/stripe-subscription",
+        {
+          customerEmail:"jrparmar8007@gmail.com",
+          priceId: selectedPlan.priceId,
+          // priceId : "price_1Rqtb1CEaskUm5BGfvrSY2RV"
+        }
+      );
+
+      const { checkoutUrl } = response.data.data;
+
+      if (checkoutUrl) {
+        window.location.href = checkoutUrl; // 🔁 Redirect to Stripe Checkout
+      } else {
+        alert("Failed to create subscription session.");
+      }
+    } catch (error) {
+      console.error("Stripe Subscription Error:", error);
+      alert("Subscription process failed. Please try again.");
+    }
+  }
 };
+
+ 
+
+
+
+
   const handlePaypalSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -118,17 +177,17 @@ const StripeSubscriptionPage = () => {
            animate={{ scale: 1, opacity: 1 }}
            transition={{ duration: 0.4 }}
     className="max-w-full  mx-auto px-4 py-4">
-      <h2 className="text-center text-3xl font-bold text-gray-800 mb-8">Choose a Subscription Plan</h2>
+      <h2 className="text-center text-2xl font-bold text-gray-800 mb-8">Choose a Subscription Plan</h2>
 
       {/* Plan Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+      <div className="grid  grid-cols-1 md:grid-cols-3 gap-4 mb-10">
         {plans.map((plan) => (
           <div
             key={plan.id}
             onClick={() => setSelectedPlan(plan)}
-            className={`rounded-xl border p-4 cursor-pointer transition hover:shadow-lg ${
+            className={` hover:scale-10 rounded-xl border p-4 cursor-pointer transition hover:shadow-lg ${
               selectedPlan.id === plan.id
-                ? "border-purple-600 bg-purple-50"
+                ? "border-blue-600 bg-purple-50"
                 : "border-gray-200 bg-white"
             }`}
           >
@@ -150,14 +209,14 @@ const StripeSubscriptionPage = () => {
       {/* Checkout Form */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Subscription Info */}
-        <div className="bg-white rounded-xl shadow p-5 space-y-4 border">
+        <div className="bg-white rounded-lg shadow p-4 space-y-4 border">
           <h3 className="text-lg font-semibold text-gray-800">Selected Plan Summary</h3>
           <div>
             <label className="block text-sm font-medium text-gray-600">Plan</label>
             <input
               value={selectedPlan.name}
               readOnly
-              className="w-full border border-gray-200 rounded px-3 py-2 bg-gray-100 text-gray-700"
+              className="w-full text-sm   border border-gray-200 rounded px-3 py-2 bg-gray-100 text-gray-700"
             />
           </div>
           <div>
@@ -166,15 +225,15 @@ const StripeSubscriptionPage = () => {
               value={selectedPlan.description}
               readOnly
               rows={2}
-              className="w-full border border-gray-200 rounded px-3 py-2 bg-gray-100 text-gray-700"
+              className="w-full text-sm border border-gray-200 rounded px-3 py-2 bg-gray-100 text-gray-700"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-600">Price</label>
+            <label className="block text-xs font-medium text-gray-600">Price</label>
             <input
               value={`$${selectedPlan.amount}`}
               readOnly
-              className="w-full border border-gray-200 rounded px-3 py-2 bg-gray-100 text-gray-700"
+              className="w-full text-sm  border border-gray-200 rounded px-3 py-2 bg-gray-100 text-gray-700"
             />
           </div>
         </div>
@@ -188,35 +247,65 @@ const StripeSubscriptionPage = () => {
 
           <div className="grid grid-cols-1 gap-4">
             {/* Stripe Option */}
-            <label
-              htmlFor="stripe"
-              className={`flex items-center justify-between border rounded-lg px-4 py-3 cursor-pointer transition ${
-                paymentMethod === "stripe" ? "border-blue-600 bg-purple-50" : "border-gray-300 bg-white"
-              } hover:shadow-md`}
-            >
-              <div className="flex items-center gap-3">
-                <img
-                  src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/stripe.svg"
-                  alt="Stripe"
-                  className="h-5 w-5"
-                />
-                <span className="text-sm font-medium text-gray-800">Pay with Stripe</span>
-              </div>
-              <input
-                type="radio"
-                id="stripe"
-                name="payment"
-                value="stripe"
-                checked={paymentMethod === "stripe"}
-                onChange={() => setPaymentMethod("stripe")}
-                className="hidden"
-              />
-              {paymentMethod === "stripe" && (
-                <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-              )}
-            </label>
+   {/* Stripe Option with Sub-options */}
+<label
+  htmlFor="stripe"
+  className={`flex flex-col items-start border rounded-lg px-4 py-3 cursor-pointer transition ${
+    paymentMethod === "stripe" ? "border-blue-600 bg-purple-50" : "border-gray-300 bg-white"
+  } hover:shadow-md`}
+>
+  <div className="flex items-center justify-between w-full">
+    <div className="flex items-center gap-3">
+      <img
+        src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/stripe.svg"
+        alt="Stripe"
+        className="h-5 w-5"
+      />
+      <span className="text-sm font-medium text-gray-800">Pay with Stripe</span>
+    </div>
+    <input
+      type="radio"
+      id="stripe"
+      name="payment"
+      value="stripe"
+      checked={paymentMethod === "stripe"}
+      onChange={() => setPaymentMethod("stripe")}
+      className="hidden"
+    />
+    {paymentMethod === "stripe" && (
+      <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+      </svg>
+    )}
+  </div>
+
+  {/* Stripe Sub-options */}
+  {paymentMethod === "stripe" && (
+    <div className="mt-4 ml-6 flex flex-col gap-2">
+      <label className="flex items-center gap-2 text-sm text-gray-700">
+        <input
+          type="radio"
+          name="stripeOption"
+          value="one-time"
+          checked={stripeOption === "one-time"}
+          onChange={() => setStripeOption("one-time")}
+        />
+        One-Time Payment
+      </label>
+      <label className="flex items-center gap-2 text-sm text-gray-700">
+        <input
+          type="radio"
+          name="stripeOption"
+          value="subscription"
+          checked={stripeOption === "subscription"}
+          onChange={() => setStripeOption("subscription")}
+        />
+        Monthly Subscription
+      </label>
+    </div>
+  )}
+</label>
+
 
             {/* PayPal Option */}
             <label

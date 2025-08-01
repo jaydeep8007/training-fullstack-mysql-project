@@ -4,7 +4,7 @@ import SubscriptionPlanes from "@/pages/payment/PremiumPlanes";
 import PaymentSuccess from "@/pages/payment/PaymentSuccess";
 import PaymentFailed from "@/pages/payment/PaymentFailed";
 import StripeCheckoutPage from "@/pages/payment/StripeCheckoutPage";
-import PaypalSubscriptionPage from "@/pages/payment/PremiumPlaneSubscription";
+// import PaypalSubscriptionPage from "@/pages/payment/PremiumPlaneSubscription";
 import PaymentStatus from "@/pages/payment/PaymentStatus";
 
 const AdminLogin = lazy(() => import("@/pages/admin/auth/AdminLogin"));
