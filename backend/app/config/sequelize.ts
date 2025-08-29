@@ -1,6 +1,6 @@
 // app/sequelize/sequelize.ts
 import { Sequelize } from 'sequelize';
-import logger from '../utils/utils.logger';
+import logger from '../utils/logger.utils';
 import { get } from './config';
 
 const config = get(process.env.NODE_ENV);

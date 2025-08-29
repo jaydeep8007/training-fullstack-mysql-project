@@ -10,9 +10,8 @@ import { customerValidations } from '../validations/customer.validation';
 import { msg } from '../constants/language';
 import { get } from '../config/config';
 import commonQuery from '../services/commonQuery.service';
-import nodemailer from "nodemailer";
-import { getSmtpSettings } from '../utils/utils.getSmtpSettings';
-
+import nodemailer from 'nodemailer';
+import { getSmtpSettings } from '../utils/getSmtpSettings.utils';
 
 const envConfig = get(process.env.NODE_ENV);
 
@@ -28,10 +27,10 @@ const signupCustomer = async (req: Request, res: Response, next: NextFunction) =
   try {
     //  const msg = getMsg();
     const parsed = await customerValidations.customerCreateSchema.safeParseAsync(req.body);
-   if (!parsed.success) {
-  const errors = parsed.error.errors.map((err) => err.message); // ⛔ no field prefix
-  return responseHandler.error(res, errors.join(', '), resCode.BAD_REQUEST);
-}
+    if (!parsed.success) {
+      const errors = parsed.error.errors.map((err) => err.message); // ⛔ no field prefix
+      return responseHandler.error(res, errors.join(', '), resCode.BAD_REQUEST);
+    }
 
     const { cus_firstname, cus_lastname, cus_email, cus_phone_number, cus_password } = parsed.data;
 
@@ -96,10 +95,10 @@ const signinCustomer = async (req: Request, res: Response, next: NextFunction) =
   try {
     //  const msg = getMsg();
     const parsed = await customerValidations.customerLoginSchema.safeParseAsync(req.body);
-   if (!parsed.success) {
-  const errors = parsed.error.errors.map((err) => err.message); // ⛔ no field prefix
-  return responseHandler.error(res, errors.join(', '), resCode.BAD_REQUEST);
-}
+    if (!parsed.success) {
+      const errors = parsed.error.errors.map((err) => err.message); // ⛔ no field prefix
+      return responseHandler.error(res, errors.join(', '), resCode.BAD_REQUEST);
+    }
 
     const { cus_email, cus_password } = parsed.data;
 
@@ -169,7 +168,7 @@ const forgotPassword = async (req: Request, res: Response, next: NextFunction) =
   try {
     const result = customerValidations.forgotPasswordSchema.safeParse(req.body);
     if (!result.success) {
-      const errors = result.error.errors.map((e) => e.message).join(", ");
+      const errors = result.error.errors.map((e) => e.message).join(', ');
       return responseHandler.error(res, errors, resCode.BAD_REQUEST);
     }
 
@@ -177,7 +176,7 @@ const forgotPassword = async (req: Request, res: Response, next: NextFunction) =
 
     const customer = await customerQuery.getOne({ cus_email });
     if (!customer) {
-      return responseHandler.error(res, "Customer not found", resCode.NOT_FOUND);
+      return responseHandler.error(res, 'Customer not found', resCode.NOT_FOUND);
     }
 
     const reset_token = authToken.generateResetToken({
@@ -189,12 +188,12 @@ const forgotPassword = async (req: Request, res: Response, next: NextFunction) =
       where: { cus_id: customer.cus_id },
       defaults: {
         cus_auth_token: '',
-        cus_auth_refresh_token : reset_token,
+        cus_auth_refresh_token: reset_token,
       },
     });
 
     if (!created) {
-      authEntry.set("cus_auth_refresh_token", reset_token);
+      authEntry.set('cus_auth_refresh_token', reset_token);
       await authEntry.save();
     }
 
@@ -203,9 +202,9 @@ const forgotPassword = async (req: Request, res: Response, next: NextFunction) =
 
     // ✅ Fetch SMTP config from DB
     const smtpConfig = await getSmtpSettings();
-    console.log("SMTP Config controller:", smtpConfig);
+    console.log('SMTP Config controller:', smtpConfig);
     if (!smtpConfig) {
-      return responseHandler.error(res, "SMTP configuration not found", resCode.SERVER_ERROR);
+      return responseHandler.error(res, 'SMTP configuration not found', resCode.SERVER_ERROR);
     }
 
     const transporter = nodemailer.createTransport({
@@ -221,7 +220,7 @@ const forgotPassword = async (req: Request, res: Response, next: NextFunction) =
     const mailOptions = {
       from: `"Job Portal" <${smtpConfig.smtp_user}>`,
       to: cus_email,
-      subject: "Reset Your Password",
+      subject: 'Reset Your Password',
       html: `
         <p>Hello ${customer.cus_firstname},</p>
         <p>Click the link below to reset your password:</p>
@@ -232,18 +231,12 @@ const forgotPassword = async (req: Request, res: Response, next: NextFunction) =
 
     await transporter.sendMail(mailOptions);
 
-    return responseHandler.success(
-      res,
-      msg.common.resetLinkSend,
-      { email: cus_email },
-      resCode.OK
-    );
+    return responseHandler.success(res, msg.common.resetLinkSend, { email: cus_email }, resCode.OK);
   } catch (error) {
-    console.error("Forgot password error:", error);
-    return responseHandler.error(res, "Something went wrong", resCode.SERVER_ERROR);
+    console.error('Forgot password error:', error);
+    return responseHandler.error(res, 'Something went wrong', resCode.SERVER_ERROR);
   }
 };
-
 
 /* ============================================================================
  * 🔒 Reset Password using Token
@@ -264,12 +257,12 @@ const resetPassword = async (req: Request, res: Response, next: NextFunction) =>
       return responseHandler.error(res, msg.common.requiredAllFields, resCode.BAD_REQUEST);
     }
 
-     // ✅ Get auth entry with associated customer
+    // ✅ Get auth entry with associated customer
     const authEntry = await customerAuthQuery.getOne(
       { cus_auth_refresh_token: reset_token },
       {
         include: [{ model: customerModel, as: 'customer' }],
-      }
+      },
     );
 
     if (!authEntry || !authEntry.get('customer')) {
@@ -319,10 +312,10 @@ const logoutCustomer = async (req: Request, res: Response, next: NextFunction) =
     await customerAuthModel.destroy({ where: { cus_id } });
 
     // ✅ Clear refresh token cookie (secure & HTTP-only)
-    res.clearCookie("refreshToken", {
+    res.clearCookie('refreshToken', {
       httpOnly: true,
-      sameSite: "strict",
-      secure: process.env.NODE_ENV === "production",
+      sameSite: 'strict',
+      secure: process.env.NODE_ENV === 'production',
     });
 
     // ✅ Return success
@@ -335,7 +328,6 @@ const logoutCustomer = async (req: Request, res: Response, next: NextFunction) =
     return next(error);
   }
 };
-
 
 const getCustomerProfile = async (req: Request, res: Response, next: NextFunction) => {
   try {

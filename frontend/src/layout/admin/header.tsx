@@ -180,7 +180,7 @@ const Header = ({
 
         <div className="py-2">
           <SectionTitle title="Support" />
-          <DropdownItem icon={<FiHelpCircle />} label="Help & Support" onClick={() => navigate("/admin-help")} />
+          <DropdownItem icon={<FiHelpCircle />} label="subscription" onClick={() => navigate("/admin/my-subscription")} />
           <DropdownItem
             icon={<FiLogOut />}
             label="Logout"

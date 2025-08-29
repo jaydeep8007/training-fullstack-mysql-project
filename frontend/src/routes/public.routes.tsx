@@ -6,6 +6,7 @@ import PaymentFailed from "@/pages/payment/PaymentFailed";
 import StripeCheckoutPage from "@/pages/payment/StripeCheckoutPage";
 // import PaypalSubscriptionPage from "@/pages/payment/PremiumPlaneSubscription";
 import PaymentStatus from "@/pages/payment/PaymentStatus";
+import PaypalSuccessPage from "@/pages/payment/PaypalSuccessPage";
 
 const AdminLogin = lazy(() => import("@/pages/admin/auth/AdminLogin"));
 const AdminSignup = lazy(() => import("@/pages/admin/auth/AdminSignup"));
@@ -24,6 +25,8 @@ export const publicRoutes = [
   { path: "/payment-success", element: <PaymentSuccess /> },
   { path: "/payment-failed", element: <PaymentFailed /> },
   { path: "/payment-status", element: <PaymentStatus /> },
+   { path: "/paypal-success", element: <PaypalSuccessPage /> },
+  { path: "/paypal-cancel", element: <PaymentFailed /> },
 ];
 
 export const publicBreadcrumbs = [

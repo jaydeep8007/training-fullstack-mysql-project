@@ -10,8 +10,8 @@ import adminModel from '../models/admin.model';
 import adminAuthModel from '../models/adminAuth.model';
 import commonQuery from '../services/commonQuery.service';
 import { adminValidations } from '../validations/admin.validation';
-import nodemailer from "nodemailer";
-import { getSmtpSettings } from '../utils/utils.getSmtpSettings';
+import nodemailer from 'nodemailer';
+import { getSmtpSettings } from '../utils/getSmtpSettings.utils';
 import roleModel from '../models/role.model';
 
 const envConfig = get(process.env.NODE_ENV);
@@ -32,14 +32,8 @@ const signupAdmin = async (req: Request, res: Response, next: NextFunction) => {
       return responseHandler.error(res, errors.join(', '), resCode.BAD_REQUEST);
     }
 
-    const {
-      admin_firstname,
-      admin_lastname,
-      admin_email,
-      admin_phone_number,
-      admin_password,
-
-    } = parsed.data;
+    const { admin_firstname, admin_lastname, admin_email, admin_phone_number, admin_password } =
+      parsed.data;
     const isSuperAdmin = admin_email === envConfig.SUPER_ADMIN_EMAIL;
     const role_id = isSuperAdmin ? 1 : DEFAULT_ADMIN_ROLE_ID; // Use 1 for super admin, otherwise default role_id
 
@@ -52,27 +46,30 @@ const signupAdmin = async (req: Request, res: Response, next: NextFunction) => {
       admin_phone_number,
       admin_password: hashedPassword,
       admin_status: 'active',
-role_id: role_id
+      role_id: role_id,
     });
 
-    const adminData = await adminModel.findOne({where :{admin_id : newAdmin.admin_id}, attributes: ['admin_id', 'admin_email', 'role_id']});
+    const adminData = await adminModel.findOne({
+      where: { admin_id: newAdmin.admin_id },
+      attributes: ['admin_id', 'admin_email', 'role_id'],
+    });
 
     // const role = await roleModel.findByPk(role_id);
     // console.log("role..../" , role)
-// if (!role) {
-//   return responseHandler.error(res, "Invalid role selected", resCode.BAD_REQUEST);
-// }
-//  console.log("....role" , role)
+    // if (!role) {
+    //   return responseHandler.error(res, "Invalid role selected", resCode.BAD_REQUEST);
+    // }
+    //  console.log("....role" , role)
     const accessToken = authToken.generateAuthToken({
       user_id: adminData.admin_id,
       email: adminData.admin_email,
-       role_id: adminData.role_id,
+      role_id: adminData.role_id,
     });
 
     const refreshToken = authToken.generateRefreshAuthToken({
       user_id: adminData.admin_id,
       email: adminData.admin_email,
- role_id: adminData.role_id,
+      role_id: adminData.role_id,
     });
 
     await adminAuthQuery.create({
@@ -86,19 +83,18 @@ role_id: role_id
       ...envConfig.COOKIE_OPTIONS,
     });
 
-
-  return responseHandler.success(
-  res,
-  msg.auth.registerSuccess,
-  {
-    accessToken,
-    admin: {
-      ...adminData,
-      role_id: adminData.role_id, // Include role_id in the response
-    },
-  },
-  resCode.CREATED
-);
+    return responseHandler.success(
+      res,
+      msg.auth.registerSuccess,
+      {
+        accessToken,
+        admin: {
+          ...adminData,
+          role_id: adminData.role_id, // Include role_id in the response
+        },
+      },
+      resCode.CREATED,
+    );
   } catch (error) {
     if (error instanceof ValidationError) {
       const messages = error.errors.map((err) => err.message);
@@ -125,7 +121,7 @@ const signinAdmin = async (req: Request, res: Response, next: NextFunction) => {
     const { admin_email, admin_password } = parsed.data;
 
     // 🔍 Find admin by email
-    const admin = await adminModel.findOne({where: { admin_email } });
+    const admin = await adminModel.findOne({ where: { admin_email } });
     if (!admin) {
       return responseHandler.error(res, msg.admin.notFound, resCode.NOT_FOUND);
     }
@@ -138,19 +134,19 @@ const signinAdmin = async (req: Request, res: Response, next: NextFunction) => {
       return responseHandler.error(res, msg.common.invalidPassword, resCode.UNAUTHORIZED);
     }
 
-     const role_id = adminData.role_id; // ✅ Get role_id directly from admin data
+    const role_id = adminData.role_id; // ✅ Get role_id directly from admin data
 
     // 🔑 Generate tokens
     const accessToken = authToken.generateAuthToken({
       user_id: adminData.admin_id,
       email: adminData.admin_email,
-      role_id
+      role_id,
     });
 
     const refreshToken = authToken.generateRefreshAuthToken({
       user_id: adminData.admin_id,
       email: adminData.admin_email,
-       role_id
+      role_id,
     });
 
     // 💾 Save tokens
@@ -176,10 +172,10 @@ const signinAdmin = async (req: Request, res: Response, next: NextFunction) => {
           admin_firstname: adminData.admin_firstname,
           admin_lastname: adminData.admin_lastname,
           admin_email: adminData.admin_email,
-         role_id: adminData.role_id, // ✅ Also return it
+          role_id: adminData.role_id, // ✅ Also return it
         },
       },
-      resCode.OK
+      resCode.OK,
     );
   } catch (error) {
     if (error instanceof ValidationError) {
@@ -189,7 +185,6 @@ const signinAdmin = async (req: Request, res: Response, next: NextFunction) => {
     return next(error);
   }
 };
-
 
 const getAdminProfile = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -238,10 +233,10 @@ const logoutAdmin = async (req: Request, res: Response, next: NextFunction) => {
     await adminAuthModel.destroy({ where: { admin_id } });
 
     // ✅ Clear refresh token cookie (secure & HTTP-only)
-    res.clearCookie("refreshToken", {
+    res.clearCookie('refreshToken', {
       httpOnly: true,
-      sameSite: "strict",
-      secure: process.env.NODE_ENV === "production",
+      sameSite: 'strict',
+      secure: process.env.NODE_ENV === 'production',
     });
 
     // ✅ Return success
@@ -263,7 +258,7 @@ const forgotPassword = async (req: Request, res: Response, next: NextFunction) =
   try {
     const result = adminValidations.forgotPasswordSchema.safeParse(req.body);
     if (!result.success) {
-      const errors = result.error.errors.map((e) => e.message).join(", ");
+      const errors = result.error.errors.map((e) => e.message).join(', ');
       return responseHandler.error(res, errors, resCode.BAD_REQUEST);
     }
 
@@ -271,7 +266,7 @@ const forgotPassword = async (req: Request, res: Response, next: NextFunction) =
 
     const admin = await adminQuery.getOne({ admin_email });
     if (!admin) {
-      return responseHandler.error(res, "Admin not found", resCode.NOT_FOUND);
+      return responseHandler.error(res, 'Admin not found', resCode.NOT_FOUND);
     }
 
     const reset_token = authToken.generateResetToken({
@@ -288,7 +283,7 @@ const forgotPassword = async (req: Request, res: Response, next: NextFunction) =
     });
 
     if (!created) {
-      authEntry.set("admin_auth_refresh_token", reset_token);
+      authEntry.set('admin_auth_refresh_token', reset_token);
       await authEntry.save();
     }
 
@@ -296,7 +291,7 @@ const forgotPassword = async (req: Request, res: Response, next: NextFunction) =
 
     const smtpConfig = await getSmtpSettings();
     if (!smtpConfig) {
-      return responseHandler.error(res, "SMTP configuration not found", resCode.SERVER_ERROR);
+      return responseHandler.error(res, 'SMTP configuration not found', resCode.SERVER_ERROR);
     }
 
     const transporter = nodemailer.createTransport({
@@ -312,9 +307,9 @@ const forgotPassword = async (req: Request, res: Response, next: NextFunction) =
     const mailOptions = {
       from: `"Job Portal Admin" <${smtpConfig.smtp_user}>`,
       to: admin_email,
-      subject: "Admin Reset Password",
+      subject: 'Admin Reset Password',
       html: `
-        <p>Hello ${admin.admin_name || "Admin"},</p>
+        <p>Hello ${admin.admin_name || 'Admin'},</p>
         <p>Click below to reset your password:</p>
         <a href="${resetUrl}" style="color:blue;">Reset Password</a>
         <p>This link will expire in 10 minutes.</p>
@@ -326,17 +321,14 @@ const forgotPassword = async (req: Request, res: Response, next: NextFunction) =
     return responseHandler.success(
       res,
       msg.common.resetLinkSend,
-      { email: admin_email,
-         reset_token
-       },
-      resCode.OK
+      { email: admin_email, reset_token },
+      resCode.OK,
     );
   } catch (error) {
-    console.error("Admin forgot password error:", error);
-    return responseHandler.error(res, "Something went wrong", resCode.SERVER_ERROR);
+    console.error('Admin forgot password error:', error);
+    return responseHandler.error(res, 'Something went wrong', resCode.SERVER_ERROR);
   }
 };
-
 
 /* ============================================================================
  * 🔒 Admin Reset Password using Token
@@ -360,7 +352,7 @@ const resetPassword = async (req: Request, res: Response, next: NextFunction) =>
       { admin_auth_refresh_token: reset_token },
       {
         include: [{ model: adminModel, as: 'admin' }],
-      }
+      },
     );
 
     if (!authEntry || !authEntry.get('admin')) {
@@ -374,7 +366,7 @@ const resetPassword = async (req: Request, res: Response, next: NextFunction) =>
     await adminInstance.save();
 
     authEntry.set('admin_auth_refresh_token', '');
-   await authEntry.destroy(); // ✅ Completely remove the auth row after successful reset
+    await authEntry.destroy(); // ✅ Completely remove the auth row after successful reset
 
     return responseHandler.success(res, msg.auth.passwordResetSuccess, {}, resCode.OK);
   } catch (error) {
@@ -386,10 +378,6 @@ const resetPassword = async (req: Request, res: Response, next: NextFunction) =>
   }
 };
 
-
-
-
-
 export default {
   signupAdmin,
   signinAdmin,
@@ -397,5 +385,4 @@ export default {
   logoutAdmin,
   forgotPassword,
   resetPassword,
-
 };

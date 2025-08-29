@@ -1,7 +1,7 @@
 
 
 import paypal from "@paypal/checkout-server-sdk";
-import paypalClient from '../utils/utils.paypalClients';
+import paypalClient from '../utils/paypalClients.utils';
 
 // src/controllers/paymentController.ts
 import { Request, Response, NextFunction } from "express";
@@ -49,108 +49,57 @@ export const createPaymentIntent = async (
   }
 };
 
+export const getMySubscriptions = async (req: Request, res: Response) => {
+  try {
+    const { customerEmail = "jaydeep@example.com" } = req.params;
+
+    console.log("📥 Incoming customerEmail:", customerEmail);
+
+    if (!customerEmail) {
+      console.log("❌ No email provided in request body");
+      return responseHandler.error(res, "Email not found", resCode.BAD_REQUEST);
+    }
+
+    // 1. Search for customer by email
+    const customers = await stripe.customers.list({
+      email: customerEmail,
+      limit: 1,
+    });
+
+    console.log("🔍 Stripe customers fetched:", customers);
+
+    const customer = customers.data[0];
+    if (!customer) {
+      console.log("❌ No customer found with this email");
+      return responseHandler.error(res, msg.customer.notFound, resCode.NOT_FOUND);
+    }
+
+    console.log("✅ Found customer:", customer.id);
+
+    // 2. Fetch subscriptions for that customer
+    const subscriptions = await stripe.subscriptions.list({
+      customer: customer.id,
+      status: "all",
+    });
+
+    console.log("📦 Subscriptions fetched:", subscriptions.data);
+
+    return responseHandler.success(
+      res,
+      "Fetch success",
+      subscriptions.data,
+      resCode.OK
+    );
+  } catch (error: any) {
+    console.error("💥 Error fetching subscription:", error);
+    return responseHandler.error(res, "Fetch error in catch block", resCode.SERVER_ERROR);
+  }
+};
 
 
 
-// export const createStripeSubscription = async (req: Request, res: Response) => {
-//   try {
-//     const { cus_id, customerEmail } = req.body;
-//     const priceId = "price_1Rqtb1CEaskUm5BGfvrSY2RV"; // Your saved recurring price ID
-
-//     if (!cus_id || !customerEmail) {
-//       return responseHandler.error(res, msg.common.missingFields);
-//     }
-
-//     // 1. Create Stripe customer
-//     const customer = await stripe.customers.create({
-//       email: customerEmail,
-//     });
-
-//     // 2. Create subscription
-//     const subscription = await stripe.subscriptions.create({
-//       customer: customer.id,
-//       items: [{ price: priceId }],
-//       payment_behavior: "default_incomplete",
-//       expand: ["latest_invoice.payment_intent"],
-//     });
-
-//     let paymentIntent: Stripe.PaymentIntent | undefined;
-//     if (subscription.latest_invoice && typeof subscription.latest_invoice !== "string") {
-//       paymentIntent = (subscription.latest_invoice as any).payment_intent as Stripe.PaymentIntent;
-//     }
-
-//     // 3. Save subscription to MySQL (via Sequelize)
-//     await subscriptionModel.create({
-//       cus_id,
-//       subscription_plan_name: "Basic Plan",
-//       subscription_plan_id: priceId,
-//       subscription_provider_id: subscription.id,
-//       subscription_provider: "stripe",
-//       subscription_amount: 1.99,
-//       subscription_currency: "USD",
-//       subscription_status: subscription.status,
-//       subscription_start_date: new Date(subscription.start_date * 1000),
-//       subscription_end_date: subscription.ended_at ? new Date(subscription.ended_at * 1000) : null,
-//       subscription_trial_end: subscription.trial_end ? new Date(subscription.trial_end * 1000) : null,
-//       subscription_is_cancelled: subscription.cancel_at ? true : false,
-//       subscription_cancel_at_period_end: subscription.cancel_at_period_end || false,
-//     });
-
-//     return responseHandler.success(
-//       res,
-//       "subscription created sucessfully",
-//       {
-//         clientSecret: paymentIntent.client_secret,
-//         subscriptionId: subscription.id,
-//       },
-//     );
-//   } catch (error: any) {
-//     console.error(error);
-//     return responseHandler.error(res, msg.common.serverError, 500);
-//   }
-// };
 
 
-
-// export const createStripeSubscription = async (req: Request, res: Response) => {
-//   try {
-//     const { customerEmail, priceId } = req.body;
-
-//     if (!customerEmail || !priceId) {
-//        res.status(400).json({ message: 'Customer email and Price ID are required' });
-//     }
-
-//     // Create a new customer
-//     const customer = await stripe.customers.create({ email: customerEmail });
-
-//     // Create the subscription for the customer
-//     const subscription = await stripe.subscriptions.create({
-//       customer: customer.id,
-//       items: [{ price: priceId }],
-//       payment_behavior: 'default_incomplete',
-//       expand: ['latest_invoice.payment_intent'],
-//     });
-
-//     const latestInvoice = subscription.latest_invoice as Stripe.Invoice;
-//     const paymentIntent = (latestInvoice as any).payment_intent as Stripe.PaymentIntent;
-
-//     if (!paymentIntent?.client_secret) {
-//        res.status(500).json({ message: 'Failed to retrieve payment intent.' });
-//     }
-
-//     res.status(200).json({
-//       message: 'Subscription created successfully',
-//       subscriptionId: subscription.id,
-//       clientSecret: paymentIntent.client_secret,
-//       customerId: customer.id,
-//       status: subscription.status
-//     });
-
-//   } catch (error: any) {
-//     console.error('Error creating subscription:', error);
-//     res.status(500).json({ message: 'Failed to create subscription', error: error.message });
-//   }
-// };
 
 
 export const createStripeSubscription = async (req: Request, res: Response) => {
@@ -231,43 +180,45 @@ export const createStripeSubscription = async (req: Request, res: Response) => {
 
 // Example Express handler
 
-export const createPaypalOrder = async (req, res) => {
-  const { amount, currency } = req.body;
+// export const createPaypalOrder = async (req, res) => {
+//   const { amount, currency } = req.body;
 
-  const request = new paypal.orders.OrdersCreateRequest();
-  request.prefer("return=representation");
-  request.requestBody({
-    intent: "CAPTURE",
-    purchase_units: [
-      {
-        amount: {
-          currency_code: currency || "USD",
-          value: amount.toString(),
-        },
-      },
-    ],
-    application_context: {
-      brand_name: "Your Brand",
-      landing_page: "LOGIN",
-      user_action: "PAY_NOW",
-      return_url: "http://localhost:5173/payment-success",
-      cancel_url: "http://localhost:5173/payment-cancel",
-    },
-  });
+//   const request = new paypal.orders.OrdersCreateRequest();
+//   request.prefer("return=representation");
+//   request.requestBody({
+//     intent: "CAPTURE",
+//     purchase_units: [
+//       {
+//         amount: {
+//           currency_code: currency || "USD",
+//           value: amount.toString(),
+//         },
+//       },
+//     ],
+//     application_context: {
+//       brand_name: "Your Brand",
+//       landing_page: "LOGIN",
+//       user_action: "PAY_NOW",
+//       return_url: "http://localhost:5173/payment-success",
+//       cancel_url: "http://localhost:5173/payment-cancel",
+//     },
+//   });
 
-  try {
-    const order = await paypalClient.execute(request);
-    const approvalUrl = order.result.links.find((link) => link.rel === "approve")?.href;
+//   try {
+//     const order = await paypalClient.execute(request);
+//     const approvalUrl = order.result.links.find((link) => link.rel === "approve")?.href;
 
-    res.status(200).json({
-      id: order.result.id,
-      url: approvalUrl,
-    });
-  } catch (err) {
-    console.error("PayPal Order Error", err);
-    res.status(500).json({ error: "PayPal order creation failed" });
-  }
-};
+//     res.status(200).json({
+//       id: order.result.id,
+//       url: approvalUrl,
+//     });
+//   } catch (err) {
+//     console.error("PayPal Order Error", err);
+//     res.status(500).json({ error: "PayPal order creation failed" });
+//   }
+// };
+
+
 
 
 // 🔹 paypal.orders.OrdersCreateRequest()
@@ -309,3 +260,6 @@ export const createPaypalOrder = async (req, res) => {
 // 🔹 paypal.products.ProductsCreateRequest()
 // Purpose: To define a product (a container for plans).
 // Endpoint: POST /v1/catalogs/products
+
+
+

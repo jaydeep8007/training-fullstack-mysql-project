@@ -1,18 +1,18 @@
 // src/controllers/stripeWebhook.controller.ts
-import { Request, Response } from "express";
-import Stripe from "stripe";
-import nodemailer from "nodemailer";
-import dotenv from "dotenv";
-import { getSmtpSettings } from "../utils/utils.getSmtpSettings";
-import { responseHandler } from "../services/responseHandler.service";
-import { resCode } from "../constants/resCode";
+import { Request, Response } from 'express';
+import Stripe from 'stripe';
+import nodemailer from 'nodemailer';
+import dotenv from 'dotenv';
+import { getSmtpSettings } from '../utils/getSmtpSettings.utils';
+import { responseHandler } from '../services/responseHandler.service';
+import { resCode } from '../constants/resCode';
 
 dotenv.config();
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {});
 
 export const handleStripeWebhook = async (req: Request, res: Response) => {
-  const sig = req.headers["stripe-signature"] as string;
+  const sig = req.headers['stripe-signature'] as string;
   const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
   let event: Stripe.Event;
@@ -20,26 +20,26 @@ export const handleStripeWebhook = async (req: Request, res: Response) => {
   try {
     event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
   } catch (err: any) {
-    console.error("❌ Webhook signature verification failed:", err.message);
+    console.error('❌ Webhook signature verification failed:', err.message);
     return responseHandler.error(res, `Webhook Error: ${err.message}`, resCode.BAD_REQUEST);
   }
 
   switch (event.type) {
-    case "payment_intent.succeeded": {
+    case 'payment_intent.succeeded': {
       const paymentIntent = event.data.object as Stripe.PaymentIntent;
-      console.log("✅ Payment succeeded:", paymentIntent.id);
+      console.log('✅ Payment succeeded:', paymentIntent.id);
 
       const cus_email = paymentIntent.metadata?.cus_email;
 
       if (!cus_email) {
-        console.warn("⚠️ No customer email in metadata. Skipping email.");
+        console.warn('⚠️ No customer email in metadata. Skipping email.');
         break;
       }
 
       try {
         const smtpConfig = await getSmtpSettings();
         if (!smtpConfig) {
-          console.error("❌ SMTP config not found.");
+          console.error('❌ SMTP config not found.');
           break;
         }
 
@@ -56,7 +56,7 @@ export const handleStripeWebhook = async (req: Request, res: Response) => {
         const mailOptions = {
           from: `"Job Portal" <${smtpConfig.smtp_user}>`,
           to: cus_email,
-          subject: "🎉 Payment Successful - Thank You!",
+          subject: '🎉 Payment Successful - Thank You!',
           html: `
             <p>Hello,</p>
             <p>Thank you for your payment. Your transaction was successful.</p>
@@ -69,7 +69,7 @@ export const handleStripeWebhook = async (req: Request, res: Response) => {
         await transporter.sendMail(mailOptions);
         console.log(`📨 Payment confirmation email sent to ${cus_email}`);
       } catch (err) {
-        console.error("❌ Error sending payment email:", err);
+        console.error('❌ Error sending payment email:', err);
       }
 
       break;
@@ -79,9 +79,13 @@ export const handleStripeWebhook = async (req: Request, res: Response) => {
       console.log(`🔍 Unhandled event type ${event.type}`);
   }
 
-  return responseHandler.success(res,"Stripe webhook event processed successfully.", { received: true }, resCode.OK);
+  return responseHandler.success(
+    res,
+    'Stripe webhook event processed successfully.',
+    { received: true },
+    resCode.OK,
+  );
 };
-
 
 // import { Request, Response } from 'express';
 // import Stripe from 'stripe';

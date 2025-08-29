@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",
+    "@paypal/react-paypal-js": "^8.8.3",
     "@radix-ui/react-accordion": "^1.2.11",
     "@radix-ui/react-alert-dialog": "^1.1.14",
     "@radix-ui/react-aspect-ratio": "^1.1.7",
@@ -43,6 +44,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
+    "currency-converter-lt": "^2.0.1",
     "date-fns": "^4.1.0",
     "embla-carousel-react": "^8.6.0",
     "framer-motion": "^12.19.2",
@@ -50,6 +52,7 @@
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.523.0",
     "next-themes": "^0.4.6",
+    "ngrok": "^5.0.0-beta.2",
     "react": "^19.1.0",
     "react-day-picker": "^9.7.0",
     "react-dom": "^19.1.0",

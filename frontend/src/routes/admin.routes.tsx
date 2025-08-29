@@ -12,6 +12,7 @@ import AdminList from "@/pages/userManagement/AdminList";
 import EditRole from "@/pages/rolesAndPermissions/EditRole";
 import AddAdmin from "@/pages/userManagement/AddAdmin";
 import EditAdmin from "@/pages/userManagement/EditAdmin";
+import SubscriptionSettings from "@/pages/subscription/SubscriptionSettings";
 
 const AdminDashboard = lazy(() => import("@/pages/admin/AdminDashboard"));
 const AdminProfile = lazy(() => import("@/pages/admin/AdminProfile"));
@@ -69,6 +70,7 @@ export const adminRoutes = {
     { path: "roles-and-permissions/edit-role/:id", element: <EditRole /> },
     { path: "user-management/add-admin", element: <AddAdmin /> },
     { path: "user-management/edit-admin/:id", element: <EditAdmin /> },
+    { path: "my-subscription", element: <SubscriptionSettings /> },
     
   ],
 };
